@@ -1,4 +1,5 @@
-import { FlatDirectory } from 'ethstorage-sdk';
+import { EthStorage, FlatDirectory } from 'ethstorage-sdk';
+
 import { NextResponse } from 'next/server';
 import { ethers } from 'ethers';
 
@@ -19,24 +20,15 @@ export async function GET() {
       );
     }
 
-    // Create providers first
-    const provider = new ethers.providers.JsonRpcProvider(rpc);
-    const wallet = new ethers.Wallet(privateKey, provider);
+    const ethStorage = await EthStorage.create({
+      rpc: rpc,
+      ethStorageRpc: ethStorageRpc,
+      privateKey: privateKey,
+  });
 
-    console.log('Created wallet and provider');
+  console.log(ethStorage)
 
-    // Create FlatDirectory with the wallet
-    const flatDirectory = await FlatDirectory.create({
-      signer: wallet,
-      ethStorageRpc,
-    });
-
-    console.log('FlatDirectory instance created successfully');
-
-    // Deploy the contract
-    const contractAddress = await flatDirectory.deploy();
-    console.log('Contract deployed successfully:', contractAddress);
-
+const contractAddress = ""
     return NextResponse.json({ 
       success: true, 
       contractAddress 
