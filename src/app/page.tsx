@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import ChatInterface from "src/components/ChatInterface";
 import FaceRecognition from "src/components/FaceRecognition";
 import FaceRegistration from "src/components/FaceRegistration";
 import Footer from "src/components/Footer";
@@ -119,6 +120,7 @@ export default function Page() {
         </div> */}
         {address ? (
           <>
+            <ChatInterface />
             {activeView === "register" ? (
               <FaceRegistration
                 onFaceSaved={handleFaceSaved}
