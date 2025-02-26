@@ -9,9 +9,11 @@ type ChatResponse = {
     functionCall?: {
       functionName: string;
       args: {
-        recipientAddress: string;
-        amount: string;
-        ticker: string;
+        recipientAddress?: string;
+        amount?: string;
+        ticker?: string;
+        platform?: string;
+        username?: string;
       };
     };
   };
@@ -34,13 +36,32 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
   const [response, setResponse] = useState<ChatResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const handleFunctionCall = (functionCall: ChatResponse['content']['functionCall']) => {
+    if (!functionCall) return;
+
+    switch (functionCall.functionName) {
+      case 'connectOnLinkedin':
+        if (profile?.linkedin) {
+          window.open(`https://linkedin.com/in/${profile.linkedin}`, '_blank');
+        }
+        break;
+      case 'connectOnTelegram':
+        if (profile?.telegram) {
+          window.open(`https://t.me/${profile.telegram}`, '_blank');
+        }
+        break;
+      // Keep existing function calls
+      default:
+        console.log('Unknown function call:', functionCall.functionName);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log(prompt, profile);
       const res = await fetch(
         "https://ai-quickstart.onrender.com/api/generate",
         {
@@ -49,7 +70,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            prompt: prompt + JSON.stringify(profile),
+            prompt: prompt + JSON.stringify(profile)
           }),
         }
       );
@@ -59,8 +80,12 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
       }
 
       const data = await res.json();
-      console.log(data);
       setResponse(data);
+      
+      // Handle function calls if present
+      if (data.content.functionCall) {
+        handleFunctionCall(data.content.functionCall);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
