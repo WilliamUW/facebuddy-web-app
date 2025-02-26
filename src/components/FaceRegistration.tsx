@@ -5,6 +5,7 @@ import * as faceapi from "face-api.js";
 import { useEffect, useRef, useState } from "react";
 
 import EthStorageUploader from "./EthStorageUploader";
+import {uploadToIPFS} from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
 
 export interface ProfileData {
@@ -54,8 +55,10 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   //     }
   //   }, [address]);
 
-  const uploadFaceData = (data: any) => {
+  const uploadFaceData = async (data: any) => {
     console.log("write data to ETHStorage", data)
+    const hash = await uploadToIPFS(data)
+    console.log("data uploaded " + hash)
   }
 
   useEffect(() => {
