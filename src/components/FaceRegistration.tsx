@@ -62,6 +62,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const [selectedFaceIndex, setSelectedFaceIndex] = useState<number | null>(
     null
   );
+  const [isSpinning, setIsSpinning] = useState(false);
 
   //   useEffect(() => {
   //     if (address) {
@@ -133,6 +134,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           setSelectedFaceIndex(null);
           setDetectedFaces([]);
           setProfile({ name: address ?? "", linkedin: "", telegram: "" });
+          setIsSpinning(true);
 
           // We need to wait for the image to be set before detecting faces
           setTimeout(() => {
@@ -160,6 +162,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     setSelectedFaceIndex(null);
     setDetectedFaces([]);
     setProfile({ name: address ?? "", linkedin: "", telegram: "" });
+    setIsSpinning(false);
 
     setTimeout(() => {
       setIsLoading(false);
@@ -208,15 +211,18 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
 
       if (detectedFacesData.length === 0) {
         alert("No faces detected. Please try again with a clearer image.");
+        setIsSpinning(false);
       } else {
         uploadFaceData(detectedFacesData);
-        setDetectedFaces(detectedFacesData);
+
+        // Store the detected faces but don't update UI yet
+        const processedFaces = detectedFacesData;
 
         // Find the largest face by area (width * height)
         let largestFaceIndex = 0;
         let largestFaceArea = 0;
 
-        detectedFacesData.forEach((face, index) => {
+        processedFaces.forEach((face, index) => {
           const area = face.detection.box.width * face.detection.box.height;
           if (area > largestFaceArea) {
             largestFaceArea = area;
@@ -224,12 +230,21 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           }
         });
 
-        // Auto-select the largest face
-        setSelectedFaceIndex(largestFaceIndex);
+        // Generate random processing time between 2-4 seconds
+        const processingTime = Math.floor(Math.random() * 2000) + 2000; // 2000-4000ms
+
+        // Show animation for the random duration
+        setTimeout(() => {
+          // Update UI after the random processing time
+          setDetectedFaces(processedFaces);
+          setSelectedFaceIndex(largestFaceIndex);
+          setIsSpinning(false);
+        }, processingTime);
       }
     } catch (error) {
       console.error("Error detecting faces:", error);
       alert("Error detecting faces. Please try again.");
+      setIsSpinning(false);
     } finally {
       setIsDetecting(false);
     }
@@ -428,12 +443,71 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
               </button>
             </div>
           ) : (
-            <div className="border rounded-lg p-4 bg-white flex-grow flex items-center justify-center">
+            <div className="border rounded-lg p-4 bg-white flex-grow flex flex-col items-center justify-center relative">
+              {/* 3D Head Visualization */}
+              <div className="w-32 h-32 mb-4 relative">
+                {/* 3D Head */}
+                <div
+                  className={`w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-100 relative ${isSpinning ? "animate-spin" : ""}`}
+                  style={{
+                    transformStyle: "preserve-3d",
+                    perspective: "1000px",
+                    animation: isSpinning ? "spin 3s linear infinite" : "none",
+                  }}
+                >
+                  {/* Face features */}
+                  <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 flex flex-col items-center justify-center">
+                    {/* Eyes */}
+                    <div className="flex w-full justify-around mb-2">
+                      <div className="w-3 h-3 rounded-full bg-gray-700"></div>
+                      <div className="w-3 h-3 rounded-full bg-gray-700"></div>
+                    </div>
+                    {/* Mouth */}
+                    <div className="w-1/2 h-1 bg-gray-700 rounded-full mt-2"></div>
+                  </div>
+                </div>
+
+                {/* Scanning Laser */}
+                {isSpinning && (
+                  <div
+                    className="absolute top-0 left-0 w-full bg-blue-400 opacity-50"
+                    style={{
+                      height: "2px",
+                      animation: "scanVertical 1.5s ease-in-out infinite",
+                      boxShadow: "0 0 10px 3px rgba(59, 130, 246, 0.5)",
+                    }}
+                  ></div>
+                )}
+              </div>
+
               <p className="text-center text-gray-500">
                 {selectedImage
                   ? "Processing image..."
                   : "Take a photo to register your face"}
               </p>
+
+              {/* Add CSS animations */}
+              <style jsx>{`
+                @keyframes scanVertical {
+                  0% {
+                    top: 0;
+                  }
+                  50% {
+                    top: 100%;
+                  }
+                  100% {
+                    top: 0;
+                  }
+                }
+                @keyframes spin {
+                  0% {
+                    transform: rotateY(0deg);
+                  }
+                  100% {
+                    transform: rotateY(360deg);
+                  }
+                }
+              `}</style>
             </div>
           )}
 
