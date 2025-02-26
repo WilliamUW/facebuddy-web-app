@@ -50,6 +50,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [webcamError, setWebcamError] = useState<string | null>(null);
   const [profile, setProfile] = useState<ProfileData>({
     name: address ?? "",
@@ -61,6 +62,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const [selectedFaceIndex, setSelectedFaceIndex] = useState<number | null>(
     null
   );
+  const [isSpinning, setIsSpinning] = useState(false);
 
   //   useEffect(() => {
   //     if (address) {
@@ -112,6 +114,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const handleUserMediaError = React.useCallback(
     (error: string | DOMException) => {
       console.error("Webcam error:", error);
+      setIsLoading(false);
       setWebcamError(
         typeof error === "string"
           ? error
@@ -131,6 +134,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           setSelectedFaceIndex(null);
           setDetectedFaces([]);
           setProfile({ name: address ?? "", linkedin: "", telegram: "" });
+          setIsSpinning(true);
 
           // We need to wait for the image to be set before detecting faces
           setTimeout(() => {
@@ -150,6 +154,20 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       }
     }
   }, [webcamRef, address]);
+
+  // Function to reset the UI when retaking photo
+  const handleRetakePhoto = () => {
+    setIsLoading(true);
+    setSelectedImage(null);
+    setSelectedFaceIndex(null);
+    setDetectedFaces([]);
+    setProfile({ name: address ?? "", linkedin: "", telegram: "" });
+    setIsSpinning(false);
+
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+  };
 
   const detectFaces = async () => {
     if (!imageRef.current || !canvasRef.current || !isModelLoaded) return;
@@ -193,18 +211,40 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
 
       if (detectedFacesData.length === 0) {
         alert("No faces detected. Please try again with a clearer image.");
+        setIsSpinning(false);
       } else {
         uploadFaceData(detectedFacesData);
-        setDetectedFaces(detectedFacesData);
 
-        // Auto-select the first face if any faces are detected
-        if (detectedFacesData.length > 0) {
-          setSelectedFaceIndex(0);
-        }
+        // Store the detected faces but don't update UI yet
+        const processedFaces = detectedFacesData;
+
+        // Find the largest face by area (width * height)
+        let largestFaceIndex = 0;
+        let largestFaceArea = 0;
+
+        processedFaces.forEach((face, index) => {
+          const area = face.detection.box.width * face.detection.box.height;
+          if (area > largestFaceArea) {
+            largestFaceArea = area;
+            largestFaceIndex = index;
+          }
+        });
+
+        // Generate random processing time between 2-4 seconds
+        const processingTime = Math.floor(Math.random() * 2000) + 2000; // 2000-4000ms
+
+        // Show animation for the random duration
+        setTimeout(() => {
+          // Update UI after the random processing time
+          setDetectedFaces(processedFaces);
+          setSelectedFaceIndex(largestFaceIndex);
+          setIsSpinning(false);
+        }, processingTime);
       }
     } catch (error) {
       console.error("Error detecting faces:", error);
       alert("Error detecting faces. Please try again.");
+      setIsSpinning(false);
     } finally {
       setIsDetecting(false);
     }
@@ -273,9 +313,12 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       <div className="flex flex-col md:flex-row w-full max-w-[900px] gap-4">
         {/* Left side: Webcam or captured image */}
         <div className="flex-1 w-full md:w-auto">
-          <div className="rounded-xl overflow-hidden">
+          <div
+            className="rounded-xl overflow-hidden h-full relative"
+            style={{ minHeight: "400px" }}
+          >
             {webcamError ? (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl absolute inset-0 flex flex-col items-center justify-center">
                 <p>{webcamError}</p>
                 <p className="text-sm mt-2">
                   Please try again after allowing camera access.
@@ -283,12 +326,12 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
               </div>
             ) : selectedImage ? (
               // Show captured image with face detection
-              <div className="relative inline-block w-full">
+              <div className="relative w-full h-full">
                 <img
                   ref={imageRef}
                   src={selectedImage}
                   alt="Selected"
-                  className="w-full rounded-xl"
+                  className="w-full h-full object-cover rounded-xl"
                   onLoad={detectFaces}
                   crossOrigin="anonymous"
                 />
@@ -303,44 +346,28 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                 )}
               </div>
             ) : (
-              // Show webcam
-              <Webcam
-                audio={false}
-                height={720}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                width={1280}
-                videoConstraints={videoConstraints}
-                onUserMediaError={handleUserMediaError}
-                className="rounded-xl w-full"
-              />
+              <>
+                {/* Webcam loading skeleton */}
+                {isLoading && (
+                  <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center">
+                    <div className="text-gray-500">Loading camera...</div>
+                  </div>
+                )}
+                {/* Show webcam */}
+                <Webcam
+                  audio={false}
+                  height={720}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  width={1280}
+                  videoConstraints={videoConstraints}
+                  onUserMediaError={handleUserMediaError}
+                  onUserMedia={() => setIsLoading(false)}
+                  className={`rounded-xl w-full h-full object-cover ${isLoading ? "opacity-0" : "opacity-100"}`}
+                />
+              </>
             )}
           </div>
-
-          {/* Capture button (only show when webcam is visible) */}
-          {!selectedImage && !webcamError && (
-            <button
-              onClick={capturePhoto}
-              disabled={isCapturing}
-              className={`mt-4 px-4 py-2 rounded text-white w-full ${
-                isCapturing
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-600"
-              }`}
-            >
-              {isCapturing ? "Capturing..." : "Capture photo"}
-            </button>
-          )}
-
-          {/* Retake photo button (only show when image is captured) */}
-          {selectedImage && (
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="mt-4 px-4 py-2 rounded text-white w-full bg-gray-500 hover:bg-gray-600"
-            >
-              Retake photo
-            </button>
-          )}
 
           {/* Comment out file upload
           <input
@@ -353,98 +380,166 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
         </div>
 
         {/* Right side: Register face button or face selection */}
-        <div className="flex flex-col gap-4 w-full md:w-[300px]">
-          {detectedFaces.length > 0 ? (
-            <>
-              <div className="border rounded-lg p-4 bg-white">
+        <div
+          className="flex flex-col gap-4 w-full md:w-[300px] h-full"
+          style={{ minHeight: "400px" }}
+        >
+          {/* First container: Message or registration form */}
+          {detectedFaces.length > 0 && selectedFaceIndex !== null ? (
+            <div className="border rounded-lg p-4 bg-white flex-grow flex flex-col justify-between">
+              <div>
                 <h3 className="text-sm font-semibold mb-2">
-                  Select Face to Label
+                  Register Your Face
                 </h3>
                 <div className="flex flex-col gap-2">
-                  {detectedFaces.map((face, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedFaceIndex(index)}
-                      className={`px-3 py-2 rounded text-left ${
-                        selectedFaceIndex === index
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100 hover:bg-gray-200"
-                      }`}
-                    >
-                      {typeof face.label === "string"
-                        ? face.label
-                        : face.label.name}
-                    </button>
-                  ))}
+                  <input
+                    type="text"
+                    value={profile.name}
+                    onChange={(e) =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    placeholder={address}
+                    className="px-2 py-1 border rounded w-full"
+                  />
+                  <input
+                    type="text"
+                    value={profile.linkedin || ""}
+                    onChange={(e) =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        linkedin: e.target.value,
+                      }))
+                    }
+                    placeholder="LinkedIn username (optional)"
+                    className="px-2 py-1 border rounded w-full"
+                  />
+                  <input
+                    type="text"
+                    value={profile.telegram || ""}
+                    onChange={(e) =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        telegram: e.target.value,
+                      }))
+                    }
+                    placeholder="Telegram username (optional)"
+                    className="px-2 py-1 border rounded w-full"
+                  />
                 </div>
               </div>
-
-              {selectedFaceIndex !== null && (
-                <div className="border rounded-lg p-4 bg-white">
-                  <h3 className="text-sm font-semibold mb-2">
-                    Label Selected Face
-                  </h3>
-                  <div className="flex flex-col gap-2">
-                    <input
-                      type="text"
-                      value={profile.name}
-                      onChange={(e) =>
-                        setProfile((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }))
-                      }
-                      placeholder={address}
-                      className="px-2 py-1 border rounded w-full"
-                    />
-                    <input
-                      type="text"
-                      value={profile.linkedin || ""}
-                      onChange={(e) =>
-                        setProfile((prev) => ({
-                          ...prev,
-                          linkedin: e.target.value,
-                        }))
-                      }
-                      placeholder="LinkedIn username (optional)"
-                      className="px-2 py-1 border rounded w-full"
-                    />
-                    <input
-                      type="text"
-                      value={profile.telegram || ""}
-                      onChange={(e) =>
-                        setProfile((prev) => ({
-                          ...prev,
-                          telegram: e.target.value,
-                        }))
-                      }
-                      placeholder="Telegram username (optional)"
-                      className="px-2 py-1 border rounded w-full"
-                    />
-                    <button
-                      onClick={saveFace}
-                      disabled={!profile.name}
-                      className={`px-4 py-2 rounded w-full ${
-                        !profile.name
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600"
-                      } text-white`}
-                    >
-                      Register Face
-                    </button>
+              <button
+                onClick={saveFace}
+                disabled={!profile.name}
+                className={`px-4 py-2 rounded w-full mt-4 ${
+                  !profile.name
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600"
+                } text-white`}
+              >
+                Register Face
+              </button>
+            </div>
+          ) : (
+            <div className="border rounded-lg p-4 bg-white flex-grow flex flex-col items-center justify-center relative">
+              {/* 3D Head Visualization */}
+              <div className="w-32 h-32 mb-4 relative">
+                {/* 3D Head */}
+                <div
+                  className={`w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-100 relative ${isSpinning ? "animate-spin" : ""}`}
+                  style={{
+                    transformStyle: "preserve-3d",
+                    perspective: "1000px",
+                    animation: isSpinning ? "spin 3s linear infinite" : "none",
+                  }}
+                >
+                  {/* Face features */}
+                  <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 flex flex-col items-center justify-center">
+                    {/* Eyes */}
+                    <div className="flex w-full justify-around mb-2">
+                      <div className="w-3 h-3 rounded-full bg-gray-700"></div>
+                      <div className="w-3 h-3 rounded-full bg-gray-700"></div>
+                    </div>
+                    {/* Mouth */}
+                    <div className="w-1/2 h-1 bg-gray-700 rounded-full mt-2"></div>
                   </div>
                 </div>
-              )}
-            </>
-          ) : (
-            <div className="border rounded-lg p-4 bg-white h-full flex items-center justify-center">
+
+                {/* Scanning Laser */}
+                {isSpinning && (
+                  <div
+                    className="absolute top-0 left-0 w-full bg-blue-400 opacity-50"
+                    style={{
+                      height: "2px",
+                      animation: "scanVertical 1.5s ease-in-out infinite",
+                      boxShadow: "0 0 10px 3px rgba(59, 130, 246, 0.5)",
+                    }}
+                  ></div>
+                )}
+              </div>
+
               <p className="text-center text-gray-500">
                 {selectedImage
                   ? "Processing image..."
                   : "Take a photo to register your face"}
               </p>
+
+              {/* Add CSS animations */}
+              <style jsx>{`
+                @keyframes scanVertical {
+                  0% {
+                    top: 0;
+                  }
+                  50% {
+                    top: 100%;
+                  }
+                  100% {
+                    top: 0;
+                  }
+                }
+                @keyframes spin {
+                  0% {
+                    transform: rotateY(0deg);
+                  }
+                  100% {
+                    transform: rotateY(360deg);
+                  }
+                }
+              `}</style>
             </div>
           )}
+
+          {/* Second container: Capture/Retake button */}
+          <div className="border rounded-lg p-4 bg-white">
+            {selectedImage ? (
+              <button
+                onClick={handleRetakePhoto}
+                className="px-4 py-2 rounded text-white w-full bg-gray-500 hover:bg-gray-600"
+              >
+                Retake photo
+              </button>
+            ) : (
+              !webcamError && (
+                <button
+                  onClick={capturePhoto}
+                  disabled={isCapturing || isLoading}
+                  className={`px-4 py-2 rounded text-white w-full ${
+                    isCapturing || isLoading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }`}
+                >
+                  {isCapturing
+                    ? "Capturing..."
+                    : isLoading
+                      ? "Loading camera..."
+                      : "Capture photo"}
+                </button>
+              )
+            )}
+          </div>
         </div>
       </div>
 
