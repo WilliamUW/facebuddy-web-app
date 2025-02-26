@@ -22,7 +22,7 @@ import Webcam from "react-webcam";
 export default function Page() {
   const { address } = useAccount();
   const [activeView, setActiveView] = useState<"recognize" | "register">(
-    "recognize"
+    "register"
   );
   const [savedFaces, setSavedFaces] = useState<
     Array<{
