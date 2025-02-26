@@ -230,8 +230,8 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           }
         });
 
-        // Generate random processing time between 2-4 seconds
-        const processingTime = Math.floor(Math.random() * 2000) + 2000; // 2000-4000ms
+        // Generate random processing time between 1-3 seconds
+        const processingTime = Math.floor(Math.random() * 1000) + 3000; // 1000-3000ms
 
         // Show animation for the random duration
         setTimeout(() => {
