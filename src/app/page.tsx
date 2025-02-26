@@ -12,9 +12,10 @@ import { ONCHAINKIT_LINK } from "src/links";
 import OnchainkitSvg from "src/svg/OnchainkitSvg";
 import { ProfileData } from "src/components/FaceRegistration";
 import SignupButton from "../components/SignupButton";
+
 import TransactionWrapper from "src/components/TransactionWrapper";
 import WalletWrapper from "src/components/WalletWrapper";
-import {getFileContent} from "src/utility/faceDataStorage";
+import { getFileContent } from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
 
 export default function Page() {
@@ -41,8 +42,10 @@ export default function Page() {
   useEffect(() => {
     async function populateFaces() {
       try {
-        const content = await getFileContent("bafkreia27z2wok67tk52sgxjytz4xvtbbho3sfty7qfkdvrr6miaunzwnm");
-        
+        const content = await getFileContent(
+          "bafkreia27z2wok67tk52sgxjytz4xvtbbho3sfty7qfkdvrr6miaunzwnm"
+        );
+
         // Handle the fallback URL case
         if (typeof content === "string") {
           console.error("Failed to fetch face data");
@@ -50,9 +53,15 @@ export default function Page() {
         }
 
         // Handle JSON response
-        if (content instanceof Object && 'data' in content && typeof content.data === 'object' && content.data && 'content' in content.data) {
+        if (
+          content instanceof Object &&
+          "data" in content &&
+          typeof content.data === "object" &&
+          content.data &&
+          "content" in content.data
+        ) {
           const jsonContent = content.data.content;
-          if (typeof jsonContent !== 'string') {
+          if (typeof jsonContent !== "string") {
             console.error("Invalid content format");
             return;
           }
@@ -61,11 +70,11 @@ export default function Page() {
           // Convert the regular arrays back to Float32Array
           const processedFaces = parsedContent.map((face: any) => ({
             ...face,
-            descriptor: new Float32Array(face.descriptor)
+            descriptor: new Float32Array(face.descriptor),
           }));
-          
+
           setSavedFaces(processedFaces);
-          console.log("faces downloaded")
+          console.log("faces downloaded");
         } else {
           console.error("Invalid response format");
         }
