@@ -63,6 +63,8 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     null
   );
   const [isSpinning, setIsSpinning] = useState(false);
+  const [isFaceRegistered, setIsFaceRegistered] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   //   useEffect(() => {
   //     if (address) {
@@ -284,8 +286,14 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       return;
     }
 
+    // Start the registration process with loading spinner
+    setIsRegistering(true);
+
     const selectedFace = detectedFaces[selectedFaceIndex];
-    if (!selectedFace) return;
+    if (!selectedFace) {
+      setIsRegistering(false);
+      return;
+    }
 
     const updatedFaces = detectedFaces.map((face, index) =>
       index === selectedFaceIndex ? { ...face, label: profile } : face
@@ -297,12 +305,27 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       descriptor: selectedFace.descriptor,
     };
 
+    // Save the face data
     onFaceSaved([savedFace]);
-    alert(`Saved face for ${profile.name}!`);
-    setProfile({ name: address ?? "", linkedin: "", telegram: "" });
-    setSelectedFaceIndex(null);
 
-    uploadFaceData(updatedFaces);
+    // Upload face data
+    await uploadFaceData(updatedFaces);
+
+    // Generate random processing time between 1-3 seconds
+    const processingTime = Math.floor(Math.random() * 2000) + 1000; // 1000-3000ms
+
+    // Show loading spinner for the random duration
+    setTimeout(() => {
+      // Update UI after the random processing time
+      setIsRegistering(false);
+      setIsFaceRegistered(true);
+    }, processingTime);
+  };
+
+  // Function to navigate to the Send page
+  const goToSendPage = () => {
+    // This will navigate to the "recognize" view which contains the Send functionality
+    window.dispatchEvent(new CustomEvent("navigate-to-recognize"));
   };
 
   return (
@@ -384,66 +407,128 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           className="flex flex-col gap-4 w-full md:w-[300px] h-full"
           style={{ minHeight: "400px" }}
         >
+          {/* For mobile: Capture/Retake button appears first (above the form) */}
+          <div className="border rounded-lg p-4 bg-white md:order-2 order-1">
+            {selectedImage ? (
+              isFaceRegistered ? (
+                <button
+                  onClick={goToSendPage}
+                  className="px-4 py-2 rounded text-white w-full bg-blue-500 hover:bg-blue-600"
+                >
+                  &larr; Go to Send page
+                </button>
+              ) : (
+                <button
+                  onClick={handleRetakePhoto}
+                  className="px-4 py-2 rounded text-white w-full bg-gray-500 hover:bg-gray-600"
+                >
+                  Retake photo
+                </button>
+              )
+            ) : (
+              !webcamError && (
+                <button
+                  onClick={capturePhoto}
+                  disabled={isCapturing || isLoading}
+                  className={`px-4 py-2 rounded text-white w-full ${
+                    isCapturing || isLoading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }`}
+                >
+                  {isCapturing
+                    ? "Capturing..."
+                    : isLoading
+                      ? "Loading camera..."
+                      : "Capture photo"}
+                </button>
+              )
+            )}
+          </div>
+
           {/* First container: Message or registration form */}
           {detectedFaces.length > 0 && selectedFaceIndex !== null ? (
-            <div className="border rounded-lg p-4 bg-white flex-grow flex flex-col justify-between">
+            <div className="border rounded-lg p-4 bg-white flex-grow flex flex-col justify-between md:order-1 order-2 relative">
+              {/* Registration loading overlay */}
+              {isRegistering && (
+                <div className="absolute inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center z-10 rounded-lg">
+                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent mb-4"></div>
+                  <p className="text-blue-600 font-medium">
+                    Registering your face...
+                  </p>
+                </div>
+              )}
+
               <div>
                 <h3 className="text-sm font-semibold mb-2">
-                  Register Your Face
+                  {isFaceRegistered ? "Face Registered!" : "Register Your Face"}
                 </h3>
+                {isFaceRegistered && (
+                  <p className="text-green-600 mb-2">
+                    Head over to "Send" to start paying people!
+                  </p>
+                )}
                 <div className="flex flex-col gap-2">
                   <input
                     type="text"
                     value={profile.name}
                     onChange={(e) =>
+                      !isFaceRegistered &&
                       setProfile((prev) => ({
                         ...prev,
                         name: e.target.value,
                       }))
                     }
                     placeholder={address}
-                    className="px-2 py-1 border rounded w-full"
+                    className={`px-2 py-1 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""}`}
+                    disabled={isFaceRegistered || isRegistering}
                   />
                   <input
                     type="text"
                     value={profile.linkedin || ""}
                     onChange={(e) =>
+                      !isFaceRegistered &&
                       setProfile((prev) => ({
                         ...prev,
                         linkedin: e.target.value,
                       }))
                     }
                     placeholder="LinkedIn username (optional)"
-                    className="px-2 py-1 border rounded w-full"
+                    className={`px-2 py-1 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""}`}
+                    disabled={isFaceRegistered || isRegistering}
                   />
                   <input
                     type="text"
                     value={profile.telegram || ""}
                     onChange={(e) =>
+                      !isFaceRegistered &&
                       setProfile((prev) => ({
                         ...prev,
                         telegram: e.target.value,
                       }))
                     }
                     placeholder="Telegram username (optional)"
-                    className="px-2 py-1 border rounded w-full"
+                    className={`px-2 py-1 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""}`}
+                    disabled={isFaceRegistered || isRegistering}
                   />
                 </div>
               </div>
-              <button
-                onClick={saveFace}
-                disabled={!profile.name}
-                className={`px-4 py-2 rounded w-full mt-4 ${
-                  !profile.name
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600"
-                } text-white`}
-              >
-                Register Face
-              </button>
+              {!isFaceRegistered && (
+                <button
+                  onClick={saveFace}
+                  disabled={!profile.name || isRegistering}
+                  className={`px-4 py-2 rounded w-full mt-4 ${
+                    !profile.name || isRegistering
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  } text-white`}
+                >
+                  {isRegistering ? "Registering..." : "Register Face"}
+                </button>
+              )}
             </div>
           ) : (
-            <div className="border rounded-lg p-4 bg-white flex-grow flex flex-col items-center justify-center relative">
+            <div className="border rounded-lg p-4 bg-white flex-grow flex flex-col items-center justify-center relative md:order-1 order-2">
               {/* 3D Head Visualization */}
               <div className="w-32 h-32 mb-4 relative">
                 {/* 3D Head */}
@@ -510,36 +595,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
               `}</style>
             </div>
           )}
-
-          {/* Second container: Capture/Retake button */}
-          <div className="border rounded-lg p-4 bg-white">
-            {selectedImage ? (
-              <button
-                onClick={handleRetakePhoto}
-                className="px-4 py-2 rounded text-white w-full bg-gray-500 hover:bg-gray-600"
-              >
-                Retake photo
-              </button>
-            ) : (
-              !webcamError && (
-                <button
-                  onClick={capturePhoto}
-                  disabled={isCapturing || isLoading}
-                  className={`px-4 py-2 rounded text-white w-full ${
-                    isCapturing || isLoading
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  }`}
-                >
-                  {isCapturing
-                    ? "Capturing..."
-                    : isLoading
-                      ? "Loading camera..."
-                      : "Capture photo"}
-                </button>
-              )
-            )}
-          </div>
         </div>
       </div>
 
