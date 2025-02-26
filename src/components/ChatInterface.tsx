@@ -16,8 +16,9 @@ type ChatResponse = {
   };
   proof: {
     type: string;
+    timestamp: number,
     metadata: {
-      logId?: string;
+      logId: string;
     };
   };
 };
@@ -112,6 +113,9 @@ export default function ChatInterface() {
               <p>Proof Type: {response.proof.type}</p>
               {response.proof.metadata.logId && (
                 <p>Log ID: {response.proof.metadata.logId}</p>
+              )}
+              {response.proof.timestamp && (
+                <p>Timestamp: {new Date(response.proof.timestamp).toLocaleString()}</p>
               )}
             </div>
           )}
