@@ -21,6 +21,8 @@ export default function SendEthWrapper({ recipientAddress, initialUsdAmount }: {
   const [usdAmount, setUsdAmount] = useState<string>(initialUsdAmount || '1.00');
   const [ethPrice, setEthPrice] = useState<number>(0);
   const [ethAmount, setEthAmount] = useState<string>('0');
+  const [shouldAutoInitiate, setShouldAutoInitiate] = useState(!!initialUsdAmount);
+  const [hasInitiatedTransaction, setHasInitiatedTransaction] = useState(false);
 
   // Fetch ETH price
   useEffect(() => {
@@ -44,17 +46,21 @@ export default function SendEthWrapper({ recipientAddress, initialUsdAmount }: {
     }
   }, [usdAmount, ethPrice]);
 
-  const contracts = ethAmount ? [{
+  const contracts = ethAmount && shouldAutoInitiate ? [{
     to: recipientAddress,
     value: parseEther(ethAmount),
   }] : [];
 
   const handleError = (err: TransactionError) => {
     console.error('Transaction error:', err);
+    setShouldAutoInitiate(false);
+    setHasInitiatedTransaction(false);
   };
 
   const handleSuccess = (response: TransactionResponse) => {
     console.log('Transaction successful', response);
+    setShouldAutoInitiate(false);
+    setHasInitiatedTransaction(true);
   };
 
   return (
@@ -65,7 +71,10 @@ export default function SendEthWrapper({ recipientAddress, initialUsdAmount }: {
           <input
             type="number"
             value={usdAmount}
-            onChange={(e) => setUsdAmount(e.target.value)}
+            onChange={(e) => {
+              setUsdAmount(e.target.value);
+              setShouldAutoInitiate(false); // Disable auto-initiate when amount is changed manually
+            }}
             min="0"
             step="0.01"
             className="w-full pl-8 pr-4 py-2 border rounded-lg"
@@ -86,10 +95,14 @@ export default function SendEthWrapper({ recipientAddress, initialUsdAmount }: {
       >
         <TransactionButton 
           className="mt-0 mr-auto ml-auto w-[450px] max-w-full text-[white] disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={!ethAmount || parseFloat(ethAmount) <= 0}
+          disabled={!ethAmount || parseFloat(ethAmount) <= 0 || hasInitiatedTransaction}
         />
         <div className="text-center text-sm text-gray-600">
-          {ethAmount && parseFloat(ethAmount) > 0 ? `Sending $${usdAmount} (${ethAmount} ETH)` : 'Enter an amount to send'}
+          {ethAmount && parseFloat(ethAmount) > 0 ? 
+            hasInitiatedTransaction ? 
+              'Transaction initiated' : 
+              `Sending $${usdAmount} (${ethAmount} ETH)` 
+            : 'Enter an amount to send'}
         </div>
         <TransactionStatus>
           <TransactionStatusLabel />

@@ -147,7 +147,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
               </pre>
             </div>
           )}
-          {transactionAmount && profile?.name && (
+          {!isLoading && transactionAmount && profile?.name && (
             <div className="mt-4">
               <SendEthWrapper 
                 recipientAddress={profile.name as `0x${string}`}
