@@ -17,8 +17,8 @@ import type { Address } from 'viem';
 import { BASE_SEPOLIA_CHAIN_ID } from '../constants';
 import { parseEther } from 'viem';
 
-export default function SendEthWrapper({ recipientAddress }: { recipientAddress: Address }) {
-  const [usdAmount, setUsdAmount] = useState<string>('1.00');
+export default function SendEthWrapper({ recipientAddress, initialUsdAmount }: { recipientAddress: Address, initialUsdAmount?: string }) {
+  const [usdAmount, setUsdAmount] = useState<string>(initialUsdAmount || '1.00');
   const [ethPrice, setEthPrice] = useState<number>(0);
   const [ethAmount, setEthAmount] = useState<string>('0');
 

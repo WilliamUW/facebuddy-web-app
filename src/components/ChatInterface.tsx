@@ -1,6 +1,7 @@
 "use client";
 
 import { ProfileData } from "./FaceRegistration";
+import SendEthWrapper from "./SendEthWrapper";
 import { useState } from "react";
 
 type ChatResponse = {
@@ -35,11 +36,17 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<ChatResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [transactionAmount, setTransactionAmount] = useState<string | null>(null);
 
   const handleFunctionCall = (functionCall: ChatResponse['content']['functionCall']) => {
     if (!functionCall) return;
 
     switch (functionCall.functionName) {
+      case 'sendTransaction':
+        if (functionCall.args.amount) {
+          setTransactionAmount(functionCall.args.amount);
+        }
+        break;
       case 'connectOnLinkedin':
         if (profile?.linkedin) {
           window.open(`https://linkedin.com/in/${profile.linkedin}`, '_blank');
@@ -50,7 +57,6 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
           window.open(`https://t.me/${profile.telegram}`, '_blank');
         }
         break;
-      // Keep existing function calls
       default:
         console.log('Unknown function call:', functionCall.functionName);
     }
@@ -139,6 +145,14 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
               <pre className="text-sm overflow-x-auto">
                 {JSON.stringify(response.content.functionCall, null, 2)}
               </pre>
+            </div>
+          )}
+          {transactionAmount && profile?.name && (
+            <div className="mt-4">
+              <SendEthWrapper 
+                recipientAddress={profile.name as `0x${string}`}
+                initialUsdAmount={transactionAmount}
+              />
             </div>
           )}
           {response.proof && (
