@@ -54,6 +54,10 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   //     }
   //   }, [address]);
 
+  const uploadFaceData = (data: any) => {
+    console.log("write data to ETHStorage", data)
+  }
+
   useEffect(() => {
     const loadModels = async () => {
       const MODEL_URL = "/models";
@@ -108,6 +112,8 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       descriptor,
       label: index === 0 ? profile : { name: `Face ${index + 1}`, linkedin: "", telegram: "" },
     }));
+
+    uploadFaceData(detectedFacesData);
 
     setDetectedFaces(detectedFacesData);
     
