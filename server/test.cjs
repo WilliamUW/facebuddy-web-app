@@ -23,9 +23,20 @@ async function main() {
     // console.log(readData)
 }
 
+const callback = {
+    onProgress: function (progress, count, isChange) {
+        console.log(`Uploaded ${progress} of ${count} chunks`);
+    },
+    onFail: function (err) {
+        console.log(err);
+    },
+    onFinish: function (totalUploadChunks, totalUploadSize, totalStorageCost) {
+        console.log(`Total upload chunk count is ${totalUploadChunks}, size is ${totalUploadSize}, storage cost is ${totalStorageCost}`);
+    }
+};
+
 async function upload() {
     const address = "0xA460C70b474cA4125c35dFaFfC1e83B0122efcaB"; // FlatDirectory address
-
 
     const flatDirectory = await FlatDirectory.create({
         rpc: rpc,
@@ -33,18 +44,7 @@ async function upload() {
         privateKey: privateKey,
         address: address,
     });
-    const callback = {
-        onProgress: function (progress, count, isChange) {
-            console.log(`Uploaded ${progress} of ${count} chunks`);
-        },
-        onFail: function (err) {
-            console.log(err);
-        },
-        onFinish: function (totalUploadChunks, totalUploadSize, totalStorageCost) {
-            console.log(`Total upload chunk count is ${totalUploadChunks}, size is ${totalUploadSize}, storage cost is ${totalStorageCost}`);
-        }
-    };
-    
+    console.log("flat directory successful")
     const request = {
         key: "test.txt",
         content: Buffer.from("big data"),
