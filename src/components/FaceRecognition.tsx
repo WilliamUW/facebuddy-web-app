@@ -30,6 +30,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
   const faceMatcher = useRef<faceapi.FaceMatcher | null>(null);
   const [detectedFaces, setDetectedFaces] = useState<DetectedFace[]>([]);
   const [selectedFaceIndex, setSelectedFaceIndex] = useState<number | null>(
@@ -100,47 +101,52 @@ export default function FaceRecognition({ savedFaces }: Props) {
     )
       return;
 
-    const displaySize = {
-      width: imageRef.current.clientWidth,
-      height: imageRef.current.clientHeight,
-    };
-
-    faceapi.matchDimensions(canvasRef.current, displaySize);
-
-    const fullFaceDescriptions = await faceapi
-      .detectAllFaces(imageRef.current, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withFaceDescriptors();
-
-    const resizedDetections = faceapi.resizeResults(
-      fullFaceDescriptions,
-      displaySize
-    );
-
-    // Store detected faces with their matches
-    const faces = resizedDetections.map(({ detection, descriptor }) => {
-      const match = faceMatcher.current!.findBestMatch(descriptor);
-      const matchedFace = savedFaces.find(
-        (face) => face.label.name === match.label
-      );
-      return {
-        detection,
-        descriptor,
-        match,
-        matchedProfile: matchedFace?.label,
+    setIsDetecting(true);
+    try {
+      const displaySize = {
+        width: imageRef.current.clientWidth,
+        height: imageRef.current.clientHeight,
       };
-    });
 
-    // Auto-select the first face that has a match and isn't unknown
-    const firstMatchIndex = faces.findIndex(
-      (face) => face.match.label !== "unknown"
-    );
-    if (firstMatchIndex !== -1) {
-      setSelectedFaceIndex(firstMatchIndex);
+      faceapi.matchDimensions(canvasRef.current, displaySize);
+
+      const fullFaceDescriptions = await faceapi
+        .detectAllFaces(imageRef.current, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptors();
+
+      const resizedDetections = faceapi.resizeResults(
+        fullFaceDescriptions,
+        displaySize
+      );
+
+      // Store detected faces with their matches
+      const faces = resizedDetections.map(({ detection, descriptor }) => {
+        const match = faceMatcher.current!.findBestMatch(descriptor);
+        const matchedFace = savedFaces.find(
+          (face) => face.label.name === match.label
+        );
+        return {
+          detection,
+          descriptor,
+          match,
+          matchedProfile: matchedFace?.label,
+        };
+      });
+
+      // Auto-select the first face that has a match and isn't unknown
+      const firstMatchIndex = faces.findIndex(
+        (face) => face.match.label !== "unknown"
+      );
+      if (firstMatchIndex !== -1) {
+        setSelectedFaceIndex(firstMatchIndex);
+      }
+
+      setDetectedFaces(faces);
+      drawFaces(faces);
+    } finally {
+      setIsDetecting(false);
     }
-
-    setDetectedFaces(faces);
-    drawFaces(faces);
   };
 
   const drawFaces = (faces: DetectedFace[]) => {
@@ -198,6 +204,11 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   ref={canvasRef}
                   className="absolute top-0 left-0 z-10 w-full h-full"
                 />
+                {isDetecting && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-xl">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent"></div>
+                  </div>
+                )}
               </>
             )}
           </div>

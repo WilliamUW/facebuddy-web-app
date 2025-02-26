@@ -38,6 +38,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
   const [profile, setProfile] = useState<ProfileData>({
     name: address ?? "",
     linkedin: "",
@@ -99,36 +100,41 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const detectFaces = async () => {
     if (!imageRef.current || !canvasRef.current || !isModelLoaded) return;
 
-    const displaySize = {
-      width: imageRef.current.clientWidth,
-      height: imageRef.current.clientHeight,
-    };
+    setIsDetecting(true);
+    try {
+      const displaySize = {
+        width: imageRef.current.clientWidth,
+        height: imageRef.current.clientHeight,
+      };
 
-    faceapi.matchDimensions(canvasRef.current, displaySize);
+      faceapi.matchDimensions(canvasRef.current, displaySize);
 
-    const fullFaceDescriptions = await faceapi
-      .detectAllFaces(imageRef.current, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withFaceDescriptors();
+      const fullFaceDescriptions = await faceapi
+        .detectAllFaces(imageRef.current, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptors();
 
-    const resizedDetections = faceapi.resizeResults(
-      fullFaceDescriptions,
-      displaySize
-    );
+      const resizedDetections = faceapi.resizeResults(
+        fullFaceDescriptions,
+        displaySize
+      );
 
-    const detectedFacesData = resizedDetections.map(({ detection, descriptor }, index) => ({
-      detection,
-      descriptor,
-      label: index === 0 ? profile : { name: `Face ${index + 1}`, linkedin: "", telegram: "" },
-    }));
+      const detectedFacesData = resizedDetections.map(({ detection, descriptor }, index) => ({
+        detection,
+        descriptor,
+        label: index === 0 ? profile : { name: `Face ${index + 1}`, linkedin: "", telegram: "" },
+      }));
 
-    uploadFaceData(detectedFacesData);
+      uploadFaceData(detectedFacesData);
 
-    setDetectedFaces(detectedFacesData);
-    
-    // Auto-select the first face if any faces are detected
-    if (detectedFacesData.length > 0) {
-      setSelectedFaceIndex(0);
+      setDetectedFaces(detectedFacesData);
+      
+      // Auto-select the first face if any faces are detected
+      if (detectedFacesData.length > 0) {
+        setSelectedFaceIndex(0);
+      }
+    } finally {
+      setIsDetecting(false);
     }
   };
 
@@ -214,8 +220,13 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                 />
                 <canvas
                   ref={canvasRef}
-                  className="absolute top-0 left-0 z-10"
+                  className="absolute top-0 left-0 z-10 w-full h-full"
                 />
+                {isDetecting && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-xl">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent"></div>
+                  </div>
+                )}
               </>
             )}
           </div>
