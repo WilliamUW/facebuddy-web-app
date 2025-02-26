@@ -371,57 +371,61 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
         >
           {/* First container: Message or registration form */}
           {detectedFaces.length > 0 && selectedFaceIndex !== null ? (
-            <div className="border rounded-lg p-4 bg-white flex-grow">
-              <h3 className="text-sm font-semibold mb-2">Register Your Face</h3>
-              <div className="flex flex-col gap-2">
-                <input
-                  type="text"
-                  value={profile.name}
-                  onChange={(e) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      name: e.target.value,
-                    }))
-                  }
-                  placeholder={address}
-                  className="px-2 py-1 border rounded w-full"
-                />
-                <input
-                  type="text"
-                  value={profile.linkedin || ""}
-                  onChange={(e) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      linkedin: e.target.value,
-                    }))
-                  }
-                  placeholder="LinkedIn username (optional)"
-                  className="px-2 py-1 border rounded w-full"
-                />
-                <input
-                  type="text"
-                  value={profile.telegram || ""}
-                  onChange={(e) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      telegram: e.target.value,
-                    }))
-                  }
-                  placeholder="Telegram username (optional)"
-                  className="px-2 py-1 border rounded w-full"
-                />
-                <button
-                  onClick={saveFace}
-                  disabled={!profile.name}
-                  className={`px-4 py-2 rounded w-full ${
-                    !profile.name
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  } text-white`}
-                >
-                  Register Face
-                </button>
+            <div className="border rounded-lg p-4 bg-white flex-grow flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-semibold mb-2">
+                  Register Your Face
+                </h3>
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="text"
+                    value={profile.name}
+                    onChange={(e) =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    placeholder={address}
+                    className="px-2 py-1 border rounded w-full"
+                  />
+                  <input
+                    type="text"
+                    value={profile.linkedin || ""}
+                    onChange={(e) =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        linkedin: e.target.value,
+                      }))
+                    }
+                    placeholder="LinkedIn username (optional)"
+                    className="px-2 py-1 border rounded w-full"
+                  />
+                  <input
+                    type="text"
+                    value={profile.telegram || ""}
+                    onChange={(e) =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        telegram: e.target.value,
+                      }))
+                    }
+                    placeholder="Telegram username (optional)"
+                    className="px-2 py-1 border rounded w-full"
+                  />
+                </div>
               </div>
+              <button
+                onClick={saveFace}
+                disabled={!profile.name}
+                className={`px-4 py-2 rounded w-full mt-4 ${
+                  !profile.name
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600"
+                } text-white`}
+              >
+                Register Face
+              </button>
             </div>
           ) : (
             <div className="border rounded-lg p-4 bg-white flex-grow flex items-center justify-center">
