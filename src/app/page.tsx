@@ -65,6 +65,7 @@ export default function Page() {
           }));
           
           setSavedFaces(processedFaces);
+          console.log("faces downloaded")
         } else {
           console.error("Invalid response format");
         }
