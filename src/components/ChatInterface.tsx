@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 type ChatResponse = {
   content: {
@@ -16,12 +16,14 @@ type ChatResponse = {
   };
   proof: {
     type: string;
-    logId?: string;
+    metadata: {
+      logId?: string;
+    };
   };
 };
 
 export default function ChatInterface() {
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<ChatResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -32,22 +34,26 @@ export default function ChatInterface() {
     setError(null);
 
     try {
-      const res = await fetch('https://ai-quickstart.onrender.com/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt }),
-      });
+      const res = await fetch(
+        "https://ai-quickstart.onrender.com/api/generate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt }),
+        }
+      );
 
       if (!res.ok) {
-        throw new Error('Failed to get response');
+        throw new Error("Failed to get response");
       }
 
       const data = await res.json();
+      console.log(data);
       setResponse(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +76,7 @@ export default function ChatInterface() {
             disabled={isLoading || !prompt.trim()}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Sending...' : 'Send'}
+            {isLoading ? "Sending..." : "Send"}
           </button>
         </div>
       </form>
@@ -104,11 +110,13 @@ export default function ChatInterface() {
           {response.proof && (
             <div className="mt-2 text-sm text-gray-600">
               <p>Proof Type: {response.proof.type}</p>
-              {response.proof.logId && <p>Log ID: {response.proof.logId}</p>}
+              {response.proof.metadata.logId && (
+                <p>Log ID: {response.proof.metadata.logId}</p>
+              )}
             </div>
           )}
         </div>
       )}
     </div>
   );
-} 
+}
