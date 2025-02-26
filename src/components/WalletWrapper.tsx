@@ -1,4 +1,5 @@
 'use client';
+
 import {
   Address,
   Avatar,
@@ -30,7 +31,8 @@ export default function WalletWrapper({
     <>
       <Wallet>
         <ConnectWallet
-          withWalletAggregator={withWalletAggregator}
+        // TODO: add back
+          // withWalletAggregator={withWalletAggregator}
           text={text}
           className={className}
         >
