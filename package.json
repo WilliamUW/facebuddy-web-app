@@ -19,6 +19,7 @@
   "dependencies": {
     "@coinbase/onchainkit": "^0.35.6",
     "@rainbow-me/rainbowkit": "^2.2.4",
+    "axios": "^1.8.1",
     "ethers": "^6.13.5",
     "ethstorage-sdk": "^3.0.0",
     "face-api.js": "^0.22.2",
