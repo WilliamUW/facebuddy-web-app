@@ -4,6 +4,7 @@ import * as faceapi from "face-api.js";
 
 import { useEffect, useRef, useState } from "react";
 
+import ChatInterface from "./ChatInterface";
 import { ProfileData } from "./FaceRegistration";
 import SendEthWrapper from "./SendEthWrapper";
 import {getFileContent} from "src/utility/faceDataStorage";
@@ -323,6 +324,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
                       }
                     />
                   </div>
+
+                  <ChatInterface profile={detectedFaces[selectedFaceIndex].matchedProfile} />
                 </div>
               )}
           </div>

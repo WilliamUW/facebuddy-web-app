@@ -13,7 +13,6 @@ import { ONCHAINKIT_LINK } from "src/links";
 import OnchainkitSvg from "src/svg/OnchainkitSvg";
 import { ProfileData } from "src/components/FaceRegistration";
 import SignupButton from "../components/SignupButton";
-
 import TransactionWrapper from "src/components/TransactionWrapper";
 import WalletWrapper from "src/components/WalletWrapper";
 import { getFileContent } from "src/utility/faceDataStorage";
@@ -120,7 +119,6 @@ export default function Page() {
         </div> */}
         {address ? (
           <>
-            <ChatInterface />
             {activeView === "register" ? (
               <FaceRegistration
                 onFaceSaved={handleFaceSaved}

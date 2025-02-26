@@ -1,5 +1,6 @@
 "use client";
 
+import { ProfileData } from "./FaceRegistration";
 import { useState } from "react";
 
 type ChatResponse = {
@@ -16,14 +17,18 @@ type ChatResponse = {
   };
   proof: {
     type: string;
-    timestamp: number,
+    timestamp: number;
     metadata: {
       logId: string;
     };
   };
 };
 
-export default function ChatInterface() {
+interface ChatInterfaceProps {
+  profile?: ProfileData;
+}
+
+export default function ChatInterface({ profile }: ChatInterfaceProps) {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<ChatResponse | null>(null);
@@ -35,6 +40,7 @@ export default function ChatInterface() {
     setError(null);
 
     try {
+      console.log(prompt, profile);
       const res = await fetch(
         "https://ai-quickstart.onrender.com/api/generate",
         {
@@ -42,7 +48,9 @@ export default function ChatInterface() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ prompt }),
+          body: JSON.stringify({
+            prompt: prompt + JSON.stringify(profile),
+          }),
         }
       );
 
@@ -115,7 +123,10 @@ export default function ChatInterface() {
                 <p>Log ID: {response.proof.metadata.logId}</p>
               )}
               {response.proof.timestamp && (
-                <p>Timestamp: {new Date(response.proof.timestamp).toLocaleString()}</p>
+                <p>
+                  Timestamp:{" "}
+                  {new Date(response.proof.timestamp).toLocaleString()}
+                </p>
               )}
             </div>
           )}
