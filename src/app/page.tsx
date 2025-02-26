@@ -77,7 +77,7 @@ export default function Page() {
             ) : (
               <>
                 <FaceRecognition savedFaces={savedFaces} />
-                <TransactionWrapper address={address} />
+                {/* <TransactionWrapper address={address} /> */}
               </>
             )}
           </>
