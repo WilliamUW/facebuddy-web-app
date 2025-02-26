@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import FaceRecognition from "src/components/FaceRecognition";
 import FaceRegistration from "src/components/FaceRegistration";
 import Footer from "src/components/Footer";
+import { GetCIDResponse } from "pinata-web3";
 import Image from "next/image";
 import LoginButton from "../components/LoginButton";
 import { ONCHAINKIT_LINK } from "src/links";
@@ -48,27 +49,31 @@ export default function Page() {
           return;
         }
 
-        // Handle the successful response
-        const jsonContent = content.data?.content;
-        if (!jsonContent) {
-          console.error("Invalid data format received");
-          return;
-        }
+        // Handle JSON response
+        if (content instanceof Object && 'data' in content && typeof content.data === 'object' && content.data && 'content' in content.data) {
+          const jsonContent = content.data.content;
+          if (typeof jsonContent !== 'string') {
+            console.error("Invalid content format");
+            return;
+          }
 
-        const parsedContent = JSON.parse(jsonContent);
-        // Convert the regular arrays back to Float32Array
-        const processedFaces = parsedContent.map((face: any) => ({
-          ...face,
-          descriptor: new Float32Array(face.descriptor)
-        }));
-        
-        setSavedFaces(processedFaces);
+          const parsedContent = JSON.parse(jsonContent);
+          // Convert the regular arrays back to Float32Array
+          const processedFaces = parsedContent.map((face: any) => ({
+            ...face,
+            descriptor: new Float32Array(face.descriptor)
+          }));
+          
+          setSavedFaces(processedFaces);
+        } else {
+          console.error("Invalid response format");
+        }
       } catch (error) {
         console.error("Error loading face data:", error);
       }
     }
     populateFaces();
-  }, []); // Add dependency array to prevent infinite loop
+  }, []);
 
   return (
     <div className="flex h-full w-96 max-w-full flex-col px-1 md:w-[1008px]">
