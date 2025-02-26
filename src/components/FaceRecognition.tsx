@@ -229,11 +229,32 @@ export default function FaceRecognition({ savedFaces }: Props) {
                     Profile Details
                   </h3>
                   <div className="flex flex-col gap-2">
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p>
-                        <strong>Wallet Address:</strong>{" "}
-                        {detectedFaces[selectedFaceIndex].matchedProfile!.name}
-                      </p>
+                  <div className="p-3 bg-gray-50 rounded-lg flex items-center justify-between">
+                      <div className="truncate">
+                        <strong>Wallet:</strong>{' '}
+                        <span className="font-mono text-sm">
+                          {detectedFaces[selectedFaceIndex].matchedProfile!.name}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(detectedFaces[selectedFaceIndex].matchedProfile!.name);
+                          // Optional: Add visual feedback
+                          const button = document.activeElement as HTMLButtonElement;
+                          const originalText = button.innerHTML;
+                          button.innerHTML = "Copied!";
+                          setTimeout(() => {
+                            button.innerHTML = originalText;
+                          }, 1000);
+                          alert("Copied Address: " + detectedFaces[selectedFaceIndex].matchedProfile!.name);
+                        }}
+                        className="ml-2 p-1.5 text-gray-500 hover:text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
+                        title="Copy wallet address"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                      </button>
                     </div>
 
                     {detectedFaces[selectedFaceIndex].matchedProfile!
