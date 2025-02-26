@@ -26,17 +26,30 @@ async function main() {
 async function upload() {
     const address = "0xA460C70b474cA4125c35dFaFfC1e83B0122efcaB"; // FlatDirectory address
 
+
     const flatDirectory = await FlatDirectory.create({
         rpc: rpc,
+        ethStorageRpc: ethStorageRpc,
         privateKey: privateKey,
         address: address,
     });
+    const callback = {
+        onProgress: function (progress, count, isChange) {
+            console.log(`Uploaded ${progress} of ${count} chunks`);
+        },
+        onFail: function (err) {
+            console.log(err);
+        },
+        onFinish: function (totalUploadChunks, totalUploadSize, totalStorageCost) {
+            console.log(`Total upload chunk count is ${totalUploadChunks}, size is ${totalUploadSize}, storage cost is ${totalStorageCost}`);
+        }
+    };
     
     const request = {
         key: "test.txt",
         content: Buffer.from("big data"),
         type: 2, // 1 for calldata and 2 for blob
-        callback: () => {}
+        callback: callback
     }
     await flatDirectory.upload(request);
     console.log("uploaded")
