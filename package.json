@@ -2,6 +2,7 @@
   "name": "onchain-app-template",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "build": "next build",
     "check": "biome check --write .",
