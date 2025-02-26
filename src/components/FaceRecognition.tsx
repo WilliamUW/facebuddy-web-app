@@ -5,6 +5,7 @@ import * as faceapi from 'face-api.js';
 import { useEffect, useRef, useState } from 'react';
 
 import { ProfileData } from './FaceRegistration';
+import SendEthWrapper from './SendEthWrapper';
 
 export interface SavedFace {
   label: ProfileData;
@@ -203,6 +204,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   <div className="p-3 bg-gray-50 rounded-lg">
                     <p><strong>Name:</strong> {detectedFaces[selectedFaceIndex].matchedProfile!.name}</p>
                   </div>
+                  <SendEthWrapper recipientAddress={detectedFaces[selectedFaceIndex].matchedProfile!.name as `0x${string}`} />
+
                   
                   {detectedFaces[selectedFaceIndex].matchedProfile!.linkedin && (
                     <div className="p-3 bg-gray-50 rounded-lg">
