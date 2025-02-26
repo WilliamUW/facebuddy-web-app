@@ -1,7 +1,7 @@
 import "./global.css";
 import "@coinbase/onchainkit/styles.css";
 import "@rainbow-me/rainbowkit/styles.css";
-
+import Footer from "src/components/Footer";
 import type { Metadata } from "next";
 import { NEXT_PUBLIC_URL } from "../config";
 import dynamic from "next/dynamic";
@@ -40,6 +40,7 @@ export default function RootLayout({
           <div>
             <Header />
             {children}
+            <Footer />
           </div>
         </OnchainProviders>
       </body>
