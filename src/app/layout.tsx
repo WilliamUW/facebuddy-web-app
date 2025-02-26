@@ -35,9 +35,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="flex items-center justify-center">
+      <body className="flex justify-center w-[800px] mx-auto my-4 bg-white">
         <OnchainProviders>
-          <div>
+          <div className="w-full border bg-gray-100 sm:rounded-lg">
             <Header />
             {children}
             <Footer />

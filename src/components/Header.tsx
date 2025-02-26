@@ -10,13 +10,14 @@ import { useAccount } from "wagmi";
 export default function Header() {
   const { address } = useAccount();
   return (
-    <section className="mt-6 mb-6 flex w-full flex-col md:flex-row">
-      <div className="flex w-full flex-row items-center justify-between gap-2 md:gap-0">
+    <section className="w-full py-4">
+      <div className="flex w-full flex-row justify-between">
         <a
           href={ONCHAINKIT_LINK}
           title="onchainkit"
           target="_blank"
           rel="noreferrer"
+          className="flex-shrink-0"
         >
           <Image
             src="/facebuddy.svg"

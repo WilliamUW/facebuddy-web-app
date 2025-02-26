@@ -11,8 +11,8 @@ export default function Footer() {
   };
 
   return (
-    <section className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-      <div className="max-w-[900px] mx-auto flex justify-around items-center h-16">
+    <section className="sticky bottom-0 w-full bg-white border-t border-gray-200">
+      <div className="flex justify-around items-center h-16">
         <button
           onClick={() => navigateTo("/send")}
           className={`flex flex-col items-center justify-center w-full h-full ${
