@@ -17,6 +17,7 @@ import TransactionWrapper from "src/components/TransactionWrapper";
 import WalletWrapper from "src/components/WalletWrapper";
 import { getFileContent } from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
+import Webcam from "react-webcam";
 
 export default function Page() {
   const { address } = useAccount();
@@ -84,7 +85,7 @@ export default function Page() {
     }
     populateFaces();
   }, []);
-
+  const WebcamComponent = () => <Webcam />;
   return (
     <div className="flex h-full w-96 max-w-full flex-col px-1 md:w-[1008px]">
       <section className="mt-6 mb-6 flex w-full flex-col md:flex-row">
@@ -141,6 +142,7 @@ export default function Page() {
       <br />
       <br />
       <br />
+     
       <section className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="max-w-[900px] mx-auto flex justify-around items-center h-16">
           <button
