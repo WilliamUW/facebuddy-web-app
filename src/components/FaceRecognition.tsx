@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ProfileData } from "./FaceRegistration";
 import SendEthWrapper from "./SendEthWrapper";
+import {getFileContent} from "src/utility/faceDataStorage";
 
 export interface SavedFace {
   label: ProfileData;
@@ -50,7 +51,11 @@ export default function FaceRecognition({ savedFaces }: Props) {
     };
 
     loadModels();
+
+    
   }, []);
+
+
 
   useEffect(() => {
     if (savedFaces.length > 0) {

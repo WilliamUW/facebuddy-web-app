@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import FaceRecognition from "src/components/FaceRecognition";
 import FaceRegistration from "src/components/FaceRegistration";
 import Footer from "src/components/Footer";
@@ -11,8 +13,8 @@ import { ProfileData } from "src/components/FaceRegistration";
 import SignupButton from "../components/SignupButton";
 import TransactionWrapper from "src/components/TransactionWrapper";
 import WalletWrapper from "src/components/WalletWrapper";
+import {getFileContent} from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
-import { useState } from "react";
 
 export default function Page() {
   const { address } = useAccount();
@@ -29,11 +31,44 @@ export default function Page() {
   const handleFaceSaved = (
     newFaces: Array<{
       label: ProfileData;
-      descriptor: Float32Array;
+      descriptor: any;
     }>
   ) => {
     setSavedFaces((prev) => [...prev, ...newFaces]);
   };
+
+  useEffect(() => {
+    async function populateFaces() {
+      try {
+        const content = await getFileContent("bafkreia27z2wok67tk52sgxjytz4xvtbbho3sfty7qfkdvrr6miaunzwnm");
+        
+        // Handle the fallback URL case
+        if (typeof content === "string") {
+          console.error("Failed to fetch face data");
+          return;
+        }
+
+        // Handle the successful response
+        const jsonContent = content.data?.content;
+        if (!jsonContent) {
+          console.error("Invalid data format received");
+          return;
+        }
+
+        const parsedContent = JSON.parse(jsonContent);
+        // Convert the regular arrays back to Float32Array
+        const processedFaces = parsedContent.map((face: any) => ({
+          ...face,
+          descriptor: new Float32Array(face.descriptor)
+        }));
+        
+        setSavedFaces(processedFaces);
+      } catch (error) {
+        console.error("Error loading face data:", error);
+      }
+    }
+    populateFaces();
+  }, []); // Add dependency array to prevent infinite loop
 
   return (
     <div className="flex h-full w-96 max-w-full flex-col px-1 md:w-[1008px]">

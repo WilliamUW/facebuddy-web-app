@@ -57,7 +57,13 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
 
   const uploadFaceData = async (data: any) => {
     console.log("write data to ETHStorage", data)
-    const hash = await uploadToIPFS(data)
+    // Convert Float32Array to regular arrays before serializing
+    const serializedData = data.map((face: any) => ({
+      ...face,
+      descriptor: Array.from(face.descriptor) // Convert Float32Array to regular array
+    }));
+    
+    const hash = await uploadToIPFS(JSON.stringify(serializedData))
     console.log("data uploaded " + hash)
   }
 
@@ -177,6 +183,8 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     alert(`Saved face for ${profile.name}!`);
     setProfile({ name: address ?? "", linkedin: "", telegram: "" });
     setSelectedFaceIndex(null);
+
+    uploadFaceData(updatedFaces);
   };
 
   return (
