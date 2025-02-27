@@ -61,7 +61,7 @@ export default function Page() {
     async function populateFaces() {
       try {
         const jsonContent = await readFromBlobId(
-          "sc6fzWNJUVtC7h5GZxfwkDMYFe3SuVE-37SgSwonxa8"
+          "953y0ewRrXoTESxKg7Gc_NO7ND4_ENg08ACKmDqOtdc"
         );
 
         const parsedContent = JSON.parse(jsonContent);
