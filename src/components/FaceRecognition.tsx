@@ -58,10 +58,10 @@ export default function FaceRecognition({ savedFaces }: Props) {
       // Clear any existing timeout
       clearTimeout(timeoutId);
 
-      // Set a new timeout to clear the transcript after 5 seconds of no new speech
+      // Set a new timeout to clear the transcript after 2 seconds of no new speech
       timeoutId = setTimeout(() => {
         resetTranscript();
-      }, 5000);
+      }, 2000);
     }
 
     return () => {
