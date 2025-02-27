@@ -239,8 +239,19 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 `Agent response: ${responseText}`,
               ]);
 
+              // Check if the response is "no action required"
+              if (
+                data.content.text.toLowerCase().includes("no action required")
+              ) {
+                // Immediately display "No action required" and stop
+                setAgentSteps([
+                  `Face scanned: ${largestFace.matchedProfile.name}`,
+                  `Agent response: ${responseText}`,
+                  "No action required",
+                ]);
+              }
               // Step 4: Handle function call if present
-              if (data.content.functionCall) {
+              else if (data.content.functionCall) {
                 const functionCall = data.content.functionCall;
                 const functionName = functionCall.functionName;
 
@@ -293,7 +304,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   ]);
                 }
               } else {
-                // Completion without function call
+                // Completion without function call and not "no action required"
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 setAgentSteps([
                   `Face scanned: ${largestFace.matchedProfile.name}`,
