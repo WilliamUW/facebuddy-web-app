@@ -30,7 +30,7 @@ export async function storeStringAndGetBlobId(data: string) {
     // Make the API call to store the string
     const response = await fetch(`https://publisher.walrus-testnet.walrus.space/v1/blobs?epochs=1`, {
         method: "PUT",
-        body: Buffer.from("hi"),
+        body: Buffer.from(data),
       })
     // const response = await fetch(`${PUBLISHER}/v1/store`, {
     //   method: 'PUT',
