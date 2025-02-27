@@ -64,7 +64,7 @@ export default function Page() {
           "953y0ewRrXoTESxKg7Gc_NO7ND4_ENg08ACKmDqOtdc"
         );
 
-        const parsedContent = JSON.parse(jsonContent);
+        const parsedContent = JSON.parse(jsonContent as string);
         // Convert the regular arrays back to Float32Array
         const processedFaces = parsedContent.map((face: any) => ({
           ...face,
