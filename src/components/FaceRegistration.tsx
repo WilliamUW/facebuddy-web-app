@@ -5,10 +5,10 @@ import * as faceapi from "face-api.js";
 import { useEffect, useRef, useState } from "react";
 
 import EthStorageUploader from "./EthStorageUploader";
+import React from "react";
+import Webcam from "react-webcam";
 import { uploadToIPFS } from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
-import Webcam from "react-webcam";
-import React from "react";
 
 const WebcamComponent = () => <Webcam />;
 const videoConstraints = {
@@ -215,8 +215,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
         alert("No faces detected. Please try again with a clearer image.");
         setIsSpinning(false);
       } else {
-        uploadFaceData(detectedFacesData);
-
         // Store the detected faces but don't update UI yet
         const processedFaces = detectedFacesData;
 
