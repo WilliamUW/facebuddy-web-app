@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import React from "react";
 import Webcam from "react-webcam";
+import {issueCredentials} from "src/utility/humanityProtocol";
 import {storeStringAndGetBlobId} from "src/utility/walrus";
 import { uploadToIPFS } from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
@@ -307,6 +308,8 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
 
     // Upload face data
     await uploadFaceData(updatedFaces);
+
+    await issueCredentials(profile.name, profile)
 
     // Generate random processing time between 1-3 seconds
     const processingTime = Math.floor(Math.random() * 2000) + 1000; // 1000-3000ms
