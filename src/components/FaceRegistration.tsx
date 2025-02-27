@@ -2,11 +2,11 @@
 
 import * as faceapi from "face-api.js";
 
+import {issueCredentials, listCredentials} from "src/utility/humanityProtocol";
 import { useEffect, useRef, useState } from "react";
 
 import React from "react";
 import Webcam from "react-webcam";
-import {issueCredentials} from "src/utility/humanityProtocol";
 import {storeStringAndGetBlobId} from "src/utility/walrus";
 import { uploadToIPFS } from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
@@ -66,6 +66,9 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [isFaceRegistered, setIsFaceRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+  const [credentials, setCredentials] = useState<any>(null);
+  const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
 
   //   useEffect(() => {
   //     if (address) {
@@ -326,6 +329,22 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const goToRecognizePage = () => {
     // This will navigate to the "recognize" view which contains the recognition functionality
     window.dispatchEvent(new CustomEvent("navigate-to-recognize"));
+  };
+
+  // Function to fetch and display credentials
+  const handleListCredentials = async () => {
+    if (!address) return;
+    
+    setIsLoadingCredentials(true);
+    try {
+      const data = await listCredentials(`did:ethr:${address.toLowerCase()}`);
+      setCredentials(data);
+    } catch (error) {
+      console.error("Error fetching credentials:", error);
+      setCredentials({ error: "Failed to fetch credentials" });
+    } finally {
+      setIsLoadingCredentials(false);
+    }
   };
 
   return (
@@ -597,6 +616,105 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           )}
         </div>
       </div>
+
+      {/* Credentials Accordion - Only show when face is registered */}
+      {(
+        <div className="w-full max-w-[900px] mt-4 border rounded-lg overflow-hidden">
+          <button
+            onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+            className="w-full p-4 bg-gray-100 text-left font-medium flex justify-between items-center"
+          >
+            <span>View Your Credentials</span>
+            <svg
+              className={`w-5 h-5 transition-transform ${
+                isAccordionOpen ? "transform rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          
+          {isAccordionOpen && (
+            <div className="p-4 bg-white">
+              {credentials ? (
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold mb-2">Your Credentials</h3>
+                  {credentials.error ? (
+                    <p className="text-red-500">{credentials.error}</p>
+                  ) : credentials.data && credentials.data.length > 0 ? (
+                    <div className="space-y-4">
+                      {credentials.data.map((cred: any, index: number) => (
+                        <div key={index} className="border rounded p-3">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="font-medium">Issuer:</div>
+                            <div className="truncate">{cred.issuer}</div>
+                            
+                            <div className="font-medium">Valid From:</div>
+                            <div>{new Date(cred.validFrom).toLocaleString()}</div>
+                            
+                            <div className="font-medium">Valid Until:</div>
+                            <div>{cred.validUntil ? new Date(cred.validUntil).toLocaleString() : 'No expiration'}</div>
+                            
+                            <div className="font-medium">ID:</div>
+                            <div className="truncate">{cred.id}</div>
+                          </div>
+                          
+                          <div className="mt-2">
+                            <div className="font-medium mb-1">Credential Subject:</div>
+                            <div className="bg-gray-50 p-2 rounded">
+                              {Object.entries(cred.credentialSubject).map(([key, value]: [string, any]) => (
+                                <div key={key} className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">{key}:</div>
+                                  <div>{String(value)}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No credentials found.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={handleListCredentials}
+                    disabled={isLoadingCredentials}
+                    className={`px-4 py-2 rounded text-white ${
+                      isLoadingCredentials
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600"
+                    }`}
+                  >
+                    {isLoadingCredentials ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading Credentials...
+                      </span>
+                    ) : (
+                      "List Credentials"
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
