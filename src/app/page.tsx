@@ -15,9 +15,10 @@ import { ProfileData } from "src/components/FaceRegistration";
 import SignupButton from "../components/SignupButton";
 import TransactionWrapper from "src/components/TransactionWrapper";
 import WalletWrapper from "src/components/WalletWrapper";
-import { getFileContent } from "src/utility/faceDataStorage";
-import { useAccount } from "wagmi";
 import Webcam from "react-webcam";
+import { getFileContent } from "src/utility/faceDataStorage";
+import { readFromBlobId } from "src/utility/walrus";
+import { useAccount } from "wagmi";
 
 export default function Page() {
   const { address } = useAccount();
@@ -59,42 +60,19 @@ export default function Page() {
   useEffect(() => {
     async function populateFaces() {
       try {
-        const content = await getFileContent(
-          "bafkreia27z2wok67tk52sgxjytz4xvtbbho3sfty7qfkdvrr6miaunzwnm"
+        const jsonContent = await readFromBlobId(
+          "sc6fzWNJUVtC7h5GZxfwkDMYFe3SuVE-37SgSwonxa8"
         );
 
-        // Handle the fallback URL case
-        if (typeof content === "string") {
-          console.error("Failed to fetch face data");
-          return;
-        }
+        const parsedContent = JSON.parse(jsonContent);
+        // Convert the regular arrays back to Float32Array
+        const processedFaces = parsedContent.map((face: any) => ({
+          ...face,
+          descriptor: new Float32Array(face.descriptor),
+        }));
 
-        // Handle JSON response
-        if (
-          content instanceof Object &&
-          "data" in content &&
-          typeof content.data === "object" &&
-          content.data &&
-          "content" in content.data
-        ) {
-          const jsonContent = content.data.content;
-          if (typeof jsonContent !== "string") {
-            console.error("Invalid content format");
-            return;
-          }
-
-          const parsedContent = JSON.parse(jsonContent);
-          // Convert the regular arrays back to Float32Array
-          const processedFaces = parsedContent.map((face: any) => ({
-            ...face,
-            descriptor: new Float32Array(face.descriptor),
-          }));
-
-          setSavedFaces(processedFaces);
-          console.log("faces downloaded");
-        } else {
-          console.error("Invalid response format");
-        }
+        setSavedFaces(processedFaces);
+        console.log("faces downloaded");
       } catch (error) {
         console.error("Error loading face data:", error);
       }

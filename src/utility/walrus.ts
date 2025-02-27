@@ -5,7 +5,7 @@ export async function readFromBlobId(blobId: string) {
   try {
     console.log("Read from: " + blobId);
     // Make the API call to read from the blobId
-    const response = await fetch(`${AGGREGATOR}/v1/${blobId}`, {
+    const response = await fetch(`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${blobId}`, {
       method: "GET",
     });
 
