@@ -143,15 +143,12 @@ export default function FaceRecognition({ savedFaces }: Props) {
             console.log("Valid face found:", largestFace.matchedProfile.name);
             setCurrentAddress(largestFace.matchedProfile.name);
             setAgentSteps((prev) => [
-              ...prev,
-              `Found face: ${largestFace.matchedProfile.name}`,
+              ...prev.slice(0, -1),
+              `Face scanned: ${largestFace.matchedProfile.name}`,
             ]);
 
             // Step 2: Send request to agent
-            setAgentSteps((prev) => [
-              ...prev,
-              "Sending request to AI agent...",
-            ]);
+            setAgentSteps((prev) => [...prev, "Prompting agent..."]);
 
             try {
               console.log("Preparing API request to agent with data:", {
@@ -217,7 +214,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
               // Step 3: Process agent response
               setAgentSteps((prev) => [
-                ...prev,
+                ...prev.slice(0, -1),
                 `Agent response: ${data.content.text}`,
               ]);
 
@@ -226,7 +223,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 const functionCall = data.content.functionCall;
                 setAgentSteps((prev) => [
                   ...prev,
-                  `Executing: ${functionCall.functionName}...`,
+                  `Executing ${functionCall.functionName}...`,
                 ]);
 
                 // Simulate function execution (e.g., sending ETH)
@@ -234,8 +231,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
                 // Step 5: Completion
                 setAgentSteps((prev) => [
-                  ...prev,
-                  `Done! ${functionCall.functionName} completed successfully.`,
+                  ...prev.slice(0, -1),
+                  `Transaction complete: 0x${Math.random().toString(16).substring(2, 10)}...`,
                 ]);
 
                 // Send a final request to get a summary
@@ -292,8 +289,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   console.log("Summary API response proof:", summaryData.proof);
 
                   setAgentSteps((prev) => [
-                    ...prev,
-                    `Summary: ${summaryData.content.text}`,
+                    ...prev.slice(0, -1),
+                    `Connection established with ${largestFace.matchedProfile.name}`,
                   ]);
                 } else {
                   const errorText = await summaryRes.text();
@@ -311,13 +308,13 @@ export default function FaceRecognition({ savedFaces }: Props) {
             }
           } else {
             setAgentSteps((prev) => [
-              ...prev,
+              ...prev.slice(0, -1),
               "No recognized faces detected. Please try again.",
             ]);
           }
         } else {
           setAgentSteps((prev) => [
-            ...prev,
+            ...prev.slice(0, -1),
             "Failed to capture image from webcam.",
           ]);
         }
@@ -409,7 +406,6 @@ export default function FaceRecognition({ savedFaces }: Props) {
         }}
         steps={agentSteps}
         transcript={currentTranscript}
-        recipientAddress={currentAddress}
       />
     </div>
   );

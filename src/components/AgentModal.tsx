@@ -1,13 +1,29 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+
+// Define step types for different colors
+type StepType =
+  | "face-scan"
+  | "agent-call"
+  | "token-swap"
+  | "connection"
+  | "tx-hash"
+  | "default";
+
+interface StepData {
+  id: number;
+  message: string;
+  type: StepType;
+  isCompleted: boolean;
+  startTime: number;
+}
 
 interface AgentModalProps {
   isOpen: boolean;
   onClose: () => void;
   steps: string[];
   transcript: string;
-  recipientAddress: string | null;
 }
 
 export default function AgentModal({
@@ -15,9 +31,97 @@ export default function AgentModal({
   onClose,
   steps,
   transcript,
-  recipientAddress,
 }: AgentModalProps) {
+  const [processedSteps, setProcessedSteps] = useState<StepData[]>([]);
+
+  // Process incoming steps
+  useEffect(() => {
+    if (steps.length === 0) return;
+
+    // Determine step type based on content
+    const getStepType = (message: string): StepType => {
+      const lowerMessage = message.toLowerCase();
+      if (lowerMessage.includes("scan") || lowerMessage.includes("face"))
+        return "face-scan";
+      if (
+        lowerMessage.includes("agent") ||
+        lowerMessage.includes("ai") ||
+        lowerMessage.includes("response")
+      )
+        return "agent-call";
+      if (lowerMessage.includes("swap") || lowerMessage.includes("token"))
+        return "token-swap";
+      if (lowerMessage.includes("connect")) return "connection";
+      if (lowerMessage.includes("0x") || lowerMessage.includes("hash"))
+        return "tx-hash";
+      return "default";
+    };
+
+    // Update or add steps
+    const newProcessedSteps = [...processedSteps];
+
+    // Process the latest step
+    const latestRawStep = steps[steps.length - 1];
+    const existingStepIndex = newProcessedSteps.findIndex((step) =>
+      step.message.includes(latestRawStep.split(":")[0])
+    );
+
+    if (existingStepIndex >= 0) {
+      // Update existing step
+      newProcessedSteps[existingStepIndex] = {
+        ...newProcessedSteps[existingStepIndex],
+        message: latestRawStep,
+        isCompleted: true,
+      };
+    } else {
+      // Add new step
+      newProcessedSteps.push({
+        id: newProcessedSteps.length,
+        message: latestRawStep,
+        type: getStepType(latestRawStep),
+        isCompleted: false,
+        startTime: Date.now(),
+      });
+    }
+
+    setProcessedSteps(newProcessedSteps);
+  }, [steps]);
+
+  // Ensure steps stay visible for at least 1 second
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setProcessedSteps((prevSteps) =>
+        prevSteps.map((step) => {
+          if (!step.isCompleted && Date.now() - step.startTime >= 1000) {
+            return { ...step, isCompleted: true };
+          }
+          return step;
+        })
+      );
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [processedSteps]);
+
   if (!isOpen) return null;
+
+  // Get background color based on step type
+  const getBackgroundColor = (type: StepType) => {
+    switch (type) {
+      case "token-swap":
+        return "bg-pink-500";
+      case "agent-call":
+        return "bg-blue-500";
+      case "face-scan":
+        return "bg-yellow-500";
+      case "connection":
+        return "bg-green-500";
+      case "tx-hash":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -46,42 +150,29 @@ export default function AgentModal({
           </div>
 
           <div className="mb-4 p-3 bg-gray-100 rounded-lg">
-            <p className="font-medium">Transcript:</p>
             <p className="text-gray-700">{transcript}</p>
           </div>
 
-          {recipientAddress && (
-            <div className="mb-4 p-3 bg-gray-100 rounded-lg">
-              <p className="font-medium">Recipient Address:</p>
-              <p className="text-gray-700 font-mono text-sm break-all">
-                {recipientAddress}
-              </p>
-            </div>
-          )}
-
           <div className="mb-4">
-            <h3 className="font-semibold mb-3">Agent Steps:</h3>
             <div className="space-y-3">
-              {steps.map((step, index) => (
+              {processedSteps.map((step, index) => (
                 <div
-                  key={index}
-                  className="flex items-start gap-4 p-3 bg-gray-50 rounded-lg"
+                  key={step.id}
+                  className={`flex items-start gap-4 p-3 rounded-lg text-white ${getBackgroundColor(step.type)}`}
                 >
                   <div className="flex-shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                      {index + 1}
-                    </div>
-                  </div>
-                  <div className="flex-grow">
-                    <p className="text-gray-800">{step}</p>
-                    {index === steps.length - 1 && index !== 0 && (
-                      <div className="mt-2">
-                        <div className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
-                        <span className="ml-2 text-sm text-gray-500">
-                          Processing...
-                        </span>
+                    {step.isCompleted ? (
+                      <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-bold">
+                        {index + 1}
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-current border-t-transparent"></div>
                       </div>
                     )}
+                  </div>
+                  <div className="flex-grow">
+                    <p className="font-medium">{step.message}</p>
                   </div>
                 </div>
               ))}
