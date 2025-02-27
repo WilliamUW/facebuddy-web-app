@@ -1,6 +1,6 @@
 
-export async function issueCredentials(userAddress: string, claims: object) {
-    console.log("Issuing Humanity Protocol Credentials...", userAddress, claims)
+export async function issueCredentials(subject_address: string, claims: object) {
+    console.log("Issuing Humanity Protocol Credentials...", subject_address, claims)
     const response = await fetch(
     "https://issuer.humanity.org/credentials/issue",
     {
@@ -10,12 +10,8 @@ export async function issueCredentials(userAddress: string, claims: object) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        subject_address: "0x0fa4adf7830a048c285e981ba5d57c51604c917f",
-        claims: {
-          kyc: "passed",
-          age: 22,
-          custom_claim: "value",
-        },
+        subject_address,
+        claims,
       }),
     }
   );
