@@ -93,8 +93,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
     // Save the transcript
     setCurrentTranscript(text);
 
-    // Reset agent steps
-    setAgentSteps(["Scanning for faces..."]);
+    // Reset agent steps - start with an empty array
+    setAgentSteps([]);
 
     // Helper function to add a step with consistent timing
     const addStep = async (step: string, delay = 600) => {
@@ -107,6 +107,9 @@ export default function FaceRecognition({ savedFaces }: Props) {
       await new Promise((resolve) => setTimeout(resolve, delay));
       setAgentSteps((prev) => [...prev.slice(0, -1), newStep]);
     };
+
+    // Start with face scanning step
+    await addStep("Scanning for faces...");
 
     // Step 1: Scan for faces
     try {
@@ -143,7 +146,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
               `Face scanned: ${largestFace.matchedProfile.name}`
             );
 
-            // Step 2: Send request to agent
+            // Step 2: Send request to agent - update the same step
             await addStep("Prompting agent...");
 
             try {
@@ -171,7 +174,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
               const data = await res.json();
 
-              // Step 3: Process agent response
+              // Step 3: Process agent response - update the same step
               const responseText =
                 data.content.text.length > 100
                   ? data.content.text.substring(0, 97) + "..."
@@ -193,25 +196,33 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 // Generate a random transaction hash
                 const txHash = `0x${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`;
 
-                // Update with transaction completion
+                // Update with transaction completion - update the same step
                 await updateLastStep(
                   `Transaction complete: ${txHash.substring(0, 10)}...`
                 );
 
                 // Final connection step
                 await addStep(
+                  `Connecting to ${largestFace.matchedProfile.name}...`
+                );
+
+                // Update the connection step
+                await updateLastStep(
                   `Connection established with ${largestFace.matchedProfile.name}`
                 );
               } else {
-                // Completion without function call
-                await addStep("No action required");
+                // Completion without function call - add a final step
+                await addStep("Processing request...");
+                await updateLastStep("No action required");
               }
             } catch (error) {
-              await addStep(
+              // Update the current step with the error
+              await updateLastStep(
                 `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`
               );
             }
           } else {
+            // Update the face scanning step with no face detected
             await updateLastStep("No recognized faces detected");
           }
         } else {
@@ -220,7 +231,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
       }
     } catch (error) {
       console.log("Error in face detection:", error);
-      await addStep(
+      await updateLastStep(
         `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`
       );
     } finally {

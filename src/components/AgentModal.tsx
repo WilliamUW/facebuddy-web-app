@@ -83,17 +83,15 @@ export default function AgentModal({
     };
 
     // Check if we're updating an existing step or adding a new one
-    const stepKey = currentStep.split(":")[0]?.trim();
-    const existingIndex = processedSteps.findIndex((s) =>
-      s.message.toLowerCase().startsWith(stepKey.toLowerCase())
-    );
+    const stepIndex = processedSteps.length - 1;
 
-    if (existingIndex >= 0) {
-      // Update existing step
+    if (stepIndex >= 0 && steps.length === processedSteps.length) {
+      // Update existing step (changing label)
       const updatedSteps = [...processedSteps];
-      updatedSteps[existingIndex] = {
-        ...updatedSteps[existingIndex],
+      updatedSteps[stepIndex] = {
+        ...updatedSteps[stepIndex],
         message: currentStep,
+        type: getStepType(currentStep),
         status: "completed",
       };
       setProcessedSteps(updatedSteps);
@@ -230,7 +228,9 @@ export default function AgentModal({
                     )}
                   </div>
                   <div className="flex-grow">
-                    <p className="font-medium text-sm">{step.message}</p>
+                    <p className="font-medium text-sm transition-all duration-300">
+                      {step.message}
+                    </p>
                   </div>
                 </div>
               </div>
