@@ -16,6 +16,7 @@ interface AgentModalProps {
   onClose: () => void;
   steps: string[];
   transcript: string;
+  children?: React.ReactNode;
 }
 
 export default function AgentModal({
@@ -23,6 +24,7 @@ export default function AgentModal({
   onClose,
   steps,
   transcript,
+  children,
 }: AgentModalProps) {
   const [processedSteps, setProcessedSteps] = useState<
     {
@@ -212,6 +214,9 @@ export default function AgentModal({
             ))}
           </div>
         </div>
+
+        {/* Render children if provided */}
+        {children && <div className="px-4 pb-4">{children}</div>}
 
         <div className="p-4 border-t border-gray-200 flex justify-end">
           <button

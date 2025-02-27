@@ -10,6 +10,7 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import AgentModal from "./AgentModal";
+import SendEthWrapper from "./SendEthWrapper";
 import {
   createImageFromDataUrl,
   detectFacesInImage,
@@ -25,6 +26,30 @@ interface Props {
   savedFaces: SavedFace[];
 }
 
+// Define the response type similar to ChatInterface
+type AgentResponse = {
+  content: {
+    text: string;
+    functionCall?: {
+      functionName: string;
+      args: {
+        recipientAddress?: string;
+        amount?: string;
+        ticker?: string;
+        platform?: string;
+        username?: string;
+      };
+    };
+  };
+  proof?: {
+    type: string;
+    timestamp: number;
+    metadata: {
+      logId: string;
+    };
+  };
+};
+
 export default function FaceRecognition({ savedFaces }: Props) {
   const webcamRef = useRef<Webcam>(null);
   const [isWebcamLoading, setIsWebcamLoading] = useState(true);
@@ -32,6 +57,12 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const [agentSteps, setAgentSteps] = useState<string[]>([]);
   const [currentAddress, setCurrentAddress] = useState<string | null>(null);
   const [currentTranscript, setCurrentTranscript] = useState<string>("");
+  const [transactionAmount, setTransactionAmount] = useState<string | null>(
+    null
+  );
+  const [matchedProfile, setMatchedProfile] = useState<ProfileData | null>(
+    null
+  );
 
   // Speech recognition setup
   const {
@@ -79,6 +110,34 @@ export default function FaceRecognition({ savedFaces }: Props) {
     };
   }, [transcript, resetTranscript, isAgentModalOpen]);
 
+  // Function to handle function calls
+  const handleFunctionCall = (
+    functionCall: AgentResponse["content"]["functionCall"],
+    profile: ProfileData
+  ) => {
+    if (!functionCall) return;
+
+    switch (functionCall.functionName) {
+      case "sendTransaction":
+        if (functionCall.args.amount) {
+          setTransactionAmount(functionCall.args.amount);
+        }
+        break;
+      case "connectOnLinkedin":
+        if (profile?.linkedin) {
+          window.open(`https://linkedin.com/in/${profile.linkedin}`, "_blank");
+        }
+        break;
+      case "connectOnTelegram":
+        if (profile?.telegram) {
+          window.open(`https://t.me/${profile.telegram}`, "_blank");
+        }
+        break;
+      default:
+        console.log("Unknown function call:", functionCall.functionName);
+    }
+  };
+
   // Function to handle agent request
   const handleAgentRequest = async (text: string) => {
     console.log("=== AGENT REQUEST STARTED ===");
@@ -95,6 +154,9 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
     // Reset agent steps - start with an empty array
     setAgentSteps([]);
+
+    // Reset transaction amount
+    setTransactionAmount(null);
 
     // Start with face scanning step
     setAgentSteps(["Scanning for faces..."]);
@@ -126,8 +188,9 @@ export default function FaceRecognition({ savedFaces }: Props) {
             largestFace.matchedProfile &&
             largestFace.match.label !== "unknown"
           ) {
-            // Set current address for later use
+            // Set current address and matched profile for later use
             setCurrentAddress(largestFace.matchedProfile.name);
+            setMatchedProfile(largestFace.matchedProfile);
 
             // Update face scanning step with result
             setAgentSteps([`Face scanned: ${largestFace.matchedProfile.name}`]);
@@ -162,7 +225,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 );
               }
 
-              const data = await res.json();
+              const data: AgentResponse = await res.json();
 
               // Step 3: Process agent response
               const responseText =
@@ -181,6 +244,9 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 const functionCall = data.content.functionCall;
                 const functionName = functionCall.functionName;
 
+                // Handle the function call
+                handleFunctionCall(functionCall, largestFace.matchedProfile);
+
                 // Show executing step
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 setAgentSteps([
@@ -189,35 +255,43 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   `Executing ${functionName}...`,
                 ]);
 
-                // Simulate function execution with a longer delay
-                await new Promise((resolve) => setTimeout(resolve, 1500));
+                // Different handling based on function type
+                if (functionName === "sendTransaction") {
+                  // For transactions, we'll show the transaction component in the modal
+                  // The actual transaction UI will be rendered in the modal
+                  await new Promise((resolve) => setTimeout(resolve, 500));
+                  setAgentSteps([
+                    `Face scanned: ${largestFace.matchedProfile.name}`,
+                    `Agent response: ${responseText}`,
+                    `Ready to send ${functionCall.args.amount} to ${largestFace.matchedProfile.name}`,
+                  ]);
+                } else if (
+                  functionName === "connectOnLinkedin" ||
+                  functionName === "connectOnTelegram"
+                ) {
+                  // For social connections, we'll show a success message
+                  const platform =
+                    functionName === "connectOnLinkedin"
+                      ? "LinkedIn"
+                      : "Telegram";
+                  await new Promise((resolve) => setTimeout(resolve, 1000));
+                  setAgentSteps([
+                    `Face scanned: ${largestFace.matchedProfile.name}`,
+                    `Agent response: ${responseText}`,
+                    `Connected to ${largestFace.matchedProfile.name} on ${platform}`,
+                  ]);
+                } else {
+                  // For unknown functions, generate a random transaction hash for visual effect
+                  const txHash = `0x${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`;
 
-                // Generate a random transaction hash
-                const txHash = `0x${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`;
-
-                // Update with transaction completion
-                setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
-                  `Agent response: ${responseText}`,
-                  `Transaction complete: ${txHash.substring(0, 10)}...`,
-                ]);
-
-                // Final connection step
-                await new Promise((resolve) => setTimeout(resolve, 500));
-                setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
-                  `Agent response: ${responseText}`,
-                  `Transaction complete: ${txHash.substring(0, 10)}...`,
-                  `Connecting to ${largestFace.matchedProfile.name}...`,
-                ]);
-
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
-                  `Agent response: ${responseText}`,
-                  `Transaction complete: ${txHash.substring(0, 10)}...`,
-                  `Connection established with ${largestFace.matchedProfile.name}`,
-                ]);
+                  await new Promise((resolve) => setTimeout(resolve, 1000));
+                  setAgentSteps([
+                    `Face scanned: ${largestFace.matchedProfile.name}`,
+                    `Agent response: ${responseText}`,
+                    `Transaction complete: ${txHash.substring(0, 10)}...`,
+                    `Connection established with ${largestFace.matchedProfile.name}`,
+                  ]);
+                }
               } else {
                 // Completion without function call
                 await new Promise((resolve) => setTimeout(resolve, 500));
@@ -334,7 +408,18 @@ export default function FaceRecognition({ savedFaces }: Props) {
         }}
         steps={agentSteps}
         transcript={currentTranscript}
-      />
+      >
+        {/* Render SendEthWrapper if there's a transaction amount and matched profile */}
+        {transactionAmount && matchedProfile?.name && (
+          <div className="mt-4 p-4 bg-white rounded-lg shadow-sm">
+            <h3 className="text-lg font-medium mb-2">Complete Transaction</h3>
+            <SendEthWrapper
+              recipientAddress={matchedProfile.name as `0x${string}`}
+              initialUsdAmount={transactionAmount}
+            />
+          </div>
+        )}
+      </AgentModal>
     </div>
   );
 }
