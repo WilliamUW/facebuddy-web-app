@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import EthStorageUploader from "./EthStorageUploader";
 import React from "react";
 import Webcam from "react-webcam";
+import {storeStringAndGetBlobId} from "src/utility/walrus";
 import { uploadToIPFS } from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
 
@@ -80,7 +81,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       descriptor: Array.from(face.descriptor), // Convert Float32Array to regular array
     }));
 
-    const hash = await uploadToIPFS(JSON.stringify(serializedData));
+    const hash = await storeStringAndGetBlobId(JSON.stringify(serializedData));
     console.log("data uploaded " + hash);
   };
 
