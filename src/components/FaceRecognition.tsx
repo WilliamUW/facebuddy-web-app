@@ -90,85 +90,58 @@ export default function FaceRecognition({ savedFaces }: Props) {
     // Open the modal
     setIsAgentModalOpen(true);
 
+    // Save the transcript
+    setCurrentTranscript(text);
+
     // Reset agent steps
     setAgentSteps(["Scanning for faces..."]);
-    console.log("Step 1: Scanning for faces...");
 
     // Step 1: Scan for faces
     try {
       // Capture the current frame from webcam
       if (webcamRef.current) {
-        console.log("Getting screenshot from webcam");
         const imageSrc = webcamRef.current.getScreenshot();
 
         if (imageSrc) {
-          console.log("Screenshot captured, creating image element");
           // Create an image element from the screenshot
           const imageElement = await createImageFromDataUrl(imageSrc);
-          console.log(
-            "Image element created, dimensions:",
-            imageElement.width,
-            "x",
-            imageElement.height
-          );
+
+          // Add a small delay for visual effect
+          await new Promise((resolve) => setTimeout(resolve, 800));
 
           // Detect faces in the image
-          console.log(
-            "Starting face detection with saved faces:",
-            savedFaces.length
-          );
           const detectedFaces = await detectFacesInImage(
             imageElement,
             savedFaces
           );
-          console.log(
-            "Face detection complete, found:",
-            detectedFaces.length,
-            "faces"
-          );
 
           // Find the largest face
-          console.log("Finding largest face");
           const largestFace = findLargestFace(detectedFaces);
-          console.log(
-            "Largest face result:",
-            largestFace ? `Found: ${largestFace.match.label}` : "No face found"
-          );
 
           if (
             largestFace &&
             largestFace.matchedProfile &&
             largestFace.match.label !== "unknown"
           ) {
-            console.log("Valid face found:", largestFace.matchedProfile.name);
+            // Set current address for later use
             setCurrentAddress(largestFace.matchedProfile.name);
+
+            // Update face scanning step with result
             setAgentSteps((prev) => [
               ...prev.slice(0, -1),
               `Face scanned: ${largestFace.matchedProfile.name}`,
             ]);
 
+            // Wait a moment before next step
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
             // Step 2: Send request to agent
             setAgentSteps((prev) => [...prev, "Prompting agent..."]);
 
             try {
-              console.log("Preparing API request to agent with data:", {
-                prompt: text,
-                profile: largestFace.matchedProfile,
-              });
-
               const requestBody = {
                 prompt: text + JSON.stringify(largestFace.matchedProfile),
               };
-
-              console.log("Full request body:", JSON.stringify(requestBody));
-              console.log(
-                "API URL:",
-                "https://ai-quickstart.onrender.com/api/generate"
-              );
-              console.log("API request method:", "POST");
-              console.log("API request headers:", {
-                "Content-Type": "application/json",
-              });
 
               const res = await fetch(
                 "https://ai-quickstart.onrender.com/api/generate",
@@ -181,141 +154,89 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 }
               );
 
-              console.log("API response status:", res.status);
-              console.log("API response status text:", res.statusText);
-              console.log(
-                "API response headers:",
-                Object.fromEntries([...res.headers.entries()])
-              );
-
               if (!res.ok) {
                 const errorText = await res.text();
-                console.error("API error response:", errorText);
                 throw new Error(
                   `Failed to get response from agent: ${res.status} ${errorText}`
                 );
               }
 
               const data = await res.json();
-              console.log("API response data:", JSON.stringify(data, null, 2));
-              console.log("API response content:", data.content);
-              console.log("API response proof:", data.proof);
-
-              if (data.content && data.content.functionCall) {
-                console.log(
-                  "Function call detected:",
-                  data.content.functionCall.functionName
-                );
-                console.log(
-                  "Function call args:",
-                  data.content.functionCall.args
-                );
-              }
 
               // Step 3: Process agent response
+              const responseText =
+                data.content.text.length > 100
+                  ? data.content.text.substring(0, 97) + "..."
+                  : data.content.text;
+
+              // Wait a moment before updating
+              await new Promise((resolve) => setTimeout(resolve, 500));
+
               setAgentSteps((prev) => [
                 ...prev.slice(0, -1),
-                `Agent response: ${data.content.text}`,
+                `Agent response: ${responseText}`,
               ]);
 
               // Step 4: Handle function call if present
               if (data.content.functionCall) {
                 const functionCall = data.content.functionCall;
+                const functionName = functionCall.functionName;
+
+                // Wait a moment before next step
+                await new Promise((resolve) => setTimeout(resolve, 500));
+
+                // Show executing step
                 setAgentSteps((prev) => [
                   ...prev,
-                  `Executing ${functionCall.functionName}...`,
+                  `Executing ${functionName}...`,
                 ]);
 
-                // Simulate function execution (e.g., sending ETH)
-                await new Promise((resolve) => setTimeout(resolve, 2000));
+                // Simulate function execution with a longer delay
+                await new Promise((resolve) => setTimeout(resolve, 1500));
 
-                // Step 5: Completion
+                // Generate a random transaction hash
+                const txHash = `0x${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`;
+
+                // Update with transaction completion
                 setAgentSteps((prev) => [
                   ...prev.slice(0, -1),
-                  `Transaction complete: 0x${Math.random().toString(16).substring(2, 10)}...`,
+                  `Transaction complete: ${txHash.substring(0, 10)}...`,
                 ]);
 
-                // Send a final request to get a summary
-                setAgentSteps((prev) => [...prev, "Generating summary..."]);
+                // Wait a moment before final step
+                await new Promise((resolve) => setTimeout(resolve, 500));
 
-                const summaryRequestBody = {
-                  prompt: `Summarize what just happened: User said "${text}", we found face for ${largestFace.matchedProfile.name}, and executed ${functionCall.functionName} with args ${JSON.stringify(functionCall.args)}`,
-                };
-
-                console.log(
-                  "Preparing summary request:",
-                  JSON.stringify(summaryRequestBody)
-                );
-                console.log(
-                  "Summary API URL:",
-                  "https://ai-quickstart.onrender.com/api/generate"
-                );
-                console.log("Summary API request method:", "POST");
-                console.log("Summary API request headers:", {
-                  "Content-Type": "application/json",
-                });
-
-                const summaryRes = await fetch(
-                  "https://ai-quickstart.onrender.com/api/generate",
-                  {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(summaryRequestBody),
-                  }
-                );
-
-                console.log("Summary API response status:", summaryRes.status);
-                console.log(
-                  "Summary API response status text:",
-                  summaryRes.statusText
-                );
-                console.log(
-                  "Summary API response headers:",
-                  Object.fromEntries([...summaryRes.headers.entries()])
-                );
-
-                if (summaryRes.ok) {
-                  const summaryData = await summaryRes.json();
-                  console.log(
-                    "Summary API response data:",
-                    JSON.stringify(summaryData, null, 2)
-                  );
-                  console.log(
-                    "Summary API response content:",
-                    summaryData.content
-                  );
-                  console.log("Summary API response proof:", summaryData.proof);
-
-                  setAgentSteps((prev) => [
-                    ...prev.slice(0, -1),
-                    `Connection established with ${largestFace.matchedProfile.name}`,
-                  ]);
-                } else {
-                  const errorText = await summaryRes.text();
-                  console.error("Summary API error response:", errorText);
-                }
+                // Final connection step
+                setAgentSteps((prev) => [
+                  ...prev,
+                  `Connection established with ${largestFace.matchedProfile.name}`,
+                ]);
               } else {
-                // Step 5: Completion without function call
-                setAgentSteps((prev) => [...prev, "Done! No action required."]);
+                // Wait a moment before final step
+                await new Promise((resolve) => setTimeout(resolve, 500));
+
+                // Completion without function call
+                setAgentSteps((prev) => [...prev, "No action required"]);
               }
             } catch (error) {
+              // Wait a moment before showing error
+              await new Promise((resolve) => setTimeout(resolve, 300));
+
               setAgentSteps((prev) => [
                 ...prev,
-                `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+                `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`,
               ]);
             }
           } else {
             setAgentSteps((prev) => [
               ...prev.slice(0, -1),
-              "No recognized faces detected. Please try again.",
+              "No recognized faces detected",
             ]);
           }
         } else {
           setAgentSteps((prev) => [
             ...prev.slice(0, -1),
-            "Failed to capture image from webcam.",
+            "Failed to capture image",
           ]);
         }
       }
@@ -323,7 +244,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
       console.log("Error in face detection:", error);
       setAgentSteps((prev) => [
         ...prev,
-        `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`,
       ]);
     } finally {
       // Reset transcript after processing
