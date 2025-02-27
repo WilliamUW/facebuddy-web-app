@@ -53,8 +53,6 @@ export default function AgentModal({
   useEffect(() => {
     if (steps.length === 0) return;
 
-    const currentStep = steps[steps.length - 1];
-
     // Determine step type
     const getStepType = (message: string): StepType => {
       const lowerMessage = message.toLowerCase();
@@ -82,55 +80,32 @@ export default function AgentModal({
       return "default";
     };
 
-    // Check if we're updating an existing step or adding a new one
-    const stepIndex = processedSteps.length - 1;
+    // Determine if this is a processing or completed step
+    const isProcessingStep = (message: string): boolean => {
+      const lowerMessage = message.toLowerCase();
+      return (
+        lowerMessage.includes("scanning") ||
+        lowerMessage.includes("prompting") ||
+        lowerMessage.includes("executing") ||
+        lowerMessage.includes("processing") ||
+        (lowerMessage.includes("connecting") &&
+          !lowerMessage.includes("established"))
+      );
+    };
 
-    if (stepIndex >= 0 && steps.length === processedSteps.length) {
-      // Update existing step (changing label)
-      const updatedSteps = [...processedSteps];
-      updatedSteps[stepIndex] = {
-        ...updatedSteps[stepIndex],
-        message: currentStep,
-        type: getStepType(currentStep),
-        status: "completed",
+    // Create new processed steps from the current steps array
+    const newProcessedSteps = steps.map((step, index) => {
+      return {
+        message: step,
+        type: getStepType(step),
+        status: isProcessingStep(step) ? "processing" : "completed",
+        timestamp: Date.now(),
+        id: Date.now() + index, // Ensure unique IDs
       };
-      setProcessedSteps(updatedSteps);
-    } else {
-      // Add new step
-      setProcessedSteps([
-        ...processedSteps,
-        {
-          message: currentStep,
-          type: getStepType(currentStep),
-          status: "processing",
-          timestamp: Date.now(),
-          id: Date.now(),
-        },
-      ]);
-    }
-  }, [steps]);
-
-  // Ensure processing steps show for at least 1 second
-  useEffect(() => {
-    const processingSteps = processedSteps.filter(
-      (step) => step.status === "processing"
-    );
-
-    if (processingSteps.length === 0) return;
-
-    const timers = processingSteps.map((step) => {
-      const elapsed = Date.now() - step.timestamp;
-      const delay = Math.max(0, 1000 - elapsed);
-
-      return setTimeout(() => {
-        setProcessedSteps((current) =>
-          current.map((s) => (s === step ? { ...s, status: "completed" } : s))
-        );
-      }, delay);
     });
 
-    return () => timers.forEach((timer) => clearTimeout(timer));
-  }, [processedSteps]);
+    setProcessedSteps(newProcessedSteps);
+  }, [steps]);
 
   // Reset steps when modal is closed
   useEffect(() => {
