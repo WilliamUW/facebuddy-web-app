@@ -4,7 +4,6 @@ import * as faceapi from "face-api.js";
 
 import { useEffect, useRef, useState } from "react";
 
-import EthStorageUploader from "./EthStorageUploader";
 import React from "react";
 import Webcam from "react-webcam";
 import {storeStringAndGetBlobId} from "src/utility/walrus";
@@ -74,7 +73,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   //   }, [address]);
 
   const uploadFaceData = async (data: any) => {
-    console.log("write data to ETHStorage", data);
     // Convert Float32Array to regular arrays before serializing
     const serializedData = data.map((face: any) => ({
       ...face,
@@ -596,10 +594,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           )}
         </div>
       </div>
-
-      {/* Comment out EthStorageUploader
-      <EthStorageUploader />
-      */}
     </div>
   );
 }
