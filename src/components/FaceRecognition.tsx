@@ -2,20 +2,20 @@
 
 import * as faceapi from "face-api.js";
 
-import { useEffect, useRef, useState } from "react";
-
-import { ProfileData } from "./FaceRegistration";
-import Webcam from "react-webcam";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import AgentModal from "./AgentModal";
-import SendEthWrapper from "./SendEthWrapper";
 import {
   createImageFromDataUrl,
   detectFacesInImage,
   findLargestFace,
 } from "../utility/faceRecognitionUtils";
+import { useEffect, useRef, useState } from "react";
+
+import AgentModal from "./AgentModal";
+import { ProfileData } from "./FaceRegistration";
+import SendEthWrapper from "./SendEthWrapper";
+import Webcam from "react-webcam";
 
 export interface SavedFace {
   label: ProfileData;

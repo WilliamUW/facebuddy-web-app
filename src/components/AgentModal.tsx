@@ -106,7 +106,13 @@ export default function AgentModal({
       };
     });
 
-    setProcessedSteps(newProcessedSteps);
+    setProcessedSteps(newProcessedSteps as {
+      message: string;
+      type: StepType;
+      status: "processing" | "completed";
+      timestamp: number;
+      id: number;
+    }[]);
   }, [steps]);
 
   // Reset steps when modal is closed
