@@ -1,20 +1,22 @@
-'use client';
-import { connectorsForWallets } from '@rainbow-me/rainbowkit';
+"use client";
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
   coinbaseWallet,
   metaMaskWallet,
   rainbowWallet,
-} from '@rainbow-me/rainbowkit/wallets';
-import { useMemo } from 'react';
-import { http, createConfig } from 'wagmi';
-import { base, baseSepolia } from 'wagmi/chains';
-import { NEXT_PUBLIC_WC_PROJECT_ID } from './config';
+} from "@rainbow-me/rainbowkit/wallets";
+import { useMemo } from "react";
+import { http, createConfig } from "wagmi";
+import { base, baseSepolia, Chain, unichain, unichainSepolia} from "wagmi/chains";
+
+import { NEXT_PUBLIC_WC_PROJECT_ID } from "./config";
+import { unichainMainnet } from "./chains";
 
 export function useWagmiConfig() {
-  const projectId = NEXT_PUBLIC_WC_PROJECT_ID ?? '';
+  const projectId = NEXT_PUBLIC_WC_PROJECT_ID ?? "";
   if (!projectId) {
     const providerErrMessage =
-      'To connect to all Wallets you need to provide a NEXT_PUBLIC_WC_PROJECT_ID env variable';
+      "To connect to all Wallets you need to provide a NEXT_PUBLIC_WC_PROJECT_ID env variable";
     throw new Error(providerErrMessage);
   }
 
@@ -22,22 +24,29 @@ export function useWagmiConfig() {
     const connectors = connectorsForWallets(
       [
         {
-          groupName: 'Recommended Wallet',
+          groupName: "Recommended Wallet",
           wallets: [coinbaseWallet],
         },
         {
-          groupName: 'Other Wallets',
+          groupName: "Other Wallets",
           wallets: [rainbowWallet, metaMaskWallet],
         },
       ],
       {
-        appName: 'onchainkit',
+        appName: "onchainkit",
         projectId,
-      },
+      }
     );
 
+    const chains = [
+      base,
+      baseSepolia,
+      unichain,
+      unichainSepolia,
+    ] as const;
+
     const wagmiConfig = createConfig({
-      chains: [base, baseSepolia],
+      chains,
       // turn off injected provider discovery
       multiInjectedProviderDiscovery: false,
       connectors,
@@ -45,6 +54,8 @@ export function useWagmiConfig() {
       transports: {
         [base.id]: http(),
         [baseSepolia.id]: http(),
+        [unichain.id]: http(),
+        [unichainSepolia.id]: http(),
       },
     });
 

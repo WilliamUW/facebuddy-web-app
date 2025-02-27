@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import ChatInterface from "src/components/ChatInterface";
+import ChainSelector from "src/components/ChainSelector";
 import FaceRegistration from "src/components/FaceRegistration";
 import Footer from "src/components/Footer";
 import { GetCIDResponse } from "pinata-web3";
@@ -15,16 +16,16 @@ import SignupButton from "../components/SignupButton";
 import TransactionWrapper from "src/components/TransactionWrapper";
 import WalletWrapper from "src/components/WalletWrapper";
 import Webcam from "react-webcam";
-import dynamic from 'next/dynamic'
+import dynamic from "next/dynamic";
 import { getFileContent } from "src/utility/faceDataStorage";
 import { readFromBlobId } from "src/utility/walrus";
 import { useAccount } from "wagmi";
 
 // Dynamically import FaceRecognition with ssr disabled
 const FaceRecognition = dynamic(
-  () => import('../components/FaceRecognition'),
+  () => import("../components/FaceRecognition"),
   { ssr: false } // This prevents server-side rendering
-)
+);
 
 export default function Page() {
   const { address } = useAccount();
@@ -105,6 +106,7 @@ export default function Page() {
             />
           </a>
           <div className="flex items-center gap-3">
+            {address && <ChainSelector />}
             <SignupButton />
             {!address && <LoginButton />}
           </div>
