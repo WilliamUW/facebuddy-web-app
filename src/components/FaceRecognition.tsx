@@ -85,7 +85,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
       // Clear any existing timeout
       if (timeoutId) clearTimeout(timeoutId);
 
-      // Set a new timeout to clear the transcript after 1 second of no new speech
+      // Set a new timeout to clear the transcript after 2 seconds of no new speech
       timeoutId = setTimeout(() => {
         // Check if the transcript contains "face" and "buddy"
         const lowerTranscript = transcript.toLowerCase();
@@ -102,7 +102,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
           // Just reset the transcript if it doesn't contain the trigger words
           resetTranscript();
         }
-      }, 1000); // Changed from 2000 to 1000 (1 second)
+      }, 2000); // Changed from 1000 to 2000 (2 seconds)
     }
 
     return () => {
