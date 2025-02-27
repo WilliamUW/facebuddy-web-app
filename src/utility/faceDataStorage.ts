@@ -7,18 +7,11 @@ const pinata = new PinataSDK({
 });
 
 export async function uploadToIPFS(jsonString: string) {
-  try {
-
-    const upload = await pinata.upload.json({
-        content: jsonString,
-        name: "faceHashes.ts",
-        lang: "ts"
-    })
-    console.log(upload);
-    return `https://brown-real-puma-604.mypinata.cloud/ipfs/${upload.IpfsHash}`;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await fetch(`https://publisher.walrus-testnet.walrus.space/v1/blobs?epochs=1`, {
+    method: "PUT",
+    body: Buffer.from("hi"),
+  })
+  console.log(response)
 }
 
 export async function getFileContent(blobId: string) {
