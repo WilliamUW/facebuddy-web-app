@@ -322,9 +322,9 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     }, processingTime);
   };
 
-  // Function to navigate to the Send page
-  const goToSendPage = () => {
-    // This will navigate to the "recognize" view which contains the Send functionality
+  // Function to navigate to the Recognize page
+  const goToRecognizePage = () => {
+    // This will navigate to the "recognize" view which contains the recognition functionality
     window.dispatchEvent(new CustomEvent("navigate-to-recognize"));
   };
 
@@ -412,10 +412,10 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
             {selectedImage ? (
               isFaceRegistered ? (
                 <button
-                  onClick={goToSendPage}
+                  onClick={goToRecognizePage}
                   className="px-4 py-2 rounded text-white w-full bg-blue-500 hover:bg-blue-600"
                 >
-                  &larr; Go to Send page
+                  &larr; Go to Recognize page
                 </button>
               ) : (
                 <button
