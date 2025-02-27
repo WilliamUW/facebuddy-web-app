@@ -93,7 +93,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
         {isWebcamLoading && (
           <div
             className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center z-10"
-            style={{ minHeight: "500px" }}
+            style={{ aspectRatio: "16/9" }}
           >
             <div className="text-gray-500">Loading camera...</div>
           </div>
@@ -103,13 +103,12 @@ export default function FaceRecognition({ savedFaces }: Props) {
           audio={false}
           screenshotFormat="image/jpeg"
           videoConstraints={{
-            width: 900,
-            height: 500,
             facingMode: "user",
+            aspectRatio: 16 / 9,
           }}
           onUserMedia={() => setIsWebcamLoading(false)}
           className="w-full rounded-xl"
-          style={{ minHeight: "500px" }}
+          style={{ aspectRatio: "16/9" }}
         />
       </div>
     </div>
