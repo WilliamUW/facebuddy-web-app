@@ -63,6 +63,10 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const [matchedProfile, setMatchedProfile] = useState<ProfileData | null>(
     null
   );
+  const [detectedFaceImage, setDetectedFaceImage] = useState<string | null>(
+    null
+  );
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Speech recognition setup
   const {
@@ -138,6 +142,38 @@ export default function FaceRecognition({ savedFaces }: Props) {
     }
   };
 
+  // Function to draw face box and label on canvas
+  const drawFaceOnCanvas = async (imageSrc: string, face: any) => {
+    if (!canvasRef.current) return;
+
+    const img = await createImageFromDataUrl(imageSrc);
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Set canvas dimensions to match image
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    // Draw the image
+    ctx.drawImage(img, 0, 0);
+
+    // Draw face box
+    const box = face.detection.box;
+    ctx.strokeStyle = "#00ff00";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+    // Draw label
+    ctx.fillStyle = "#00ff00";
+    ctx.font = "16px Arial";
+    const label = face.matchedProfile?.name || "Unknown";
+    ctx.fillText(label, box.x, box.y - 5);
+
+    // Save the canvas as image
+    setDetectedFaceImage(canvas.toDataURL());
+  };
+
   // Function to handle agent request
   const handleAgentRequest = async (text: string) => {
     console.log("=== AGENT REQUEST STARTED ===");
@@ -188,6 +224,9 @@ export default function FaceRecognition({ savedFaces }: Props) {
             largestFace.matchedProfile &&
             largestFace.match.label !== "unknown"
           ) {
+            // Draw face on canvas
+            await drawFaceOnCanvas(imageSrc, largestFace);
+
             // Set current address and matched profile for later use
             setCurrentAddress(largestFace.matchedProfile.name);
             setMatchedProfile(largestFace.matchedProfile);
@@ -407,6 +446,9 @@ export default function FaceRecognition({ savedFaces }: Props) {
         />
       </div>
 
+      {/* Hidden canvas for face labeling */}
+      <canvas ref={canvasRef} className="hidden" />
+
       {/* Agent Modal */}
       <AgentModal
         isOpen={isAgentModalOpen}
@@ -420,6 +462,18 @@ export default function FaceRecognition({ savedFaces }: Props) {
         steps={agentSteps}
         transcript={currentTranscript}
       >
+        {/* Show labeled face image if available */}
+        {detectedFaceImage && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-sm font-semibold mb-2">Detected Face</h3>
+            <img
+              src={detectedFaceImage}
+              alt="Detected face"
+              className="w-full rounded-lg shadow-sm"
+            />
+          </div>
+        )}
+
         {/* Render SendEthWrapper if there's a transaction amount and matched profile */}
         {transactionAmount && matchedProfile?.name && (
           <div className="mt-4 p-4 bg-white rounded-lg shadow-sm">
