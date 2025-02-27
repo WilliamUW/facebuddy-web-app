@@ -45,6 +45,11 @@ export default function FaceRecognition({ savedFaces }: Props) {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
 
+    // Don't set a timeout if the agent modal is open
+    if (isAgentModalOpen) {
+      return;
+    }
+
     if (transcript) {
       // Clear any existing timeout
       if (timeoutId) clearTimeout(timeoutId);
@@ -72,12 +77,15 @@ export default function FaceRecognition({ savedFaces }: Props) {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [transcript, resetTranscript]);
+  }, [transcript, resetTranscript, isAgentModalOpen]);
 
   // Function to handle agent request
   const handleAgentRequest = async (text: string) => {
     console.log("=== AGENT REQUEST STARTED ===");
     console.log("Transcript:", text);
+
+    // Stop speech recognition when agent is started
+    SpeechRecognition.stopListening();
 
     // Open the modal
     setIsAgentModalOpen(true);
@@ -392,7 +400,13 @@ export default function FaceRecognition({ savedFaces }: Props) {
       {/* Agent Modal */}
       <AgentModal
         isOpen={isAgentModalOpen}
-        onClose={() => setIsAgentModalOpen(false)}
+        onClose={() => {
+          setIsAgentModalOpen(false);
+          // Resume speech recognition when agent modal is closed
+          if (browserSupportsSpeechRecognition) {
+            SpeechRecognition.startListening({ continuous: true });
+          }
+        }}
         steps={agentSteps}
         transcript={currentTranscript}
         recipientAddress={currentAddress}
