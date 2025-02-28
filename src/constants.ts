@@ -80,5 +80,4 @@ export const USDC_ABI = [
   }
 ] as const;
 
-// Base Sepolia USDC has 18 decimals
 export const USDC_DECIMALS = 6;
