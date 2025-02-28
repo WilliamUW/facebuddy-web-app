@@ -89,19 +89,14 @@ export default function AgentModal({
                 {step.isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <svg
-                    className="w-5 h-5 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                  <div className="relative flex-shrink-0 w-5 h-5">
+                    <div className="absolute inset-0 bg-white rounded-full"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-semibold text-black">
+                        {index + 1}
+                      </span>
+                    </div>
+                  </div>
                 )}
                 <span
                   className="text-sm"
