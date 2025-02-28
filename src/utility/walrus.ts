@@ -25,7 +25,7 @@ export async function readFromBlobId(blobId: string) {
 }
 
 export async function storeStringAndGetBlobId(data: string) {
-  if (process.env.NEXT_PUBLIC_WALRUS_ENABLED === "false") {
+  if (!process.env.NEXT_PUBLIC_WALRUS_ENABLED) {
     return null;
   }
   try {
