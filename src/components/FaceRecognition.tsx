@@ -269,6 +269,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
             try {
               const requestBody = {
                 prompt: text + JSON.stringify(largestFace.matchedProfile),
+                userAddress: largestFace.matchedProfile.name,
               };
 
               const res = await fetch(
