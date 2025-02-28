@@ -94,7 +94,6 @@ export default function FaceRecognition({ savedFaces }: Props) {
     abi: facebuddyabi,
     functionName: "preferredToken",
     args: currentAddress ? [currentAddress as `0x${string}`] : undefined,
-    
   });
   console.log("preferredTokenAddress:", preferredTokenAddress);
   console.log("currentAddress:", currentAddress);
@@ -222,9 +221,9 @@ export default function FaceRecognition({ savedFaces }: Props) {
             },
           ]);
           await new Promise((resolve) => setTimeout(resolve, 500));
-
+          console.log("preferredTokenAddress: MEEP", preferredTokenAddress);
           const tokenInfo = getTokenInfo(
-            preferredTokenAddress || UNICHAIN_USDC_ADDRESS
+            preferredTokenAddress as `0x${string}`
           );
           setAgentSteps((prevSteps) => [
             ...prevSteps.slice(0, -1),
@@ -568,8 +567,13 @@ export default function FaceRecognition({ savedFaces }: Props) {
   }, [browserSupportsSpeechRecognition]);
 
   // Function to get token symbol and icon from address
-  const getTokenInfo = (address: string) => {
-    if (address === UNICHAIN_ETH_ADDRESS) {
+  const getTokenInfo = (address: `0x${string}`) => {
+    console.log("bro this is the addy i got:", address);
+    if (
+      address === undefined ||
+      address.toLowerCase() === UNICHAIN_ETH_ADDRESS.toLowerCase() ||
+      address.toLowerCase() === "0x0000000000000000000000000000000000000000"
+    ) {
       return {
         symbol: "ETH",
         icon: "/eth.png",
