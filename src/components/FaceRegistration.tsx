@@ -11,7 +11,6 @@ import { useEffect, useRef, useState } from "react";
 import React from "react";
 import Webcam from "react-webcam";
 import { storeStringAndGetBlobId } from "src/utility/walrus";
-import { uploadToIPFS } from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
 
 const WebcamComponent = () => <Webcam />;
