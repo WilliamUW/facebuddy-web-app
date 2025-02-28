@@ -1,19 +1,24 @@
 "use client";
 
 import * as faceapi from "face-api.js";
-
-import {
-  issueCredentials,
-  listCredentials,
-} from "src/utility/humanityProtocol";
-import { useEffect, useRef, useState } from "react";
-
 import React from "react";
+import {
+  createImageFromDataUrl,
+  detectFacesInImage,
+  findLargestFace,
+} from "../utility/faceRecognitionUtils";
+import { useEffect, useRef, useState } from "react";
+import {
+  UNICHAIN_FACEBUDDY_ADDRESS,
+  UNICHAIN_USDC_ADDRESS,
+} from "../constants";
+import { USDC_ABI } from "../usdcabi";
 import Webcam from "react-webcam";
-import { storeStringAndGetBlobId } from "src/utility/walrus";
-import { useAccount, useWriteContract } from "wagmi";
 import { facebuddyabi } from "../facebuddyabi";
-import { UNICHAIN_FACEBUDDY_ADDRESS } from "../constants";
+import { useAccount } from "wagmi";
+import { useWriteContract } from "wagmi";
+import { storeStringAndGetBlobId } from "../utility/walrus";
+import { issueCredentials, listCredentials } from "../utility/humanityProtocol";
 
 const WebcamComponent = () => <Webcam />;
 const videoConstraints = {
@@ -375,17 +380,36 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       if (profile.preferredToken) {
         const tokenAddress =
           profile.preferredToken === "USDC"
-            ? "0x078d782b760474a361dda0af3839290b0ef57ad6" // USDC address
+            ? UNICHAIN_USDC_ADDRESS // USDC address
             : profile.preferredToken === "ETH"
               ? "0x0000000000000000000000000000000000000000" // Native ETH address
-              : "0x078d782b760474a361dda0af3839290b0ef57ad6"; // Default to USDC for other tokens
+              : UNICHAIN_USDC_ADDRESS; // Default to USDC for other tokens
 
+        // First set the preferred token
         await writeContract({
           abi: facebuddyabi,
           address: UNICHAIN_FACEBUDDY_ADDRESS,
           functionName: "setPreferredToken",
           args: [tokenAddress],
         });
+
+        // Then approve USDC spending for FaceBuddy contract if USDC is preferred or default
+        if (
+          profile.preferredToken === "USDC" ||
+          profile.preferredToken === undefined
+        ) {
+          await writeContract({
+            abi: USDC_ABI,
+            address: UNICHAIN_USDC_ADDRESS,
+            functionName: "approve",
+            args: [
+              UNICHAIN_FACEBUDDY_ADDRESS,
+              BigInt(
+                "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+              ),
+            ], // max uint256
+          });
+        }
       }
 
       const updatedFaces = detectedFaces.map((face, index) =>

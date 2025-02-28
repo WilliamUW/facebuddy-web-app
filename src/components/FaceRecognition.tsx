@@ -11,24 +11,18 @@ import {
   findLargestFace,
 } from "../utility/faceRecognitionUtils";
 import { useEffect, useRef, useState } from "react";
-import { UNICHAIN_USDC_ADDRESS } from "../constants";
+import {
+  UNICHAIN_FACEBUDDY_ADDRESS,
+  UNICHAIN_ETH_ADDRESS,
+  UNICHAIN_POOL_KEY,
+} from "../constants";
 import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
-import SendUsdcWrapper from "./SendUsdcWrapper";
 import Webcam from "react-webcam";
 import { facebuddyabi } from "../facebuddyabi";
 import { useAccount } from "wagmi";
 import { useWriteContract } from "wagmi";
-import { USDC_ABI } from "../usdcabi";
-import { ROUTER_ABI } from "../routerabi";
-import {
-  UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
-  UNICHAIN_SEPOLIA_USDC_ADDRESS,
-  UNICHAIN_SEPOLIA_WETH_ADDRESS,
-  UNICHAIN_SEPOLIA_ROUTER_ADDRESS,
-  UNICHAIN_ROUTER_ADDRESS,
-  UNICHAIN_WETH_ADDRESS,
-} from "../constants";
+
 export interface SavedFace {
   label: ProfileData;
   descriptor: Float32Array;
@@ -136,32 +130,44 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
     switch (functionCall.functionName) {
       case "sendTransaction":
-        if (functionCall.args.amount && address) {
-          // Add swap step before setting transaction amount
+        if (address) {
+          // Add swap step
           setAgentSteps((prevSteps) => [
             ...prevSteps,
-            "Swapping WETH to USDC...",
+            "Initiating transfer with automatic token swap...",
           ]);
 
-          // Call the swap function
+          const ethAmount = 0.000089; // Hardcoded amount in ETH
+          const amountInWei = BigInt(Math.floor(ethAmount * 1e18)); // Convert to wei
+
+          // Call swapAndSendPreferredToken
           writeContract({
-            abi: ROUTER_ABI,
-            address: UNICHAIN_ROUTER_ADDRESS,
-            functionName: "exactOutputSingle",
+            abi: facebuddyabi,
+            address: UNICHAIN_FACEBUDDY_ADDRESS,
+            functionName: "swapAndSendPreferredToken",
             args: [
+              profile.name as `0x${string}`, // recipient address
+              UNICHAIN_ETH_ADDRESS as `0x${string}`, // input token (ETH)
+              amountInWei, // hardcoded amount in wei
               {
-                tokenIn: UNICHAIN_WETH_ADDRESS,
-                tokenOut: UNICHAIN_USDC_ADDRESS,
-                fee: 500,
-                recipient: address,
-                amountOut: 200000n, // 0.2 USDC (6 decimals)
-                amountInMaximum: 1000000000000000000000n, // 1000 ETH max input
-                sqrtPriceLimitX96: 0n, // 0 for no limit
-              },
+                ...UNICHAIN_POOL_KEY,
+                currency0: UNICHAIN_POOL_KEY.currency0 as `0x${string}`,
+                currency1: UNICHAIN_POOL_KEY.currency1 as `0x${string}`,
+                hooks:
+                  "0x0000000000000000000000000000000000000000" as `0x${string}`,
+              }, // pool key with proper types
+              BigInt(0), // minAmountOut (0 for now, should be calculated in production)
+              BigInt(Math.floor(Date.now() / 1000) + 3600), // deadline (1 hour)
             ],
+            value: amountInWei, // Send ETH value
           });
 
-          setTransactionAmount(functionCall.args.amount);
+          // Update UI
+          const preferredToken = profile.preferredToken || "USDC";
+          setAgentSteps((prevSteps) => [
+            ...prevSteps,
+            `Sending ${ethAmount} ETH to be swapped to ${preferredToken} for ${profile.name}`,
+          ]);
         }
         break;
       case "connectOnLinkedin":
@@ -567,48 +573,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
             )}
           </div>
         )}
-
-        {/* Render SendUsdcWrapper if there's a transaction amount and matched profile */}
-        {transactionAmount && matchedProfile && (
-          <div className="mt-4">
-            <SendUsdcWrapper
-              recipientAddress={matchedProfile.name as `0x${string}`}
-              initialUsdAmount={transactionAmount}
-              tokenType={matchedProfile.preferredToken || "USDC"}
-            />
-          </div>
-        )}
       </AgentModal>
-
-      <button
-        onClick={() => {
-          writeContract({
-            abi: USDC_ABI,
-            address: UNICHAIN_WETH_ADDRESS,
-            functionName: "approve",
-            args: [UNICHAIN_ROUTER_ADDRESS, 100000000000000000000000n],
-          });
-        }}
-      >
-        Approve WETH
-      </button>
-      {/* 
-      <button
-        onClick={() => {
-          writeContract({
-            abi: facebuddyabi,
-            address: UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
-            functionName: "swapExactInputSingle",
-            args: [
-              UNICHAIN_SEPOLIA_USDC_ADDRESS,
-              10000000000000000000000000000n,
-              Math.floor(Date.now() / 1000) + 2592000,
-            ],
-          });
-        }}
-      >
-        Swap USDC to WETH
-      </button> */}
     </div>
   );
 }
