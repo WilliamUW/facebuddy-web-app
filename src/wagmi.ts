@@ -44,7 +44,13 @@ export function useWagmiConfig() {
       }
     );
 
-    const chains = [base, baseSepolia, unichain, unichainSepolia] as const;
+    const chains = [
+      base,
+      baseSepolia,
+      unichain,
+      unichainSepolia,
+      unichainMainnet,
+    ] as const;
 
     const wagmiConfig = createConfig({
       chains,
@@ -55,7 +61,9 @@ export function useWagmiConfig() {
       transports: {
         [base.id]: http(),
         [baseSepolia.id]: http(),
-        [unichain.id]: http(),
+        [unichain.id]: http(
+          "https://unichain-mainnet.g.alchemy.com/v2/cCmdllUM3oiBjOpStn0RrTb8eifa87te"
+        ),
         [unichainSepolia.id]: http(),
       },
     });

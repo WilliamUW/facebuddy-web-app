@@ -89,12 +89,16 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const { data: hash, isPending, writeContract } = useWriteContract();
 
   // Add contract read for preferred token
-  const { data: preferredTokenAddress } = useReadContract({
+  const { data: preferredTokenAddress, refetch } = useReadContract({
     address: UNICHAIN_FACEBUDDY_ADDRESS,
     abi: facebuddyabi,
     functionName: "preferredToken",
-    args: currentAddress ? [currentAddress as `0x${string}`] : undefined,
+    args: [matchedProfile?.name as `0x${string}`],
   });
+
+  useEffect(() => {
+    refetch();
+  }, [matchedProfile]);
   console.log("preferredTokenAddress:", preferredTokenAddress);
   console.log("currentAddress:", currentAddress);
 
@@ -196,7 +200,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
     switch (functionCall.functionName) {
       case "sendTransaction":
-        if (address) {
+        if (profile.name as `0x${string}`) {
           // 4.1: Grab amount from JSON
           const requestedUsdAmount = parseFloat(
             functionCall.args.amount || "0"
@@ -221,9 +225,11 @@ export default function FaceRecognition({ savedFaces }: Props) {
             },
           ]);
           await new Promise((resolve) => setTimeout(resolve, 500));
-          console.log("preferredTokenAddress: MEEP", preferredTokenAddress);
+          const { data: updatedPreferredToken } = await refetch();
+
+          console.log("preferredTokenAddress: MEEP", updatedPreferredToken);
           const tokenInfo = getTokenInfo(
-            preferredTokenAddress as `0x${string}`
+            updatedPreferredToken as `0x${string}`
           );
           setAgentSteps((prevSteps) => [
             ...prevSteps.slice(0, -1),
@@ -252,7 +258,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
           const ethAmount = requestedUsdAmount / currentEthPrice;
           const amountInWei = BigInt(Math.floor(ethAmount * 1e18));
 
-          const isEth = preferredTokenAddress === UNICHAIN_ETH_ADDRESS;
+          const isEth = updatedPreferredToken === UNICHAIN_ETH_ADDRESS;
           setAgentSteps((prevSteps) => [
             ...prevSteps,
             {
