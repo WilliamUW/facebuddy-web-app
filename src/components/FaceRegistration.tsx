@@ -839,29 +839,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
 
       {/* Credentials Accordion - Only show when face is registered */}
       {
-        <div className="w-full max-w-[900px] mt-4 border rounded-lg overflow-hidden">
-          <button
-            onClick={() => setIsAccordionOpen(!isAccordionOpen)}
-            className="w-full p-4 bg-gray-100 text-left font-medium flex justify-between items-center"
-          >
-            <span>View Your Credentials</span>
-            <svg
-              className={`w-5 h-5 transition-transform ${
-                isAccordionOpen ? "transform rotate-180" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M19 9l-7 7-7-7"
-              ></path>
-            </svg>
-          </button>
+        <div className="w-full max-w-[900px] border rounded-lg overflow-hidden">
 
           {isAccordionOpen && (
             <div className="p-4 bg-white">
