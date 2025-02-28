@@ -21,7 +21,7 @@ import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
 import Webcam from "react-webcam";
 import { facebuddyabi } from "../facebuddyabi";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import {
   useWriteContract,
   useWaitForTransactionReceipt,
@@ -89,12 +89,15 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const { data: hash, isPending, writeContract } = useWriteContract();
 
   // Add contract read for preferred token
-  const { data: preferredTokenAddress } = useContractRead({
+  const { data: preferredTokenAddress } = useReadContract({
     address: UNICHAIN_FACEBUDDY_ADDRESS,
     abi: facebuddyabi,
     functionName: "preferredToken",
     args: currentAddress ? [currentAddress as `0x${string}`] : undefined,
+    
   });
+  console.log("preferredTokenAddress:", preferredTokenAddress);
+  console.log("currentAddress:", currentAddress);
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
