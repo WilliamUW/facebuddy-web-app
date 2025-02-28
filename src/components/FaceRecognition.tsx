@@ -566,7 +566,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
       >
         Approve USDC
       </button>
-
+{/* 
       <button
         onClick={() => {
           writeContract({
@@ -582,7 +582,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
         }}
       >
         Swap USDC to WETH
-      </button>
+      </button> */}
     </div>
   );
 }
