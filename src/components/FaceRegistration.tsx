@@ -78,6 +78,41 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [credentials, setCredentials] = useState<any>(null);
   const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
+  const [showTransactions, setShowTransactions] = useState(false);
+  const [transactionData, setTransactionData] = useState<any>(null);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
+
+  // Define transaction data types
+  interface TransactionArg {
+    recipientAddress?: string;
+    amount?: string;
+    ticker?: string;
+  }
+
+  interface FunctionCall {
+    functionName: string;
+    args: TransactionArg;
+  }
+
+  interface TransactionResult {
+    text: string;
+    functionCall?: FunctionCall;
+  }
+
+  interface Transaction {
+    result: TransactionResult;
+    hasProof: boolean;
+    timestamp: string;
+    userAddress: string;
+    sequence: number;
+  }
+
+  interface TransactionData {
+    walletAddress: string;
+    transactionCount: number;
+    transactions: Transaction[];
+  }
 
   //   useEffect(() => {
   //     if (address) {
@@ -381,6 +416,27 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       setCredentials({ error: "Failed to fetch credentials" });
     } finally {
       setIsLoadingCredentials(false);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    if (!address) return;
+
+    setIsLoadingTransactions(true);
+    setTransactionError(null);
+    try {
+      // Replace with actual API call to fetch transactions
+      const response = await fetch(`http://localhost:4000/api/transactions/${address}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch transaction data');
+      }
+      const data: TransactionData = await response.json();
+      setTransactionData(data);
+    } catch (error) {
+      console.error("Error fetching transaction data:", error);
+      setTransactionError("Failed to fetch transaction data");
+    } finally {
+      setIsLoadingTransactions(false);
     }
   };
 
@@ -809,117 +865,352 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
 
           {isAccordionOpen && (
             <div className="p-4 bg-white">
-              {credentials ? (
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">
-                    Your Credentials
-                  </h3>
-                  {credentials.error ? (
-                    <p className="text-red-500">{credentials.error}</p>
-                  ) : credentials.data && credentials.data.length > 0 ? (
-                    <div className="space-y-4">
-                      {credentials.data.map((cred: any, index: number) => (
-                        <div key={index} className="border rounded p-3">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="font-medium">Issuer:</div>
-                            <div className="truncate">{cred.issuer}</div>
-
-                            <div className="font-medium">Valid From:</div>
-                            <div>
-                              {new Date(cred.validFrom).toLocaleString()}
-                            </div>
-
-                            <div className="font-medium">Valid Until:</div>
-                            <div>
-                              {cred.validUntil
-                                ? new Date(cred.validUntil).toLocaleString()
-                                : "No expiration"}
-                            </div>
-
-                            <div className="font-medium">ID:</div>
-                            <div className="truncate">{cred.id}</div>
-
-                            {profile.humanId && (
-                              <>
-                                <div className="font-medium">Human ID:</div>
-                                <div className="flex items-center">
-                                  <span>{profile.humanId}</span>
-                                  <img
-                                    src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
-                                    alt="Humanity Protocol"
-                                    className="h-4 ml-2"
-                                  />
-                                </div>
-                              </>
-                            )}
-                          </div>
-
-                          <div className="mt-2">
-                            <div className="font-medium mb-1">
-                              Credential Subject:
-                            </div>
-                            <div className="bg-gray-50 p-2 rounded">
-                              {Object.entries(cred.credentialSubject).map(
-                                ([key, value]: [string, any]) => (
-                                  <div
-                                    key={key}
-                                    className="grid grid-cols-2 gap-2"
-                                  >
-                                    <div className="font-medium">{key}:</div>
-                                    <div>{String(value)}</div>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p>No credentials found.</p>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center">
+              {/* Tabs for Credentials and Transactions */}
+              <div className="mb-4 border-b">
+                <div className="flex flex-wrap -mb-px">
                   <button
-                    onClick={handleListCredentials}
-                    disabled={isLoadingCredentials}
-                    className={`px-4 py-2 rounded text-white ${
-                      isLoadingCredentials
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600"
+                    className={`mr-2 py-2 px-4 font-medium text-sm border-b-2 ${
+                      !showTransactions
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                     }`}
+                    onClick={() => setShowTransactions(false)}
                   >
-                    {isLoadingCredentials ? (
-                      <span className="flex items-center">
-                        <svg
-                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                        Loading Credentials...
-                      </span>
-                    ) : (
-                      "List Credentials"
-                    )}
+                    Credentials
+                  </button>
+                  <button
+                    className={`py-2 px-4 font-medium text-sm border-b-2 ${
+                      showTransactions
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                    onClick={() => setShowTransactions(true)}
+                  >
+                    Transactions
                   </button>
                 </div>
-              )}
+              </div>
+
+              {showTransactions ? (
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Transaction History</h3>
+                    <button
+                      onClick={fetchTransactions}
+                      disabled={isLoadingTransactions}
+                      className={`px-4 py-2 rounded-full text-white flex items-center ${
+                        isLoadingTransactions
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200"
+                      }`}
+                    >
+                      {isLoadingTransactions ? (
+                        <>
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            ></path>
+                          </svg>
+                          Refresh Transactions
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {transactionError ? (
+                    <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg
+                            className="h-5 w-5 text-red-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm text-red-700">
+                            {transactionError}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : transactionData ? (
+                    <div>
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-4 shadow-sm">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-sm text-gray-500">Wallet Address</p>
+                            <p className="font-mono text-sm truncate max-w-xs">
+                              {transactionData.walletAddress}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-indigo-600">
+                              {transactionData.transactionCount}
+                            </div>
+                            <p className="text-sm text-gray-500">Transactions</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {transactionData.transactions.length > 0 ? (
+                        <div className="space-y-4">
+                          {transactionData.transactions.map((tx: Transaction, index: number) => {
+                            // Determine colors based on transaction type
+                            const isSend = tx.result.functionCall?.functionName === "sendTransaction";
+                            const bgGradient = isSend 
+                              ? "from-green-50 to-emerald-50" 
+                              : "from-amber-50 to-yellow-50";
+                            const iconBg = isSend ? "bg-green-100" : "bg-amber-100";
+                            const iconColor = isSend ? "text-green-500" : "text-amber-500";
+                            const borderColor = isSend ? "border-green-200" : "border-amber-200";
+                            
+                            // Format date
+                            const txDate = new Date(tx.timestamp);
+                            const formattedDate = txDate.toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            });
+                            const formattedTime = txDate.toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            });
+
+                            // Get token icon based on ticker
+                            const ticker = tx.result.functionCall?.args.ticker || "USDC";
+                            const tokenIconMap: Record<string, { icon: string, color: string }> = {
+                              "USDC": { 
+                                icon: "https://cryptologos.cc/logos/usd-coin-usdc-logo.svg?v=026", 
+                                color: "text-blue-600" 
+                              },
+                              "ETH": { 
+                                icon: "https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=026", 
+                                color: "text-purple-600" 
+                              },
+                              "USDT": { 
+                                icon: "https://cryptologos.cc/logos/tether-usdt-logo.svg?v=026", 
+                                color: "text-green-600" 
+                              },
+                              "DAI": { 
+                                icon: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.svg?v=026", 
+                                color: "text-yellow-600" 
+                              },
+                              "WBTC": { 
+                                icon: "https://cryptologos.cc/logos/wrapped-bitcoin-wbtc-logo.svg?v=026", 
+                                color: "text-orange-600" 
+                              }
+                            };
+                            
+                            const tokenInfo = tokenIconMap[ticker] || tokenIconMap["USDC"];
+                            
+                            return (
+                              <div 
+                                key={index} 
+                                className={`bg-gradient-to-r ${bgGradient} border ${borderColor} rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1`}
+                              >
+                                <div className="flex items-start">
+                                  <div className={`${iconBg} p-3 rounded-full mr-4 shadow-md relative overflow-hidden`}>
+                                    {/* Animated background effect */}
+                                    <div className="absolute inset-0 opacity-20">
+                                      <div className="absolute inset-0 bg-white rounded-full animate-pulse"></div>
+                                    </div>
+                                    
+                                    {isSend ? (
+                                      <svg className={`h-6 w-6 ${iconColor} relative z-10`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                      </svg>
+                                    ) : (
+                                      <svg className={`h-6 w-6 ${iconColor} relative z-10`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                      </svg>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="flex-1">
+                                    <div className="flex justify-between items-start">
+                                      <h4 className="font-medium text-gray-800 text-lg">
+                                        {tx.result.text}
+                                      </h4>
+                                      <div className="text-right">
+                                        <div className="text-sm text-gray-500">{formattedDate}</div>
+                                        <div className="text-sm text-gray-500">{formattedTime}</div>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="mt-4 grid grid-cols-2 gap-4">
+                                      <div className="bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
+                                        <p className="text-xs text-gray-500 uppercase tracking-wider">Function</p>
+                                        <p className={`font-medium ${tokenInfo.color}`}>
+                                          {tx.result.functionCall?.functionName || "N/A"}
+                                        </p>
+                                      </div>
+                                      
+                                      {tx.result.functionCall?.args.amount && (
+                                        <div className="bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
+                                          <p className="text-xs text-gray-500 uppercase tracking-wider">Amount</p>
+                                          <div className="flex items-center">
+                                            <img 
+                                              src={tokenInfo.icon} 
+                                              alt={ticker} 
+                                              className="w-5 h-5 mr-2" 
+                                            />
+                                            <span className="font-bold text-lg">
+                                              {tx.result.functionCall.args.amount}
+                                            </span>
+                                            <span className="ml-1 font-medium text-gray-700">
+                                              {ticker}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      )}
+                                      
+                                      {tx.result.functionCall?.args.recipientAddress && (
+                                        <div className="col-span-2 bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
+                                          <p className="text-xs text-gray-500 uppercase tracking-wider">Recipient</p>
+                                          <div className="flex items-center">
+                                            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                                              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                              </svg>
+                                            </div>
+                                            <p className="font-mono text-sm truncate">
+                                              {tx.result.functionCall.args.recipientAddress}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      )}
+                                      
+                                      <div className="col-span-2 flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
+                                        <div className="flex items-center">
+                                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                            tx.hasProof 
+                                              ? "bg-green-100 text-green-800 border border-green-200" 
+                                              : "bg-gray-100 text-gray-800 border border-gray-200"
+                                          }`}>
+                                            {tx.hasProof ? (
+                                              <span className="flex items-center">
+                                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                                Verified
+                                              </span>
+                                            ) : (
+                                              <span className="flex items-center">
+                                                <svg className="w-3 h-3 mr-1 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                Pending
+                                              </span>
+                                            )}
+                                          </span>
+                                          <div className="ml-2 px-2 py-1 bg-indigo-50 rounded-md border border-indigo-100">
+                                            <span className="text-xs text-indigo-600 font-medium">
+                                              Sequence: {tx.sequence}
+                                            </span>
+                                          </div>
+                                        </div>
+                                        
+                                        <button className="px-3 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
+                                          <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                          </svg>
+                                          View Details
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="relative w-20 h-20 mx-auto mb-4">
+                            <svg className="absolute inset-0 text-gray-300 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <svg className="absolute inset-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                          <h3 className="mt-2 text-lg font-medium text-gray-900">No transactions found</h3>
+                          <p className="mt-1 text-sm text-gray-500 max-w-md mx-auto">
+                            You haven't made any transactions yet. When you do, they'll appear here with all the details.
+                          </p>
+                          <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200">
+                            Make Your First Transaction
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-16 bg-gradient-to-b from-gray-50 to-white rounded-lg border border-gray-200 shadow-sm">
+                      <div className="relative w-24 h-24 mx-auto mb-6">
+                        <div className="absolute inset-0 bg-indigo-100 rounded-full animate-ping opacity-30"></div>
+                        <div className="absolute inset-0 bg-indigo-50 rounded-full animate-pulse"></div>
+                        <svg className="absolute inset-0 m-auto h-12 w-12 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                      </div>
+                      <h3 className="mt-2 text-xl font-medium text-gray-900">No transaction data</h3>
+                      <p className="mt-2 text-base text-gray-500 max-w-md mx-auto">
+                        Click the button below to fetch your transaction history and see all your on-chain activity.
+                      </p>
+                      <button 
+                        onClick={fetchTransactions}
+                        className="mt-6 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full hover:from-indigo-600 hover:to-purple-700 shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1 flex items-center mx-auto"
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Fetch Transaction History
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
           )}
         </div>
