@@ -7,7 +7,13 @@ import {
 } from "@rainbow-me/rainbowkit/wallets";
 import { useMemo } from "react";
 import { http, createConfig } from "wagmi";
-import { base, baseSepolia, Chain, unichain, unichainSepolia} from "wagmi/chains";
+import {
+  base,
+  baseSepolia,
+  Chain,
+  unichain,
+  unichainSepolia,
+} from "wagmi/chains";
 
 import { NEXT_PUBLIC_WC_PROJECT_ID } from "./config";
 import { unichainMainnet } from "./chains";
@@ -38,12 +44,7 @@ export function useWagmiConfig() {
       }
     );
 
-    const chains = [
-      base,
-      baseSepolia,
-      unichain,
-      unichainSepolia,
-    ] as const;
+    const chains = [base, baseSepolia, unichain, unichainSepolia] as const;
 
     const wagmiConfig = createConfig({
       chains,
