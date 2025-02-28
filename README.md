@@ -1,68 +1,74 @@
-bun i && bun run dev
+# **FaceBuddy** 🤖💸  
+> **Pay anyone—just with their face.**  
 
-Agent Backend: https://github.com/WilliamUW/facebuddy-opacity-agent
+## 🌍 **The Problem**  
+📌 **1.4 billion** unbanked (World Bank)  
+📌 **3.4 billion** without smartphones  
+📌 **2.6 billion** without internet  
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/coinbase/onchainkit/main/site/docs/public/logo/v0-27.png">
-    <img alt="OnchainKit logo vibes" src="https://raw.githubusercontent.com/coinbase/onchainkit/main/site/docs/public/logo/v0-27.png" width="auto">
-  </picture>
-</p>
+💭 **How do you give financial access to those who can't be paid?**  
 
-# Onchain App Template
+---
 
-An Onchain App Template build with [OnchainKit](https://onchainkit.xyz), and ready to be deployed to Vercel.
+## 🚀 **What is FaceBuddy?**  
+FaceBuddy enables **seamless payments** to anyone—**even without a phone or internet!**  
+📸 **Scan a face, send money, and connect on-chain.**  
 
-Play with it live on https://onchain-app-template.vercel.app
+🔹 **No phone? No problem.**  
+🔹 **No internet? No worries.**  
+🔹 **No barriers. Just seamless transactions.**  
 
-Have fun! ⛵️
+---
 
-<br />
+## ⚙️ **How It Works**  
+1️⃣ **Connect wallet** 🔗  
+2️⃣ **Link your face to your wallet & socials** 📸  
+3️⃣ **Scan a face** 👀  
+4️⃣ **Send crypto instantly** 💰  
+5️⃣ **Connect with their socials** 🔄  
 
-## Setup
+---
 
-To ensure all components work seamlessly, set the following environment variables in your `.env` file using `.env.local.example` as a reference.
+## 🛠 **Tech Stack**  
+🤖 **AI Face Recognition** → `face-api.js`  
+🧠 **AI Agent** → `Opacity Verifiable Agent (EigenLayer AVS)`  
+💳 **Payments** → `Gas-free USDC transactions on Base`  
+🔄 **DEX Swaps** → `Uniswap for auto-swap tokens`  
+🌐 **Frontend** → `React, Next.js`  
+🗄 **Storage** → `ETHStorage, EigenDA, Walrus`  
 
-You can find the API key on the [Coinbase Developer Portal's OnchainKit page](https://portal.cdp.coinbase.com/products/onchainkit). If you don't have an account, you will need to create one. 
+🚀 **Bringing the next billion on-chain!**  
 
-You can find your Wallet Connector project ID at [Wallet Connect](https://cloud.walletconnect.com).
+---
 
+## 🏗 **Getting Started**  
+### **1️⃣ Install dependencies**  
 ```sh
-# See https://portal.cdp.coinbase.com/products/onchainkit
-NEXT_PUBLIC_CDP_API_KEY="GET_FROM_COINBASE_DEVELOPER_PLATFORM"
-
-# See https://cloud.walletconnect.com
-NEXT_PUBLIC_WC_PROJECT_ID="GET_FROM_WALLET_CONNECT"
-```
-<br />
-
-## Locally run
-
-```sh
-# Install bun in case you don't have it
-curl -fsSL https://bun.sh/install | bash
-
-# Install packages
 bun i
-
-# Run Next app
+```
+### **2️⃣ Run the dev server**  
+```sh
 bun run dev
 ```
-<br />
 
-## Resources
+### **Agent Backend**  
+🔗 [FaceBuddy-Opacity Agent](https://github.com/WilliamUW/facebuddy-opacity-agent)  
 
-- [OnchainKit documentation](https://onchainkit.xyz)
-- We use the [OnchainKit Early Adopter](https://github.com/neodaoist/onchainkit-early-adopter) contract written by neodaoist [[X]](https://x.com/neodaoist)
+---
 
-<br />
+## 🎤 **Presentation**  
+📊 **Check out our slides!**  
+🔗 [FaceBuddy Pitch Deck](https://docs.google.com/presentation/d/1RVs_foW1B6GwXitRPJlFmM_yVQ9-lM0x9NVgwuXKFlE/edit#slide=id.g3322bda7de7_0_40)  
 
-## License
+---
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 💡 **Why FaceBuddy?**  
+🏦 **Banking for the unbanked**  
+📶 **No phone? No internet? No problem.**  
+💡 **Simple, secure, and scalable.**  
 
-## Need more help?
+💙 **Join us in revolutionizing financial access!**  
 
-If you have any questions or need help, feel free to reach out to us on [Discord](https://discord.gg/8gW3h6w5) 
-or open a [Github issue](https://github.com/coinbase/onchainkit/issues) or DMs us 
-on X at [@onchainkit](https://x.com/onchainkit), [@zizzamia](https://x.com/zizzamia), [@fkpxls](https://x.com/fkpxls).
+---
+
+🔥 Ready to onboard the next billion? **Let’s go!** 🚀
