@@ -11,22 +11,18 @@ import {
   findLargestFace,
 } from "../utility/faceRecognitionUtils";
 import { useEffect, useRef, useState } from "react";
-
+import {
+  UNICHAIN_FACEBUDDY_ADDRESS,
+  UNICHAIN_ETH_ADDRESS,
+  UNICHAIN_POOL_KEY,
+} from "../constants";
 import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
-import SendUsdcWrapper from "./SendUsdcWrapper";
 import Webcam from "react-webcam";
 import { facebuddyabi } from "../facebuddyabi";
 import { useAccount } from "wagmi";
-import { useWriteContract } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
-
-import {
-  UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
-  UNICHAIN_SEPOLIA_USDC_ADDRESS,
-  UNICHAIN_SEPOLIA_WETH_ADDRESS,
-  UNICHAIN_SEPOLIA_ROUTER_ADDRESS,
-} from "../constants";
 export interface SavedFace {
   label: ProfileData;
   descriptor: Float32Array;
@@ -60,7 +56,6 @@ type AgentResponse = {
   };
 };
 
-
 export default function FaceRecognition({ savedFaces }: Props) {
   const { address } = useAccount();
   const webcamRef = useRef<Webcam>(null);
@@ -79,7 +74,12 @@ export default function FaceRecognition({ savedFaces }: Props) {
     null
   );
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { writeContract } = useWriteContract();
+  const { data: hash, isPending, writeContract } = useWriteContract();
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
   // Speech recognition setup
   const {
     transcript,
@@ -87,6 +87,17 @@ export default function FaceRecognition({ savedFaces }: Props) {
     resetTranscript,
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
+
+  // Add effect to handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed && hash) {
+      const uniscanUrl = `https://uniscan.xyz/tx/${hash}`;
+      setAgentSteps((prevSteps) => [
+        ...prevSteps,
+        `Transaction successful: <a href="${uniscanUrl}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline">${hash}</a>`,
+      ]);
+    }
+  }, [isConfirmed, hash]);
 
   // Reset transcript after a period of silence
   useEffect(() => {
@@ -135,8 +146,45 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
     switch (functionCall.functionName) {
       case "sendTransaction":
-        if (functionCall.args.amount) {
-          setTransactionAmount(functionCall.args.amount);
+        if (address) {
+          // Add swap step
+          setAgentSteps((prevSteps) => [
+            ...prevSteps,
+            "Initiating transfer with automatic token swap...",
+          ]);
+
+          const ethAmount = 0.000089; // Hardcoded amount in ETH
+          const amountInWei = BigInt(Math.floor(ethAmount * 1e18)); // Convert to wei
+
+          // Call swapAndSendPreferredToken
+          writeContract({
+            abi: facebuddyabi,
+            address: UNICHAIN_FACEBUDDY_ADDRESS,
+            functionName: "swapAndSendPreferredToken",
+
+            args: [
+              profile.name as `0x${string}`, // recipient address
+              UNICHAIN_ETH_ADDRESS as `0x${string}`, // input token (ETH)
+              amountInWei, // hardcoded amount in wei
+              {
+                ...UNICHAIN_POOL_KEY,
+                currency0: UNICHAIN_POOL_KEY.currency0 as `0x${string}`,
+                currency1: UNICHAIN_POOL_KEY.currency1 as `0x${string}`,
+                hooks:
+                  "0x0000000000000000000000000000000000000000" as `0x${string}`,
+              }, // pool key with proper types
+              BigInt(0), // minAmountOut (0 for now, should be calculated in production)
+              BigInt(Math.floor(Date.now() / 1000) + 3600), // deadline (1 hour)
+            ],
+            value: amountInWei, // Send ETH value
+          });
+
+          // Update UI
+          const preferredToken = profile.preferredToken || "USDC";
+          setAgentSteps((prevSteps) => [
+            ...prevSteps,
+            `Sending ${ethAmount} ETH to be swapped to ${preferredToken} for ${profile.name}`,
+          ]);
         }
         break;
       case "connectOnLinkedin":
@@ -181,27 +229,33 @@ export default function FaceRecognition({ savedFaces }: Props) {
     ctx.font = "16px Arial";
     const label = face.matchedProfile?.name || "Unknown";
     ctx.fillText(label, box.x, box.y - 5);
-    
+
     // If the user has a Human ID, add a badge
     if (face.matchedProfile?.humanId) {
       // Draw a small badge in the top-right corner of the face box
       const badgeSize = 24;
       const badgeX = box.x + box.width - badgeSize - 5;
       const badgeY = box.y + 5;
-      
+
       // Draw badge background
       ctx.fillStyle = "#6366F1"; // Indigo color
       ctx.beginPath();
-      ctx.arc(badgeX + badgeSize/2, badgeY + badgeSize/2, badgeSize/2, 0, Math.PI * 2);
+      ctx.arc(
+        badgeX + badgeSize / 2,
+        badgeY + badgeSize / 2,
+        badgeSize / 2,
+        0,
+        Math.PI * 2
+      );
       ctx.fill();
-      
+
       // Draw "H" for Human ID
       ctx.fillStyle = "#FFFFFF";
       ctx.font = "bold 16px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("H", badgeX + badgeSize/2, badgeY + badgeSize/2);
-      
+      ctx.fillText("H", badgeX + badgeSize / 2, badgeY + badgeSize / 2);
+
       // Reset text alignment
       ctx.textAlign = "start";
       ctx.textBaseline = "alphabetic";
@@ -313,7 +367,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   : data.content.text;
 
               // Prepare face scan message with Human ID if available
-              const faceScanMessage = largestFace.matchedProfile.humanId 
+              const faceScanMessage = largestFace.matchedProfile.humanId
                 ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
                 : `Face scanned: ${largestFace.matchedProfile.name}`;
 
@@ -354,12 +408,13 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 if (functionName === "sendTransaction") {
                   // For transactions, we'll show the transaction component in the modal
                   // The actual transaction UI will be rendered in the modal
-                  const preferredToken = largestFace.matchedProfile.preferredToken || "USDC";
+                  const preferredToken =
+                    largestFace.matchedProfile.preferredToken || "USDC";
                   await new Promise((resolve) => setTimeout(resolve, 500));
                   setAgentSteps([
                     faceScanMessage,
                     `Agent response: ${responseText}`,
-                    `Ready to send ${functionCall.args.amount} ${preferredToken} to ${largestFace.matchedProfile.name}`,
+                    `Swapped ETH to ${functionCall.args.amount} ${preferredToken} and sent to ${largestFace.matchedProfile.name}`,
                   ]);
                 } else if (
                   functionName === "connectOnLinkedin" ||
@@ -406,10 +461,10 @@ export default function FaceRecognition({ savedFaces }: Props) {
               }
             } catch (error) {
               // Define face scan message for error case
-              const faceScanMessage = largestFace.matchedProfile.humanId 
+              const faceScanMessage = largestFace.matchedProfile.humanId
                 ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
                 : `Face scanned: ${largestFace.matchedProfile.name}`;
-                
+
               setAgentSteps([
                 faceScanMessage,
                 `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`,
@@ -480,9 +535,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
           style={{ minHeight: "400px", height: "50vh" }}
         >
           {isWebcamLoading && (
-            <div
-              className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center z-10"
-            >
+            <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center z-10">
               <div className="text-gray-500">Loading camera...</div>
             </div>
           )}
@@ -528,61 +581,16 @@ export default function FaceRecognition({ savedFaces }: Props) {
               <div className="mt-2 flex items-center text-sm">
                 <span className="font-medium text-indigo-600">Human ID:</span>
                 <span className="ml-2">{matchedProfile.humanId}</span>
-                <img 
+                <img
                   src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
-                  alt="Humanity Protocol" 
-                  className="h-4 ml-2" 
+                  alt="Humanity Protocol"
+                  className="h-4 ml-2"
                 />
               </div>
             )}
           </div>
         )}
-
-        {/* Render SendUsdcWrapper if there's a transaction amount and matched profile */}
-        {transactionAmount && matchedProfile && (
-          <div className="mt-4">
-            <SendUsdcWrapper
-              recipientAddress={matchedProfile.name as `0x${string}`}
-              initialUsdAmount={transactionAmount}
-              tokenType={matchedProfile.preferredToken || "USDC"}
-            />
-          </div>
-        )}
       </AgentModal>
-
-      <button
-        onClick={() => {
-          writeContract({
-            abi: facebuddyabi,
-            address: UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
-            functionName: "approveTokenWithPermit2",
-            args: [
-              UNICHAIN_SEPOLIA_USDC_ADDRESS,
-              10000000000000000000000000000n,
-              Math.floor(Date.now() / 1000) + 2592000,
-            ],
-          });
-        }}
-      >
-        Approve USDC
-      </button>
-{/* 
-      <button
-        onClick={() => {
-          writeContract({
-            abi: facebuddyabi,
-            address: UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
-            functionName: "swapExactInputSingle",
-            args: [
-              UNICHAIN_SEPOLIA_USDC_ADDRESS,
-              10000000000000000000000000000n,
-              Math.floor(Date.now() / 1000) + 2592000,
-            ],
-          });
-        }}
-      >
-        Swap USDC to WETH
-      </button> */}
     </div>
   );
 }

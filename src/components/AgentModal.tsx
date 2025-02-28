@@ -43,20 +43,20 @@ export default function AgentModal({
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
-      
+
       // Add ESC key event listener
       const handleEscKey = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
+        if (event.key === "Escape") {
           onClose();
         }
       };
-      
+
       // Add the event listener
-      document.addEventListener('keydown', handleEscKey);
-      
+      document.addEventListener("keydown", handleEscKey);
+
       // Clean up the event listener
       return () => {
-        document.removeEventListener('keydown', handleEscKey);
+        document.removeEventListener("keydown", handleEscKey);
       };
     } else {
       const timer = setTimeout(() => {
@@ -73,6 +73,9 @@ export default function AgentModal({
     // Determine step type
     const getStepType = (message: string): StepType => {
       const lowerMessage = message.toLowerCase();
+      // Check for transaction success first
+      if (lowerMessage.includes("transaction successful")) return "token-swap";
+      // Then check other conditions
       if (lowerMessage.includes("scan") || lowerMessage.includes("face"))
         return "face-scan";
       if (
@@ -81,7 +84,11 @@ export default function AgentModal({
         lowerMessage.includes("response")
       )
         return "agent-call";
-      if (lowerMessage.includes("swap") || lowerMessage.includes("token"))
+      if (
+        lowerMessage.includes("swap") ||
+        lowerMessage.includes("weth to usdc") ||
+        lowerMessage.includes("ready to send")
+      )
         return "token-swap";
       if (
         lowerMessage.includes("connect") ||
@@ -89,9 +96,8 @@ export default function AgentModal({
       )
         return "connection";
       if (
-        lowerMessage.includes("0x") ||
-        lowerMessage.includes("transaction") ||
-        lowerMessage.includes("hash")
+        (lowerMessage.includes("0x") && lowerMessage.includes("transaction")) ||
+        (lowerMessage.includes("0x") && lowerMessage.includes("complete"))
       )
         return "tx-hash";
       return "default";
@@ -121,13 +127,15 @@ export default function AgentModal({
       };
     });
 
-    setProcessedSteps(newProcessedSteps as {
-      message: string;
-      type: StepType;
-      status: "processing" | "completed";
-      timestamp: number;
-      id: number;
-    }[]);
+    setProcessedSteps(
+      newProcessedSteps as {
+        message: string;
+        type: StepType;
+        status: "processing" | "completed";
+        timestamp: number;
+        id: number;
+      }[]
+    );
   }, [steps]);
 
   // Reset steps when modal is closed
@@ -226,9 +234,10 @@ export default function AgentModal({
                     )}
                   </div>
                   <div className="flex-grow">
-                    <p className="font-medium text-sm transition-all duration-300">
-                      {step.message}
-                    </p>
+                    <p
+                      className="font-medium text-sm transition-all duration-300"
+                      dangerouslySetInnerHTML={{ __html: step.message }}
+                    />
                   </div>
                 </div>
               </div>

@@ -18,7 +18,7 @@ import { BASE_SEPOLIA_CHAIN_ID } from '../constants';
 import { parseUnits } from 'viem';
 
 // USDC contract address on Base Sepolia
-const USDC_CONTRACT_ADDRESS = '0x5deac602762362fe5f135fa5904351916053cf70';
+const USDC_CONTRACT_ADDRESS = "0x078d782b760474a361dda0af3839290b0ef57ad6";
 
 // ERC20 ABI for the transfer function
 const USDC_ABI = [
