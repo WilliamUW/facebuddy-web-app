@@ -1,4 +1,4 @@
-[
+export const referenceFaces = [
   {
     detection: {
       _imageDims: { _width: 360, _height: 400 },

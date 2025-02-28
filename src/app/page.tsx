@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import ChatInterface from "src/components/ChatInterface";
 import ChainSelector from "src/components/ChainSelector";
+import ChatInterface from "src/components/ChatInterface";
 import FaceRegistration from "src/components/FaceRegistration";
 import Footer from "src/components/Footer";
 import { GetCIDResponse } from "pinata-web3";
@@ -19,6 +19,7 @@ import Webcam from "react-webcam";
 import dynamic from "next/dynamic";
 import { getFileContent } from "src/utility/faceDataStorage";
 import { readFromBlobId } from "src/utility/walrus";
+import {referenceFaces} from "src/lib/faces";
 import { useAccount } from "wagmi";
 
 // Dynamically import FaceRecognition with ssr disabled
@@ -67,11 +68,14 @@ export default function Page() {
   useEffect(() => {
     async function populateFaces() {
       try {
-        const jsonContent = await readFromBlobId(
-          "953y0ewRrXoTESxKg7Gc_NO7ND4_ENg08ACKmDqOtdc"
-        );
+        // const jsonContent = await readFromBlobId(
+        //   "953y0ewRrXoTESxKg7Gc_NO7ND4_ENg08ACKmDqOtdc"
+        // );
 
-        const parsedContent = JSON.parse(jsonContent as string);
+        // const parsedContent = JSON.parse(jsonContent as string);
+
+        const parsedContent = referenceFaces;
+
         // Convert the regular arrays back to Float32Array
         const processedFaces = parsedContent.map((face: any) => ({
           ...face,
