@@ -2,12 +2,15 @@
 
 import * as faceapi from "face-api.js";
 
-import {issueCredentials, listCredentials} from "src/utility/humanityProtocol";
+import {
+  issueCredentials,
+  listCredentials,
+} from "src/utility/humanityProtocol";
 import { useEffect, useRef, useState } from "react";
 
 import React from "react";
 import Webcam from "react-webcam";
-import {storeStringAndGetBlobId} from "src/utility/walrus";
+import { storeStringAndGetBlobId } from "src/utility/walrus";
 import { uploadToIPFS } from "src/utility/faceDataStorage";
 import { useAccount } from "wagmi";
 
@@ -118,7 +121,14 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       setSelectedImage(imageUrl);
       setSelectedFaceIndex(null);
       setDetectedFaces([]);
-      setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC", humanId: "" });
+      setProfile({
+        name: address ?? "",
+        linkedin: "",
+        telegram: "",
+        twitter: "",
+        preferredToken: "USDC",
+        humanId: "",
+      });
     }
   };
 
@@ -144,7 +154,14 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           setSelectedImage(imageSrc);
           setSelectedFaceIndex(null);
           setDetectedFaces([]);
-          setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC", humanId: "" });
+          setProfile({
+            name: address ?? "",
+            linkedin: "",
+            telegram: "",
+            twitter: "",
+            preferredToken: "USDC",
+            humanId: "",
+          });
           setIsSpinning(true);
 
           // We need to wait for the image to be set before detecting faces
@@ -172,7 +189,14 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     setSelectedImage(null);
     setSelectedFaceIndex(null);
     setDetectedFaces([]);
-    setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC", humanId: "" });
+    setProfile({
+      name: address ?? "",
+      linkedin: "",
+      telegram: "",
+      twitter: "",
+      preferredToken: "USDC",
+      humanId: "",
+    });
     setIsSpinning(false);
 
     setTimeout(() => {
@@ -216,7 +240,14 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           label:
             index === 0
               ? profile
-              : { name: `Face ${index + 1}`, linkedin: "", telegram: "", twitter: "", preferredToken: "USDC", humanId: "" },
+              : {
+                  name: `Face ${index + 1}`,
+                  linkedin: "",
+                  telegram: "",
+                  twitter: "",
+                  preferredToken: "USDC",
+                  humanId: "",
+                },
         })
       );
 
@@ -318,7 +349,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     // Upload face data
     await uploadFaceData(updatedFaces);
 
-    await issueCredentials(profile.name, profile)
+    await issueCredentials(profile.name, profile);
 
     // Generate random processing time between 1-3 seconds
     const processingTime = Math.floor(Math.random() * 2000) + 1000; // 1000-3000ms
@@ -340,7 +371,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   // Function to fetch and display credentials
   const handleListCredentials = async () => {
     if (!address) return;
-    
+
     setIsLoadingCredentials(true);
     try {
       const data = await listCredentials(`did:ethr:${address.toLowerCase()}`);
@@ -524,7 +555,12 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                       disabled={isFaceRegistered || isRegistering}
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0077B5" className="w-5 h-5">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="#0077B5"
+                        className="w-5 h-5"
+                      >
                         <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path>
                       </svg>
                     </div>
@@ -545,7 +581,12 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                       disabled={isFaceRegistered || isRegistering}
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0088cc" className="w-5 h-5">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="#0088cc"
+                        className="w-5 h-5"
+                      >
                         <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.515 7.143c-.112.54-.53.664-.854.413l-2.355-1.735-1.138 1.093c-.125.126-.23.232-.468.232l.167-2.378 4.326-3.908c.189-.168-.041-.262-.291-.094L7.564 12.75l-2.295-.714c-.498-.155-.507-.498.103-.736l8.964-3.453c.41-.155.771.103.643.632z"></path>
                       </svg>
                     </div>
@@ -566,22 +607,35 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                       disabled={isFaceRegistered || isRegistering}
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1DA1F2" className="w-5 h-5">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="#1DA1F2"
+                        className="w-5 h-5"
+                      >
                         <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.054 10.054 0 01-3.127 1.195 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
                       </svg>
                     </div>
                   </div>
-                  
+
                   {/* Preferred Token Selection */}
                   <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Preferred Token for Transactions
                     </label>
                     <div className="flex items-center">
-                      <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#2775CA" className="w-5 h-5">
+                      <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none mt-4">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="#2775CA"
+                          className="w-5 h-5 mt-1"
+                        >
                           <circle cx="12" cy="12" r="10" />
-                          <path fill="white" d="M12.75 14.4v1.2h2.1v1.2h-2.1v1.5h-1.5v-1.5h-2.1v-1.2h2.1v-1.2h-2.1v-1.2h1.5l-2.1-2.1 1.05-1.05 2.55 2.55 2.55-2.55 1.05 1.05-2.1 2.1h1.5v1.2h-2.1z" />
+                          <path
+                            fill="white"
+                            d="M12.75 14.4v1.2h2.1v1.2h-2.1v1.5h-1.5v-1.5h-2.1v-1.2h2.1v-1.2h-2.1v-1.2h1.5l-2.1-2.1 1.05-1.05 2.55 2.55 2.55-2.55 1.05 1.05-2.1 2.1h1.5v1.2h-2.1z"
+                          />
                         </svg>
                       </div>
                       <select
@@ -604,23 +658,22 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                       </select>
                     </div>
                   </div>
-                  
+
                   {/* Human ID Field */}
                   <div className="relative mt-3">
                     <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
                       <span>Human ID</span>
-                      <span className="ml-1 text-xs text-gray-500">(optional)</span>
-                      <img 
-                        src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
-                        alt="Humanity Protocol" 
-                        className="h-5 ml-2" 
-                      />
+                      <span className="ml-1 text-xs text-gray-500">
+                        (optional)
+                      </span> 
                     </label>
                     <div className="flex items-center">
                       <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#6366F1" className="w-5 h-5">
-                          <path fillRule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
-                        </svg>
+                        <img
+                          src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
+                          alt="Humanity Protocol"
+                          className="h-5 w-5"
+                        />
                       </div>
                       <input
                         type="text"
@@ -729,7 +782,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       </div>
 
       {/* Credentials Accordion - Only show when face is registered */}
-      {(
+      {
         <div className="w-full max-w-[900px] mt-4 border rounded-lg overflow-hidden">
           <button
             onClick={() => setIsAccordionOpen(!isAccordionOpen)}
@@ -753,12 +806,14 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
               ></path>
             </svg>
           </button>
-          
+
           {isAccordionOpen && (
             <div className="p-4 bg-white">
               {credentials ? (
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Your Credentials</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Your Credentials
+                  </h3>
                   {credentials.error ? (
                     <p className="text-red-500">{credentials.error}</p>
                   ) : credentials.data && credentials.data.length > 0 ? (
@@ -768,40 +823,53 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                           <div className="grid grid-cols-2 gap-2">
                             <div className="font-medium">Issuer:</div>
                             <div className="truncate">{cred.issuer}</div>
-                            
+
                             <div className="font-medium">Valid From:</div>
-                            <div>{new Date(cred.validFrom).toLocaleString()}</div>
-                            
+                            <div>
+                              {new Date(cred.validFrom).toLocaleString()}
+                            </div>
+
                             <div className="font-medium">Valid Until:</div>
-                            <div>{cred.validUntil ? new Date(cred.validUntil).toLocaleString() : 'No expiration'}</div>
-                            
+                            <div>
+                              {cred.validUntil
+                                ? new Date(cred.validUntil).toLocaleString()
+                                : "No expiration"}
+                            </div>
+
                             <div className="font-medium">ID:</div>
                             <div className="truncate">{cred.id}</div>
-                            
+
                             {profile.humanId && (
                               <>
                                 <div className="font-medium">Human ID:</div>
                                 <div className="flex items-center">
                                   <span>{profile.humanId}</span>
-                                  <img 
+                                  <img
                                     src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
-                                    alt="Humanity Protocol" 
-                                    className="h-4 ml-2" 
+                                    alt="Humanity Protocol"
+                                    className="h-4 ml-2"
                                   />
                                 </div>
                               </>
                             )}
                           </div>
-                          
+
                           <div className="mt-2">
-                            <div className="font-medium mb-1">Credential Subject:</div>
+                            <div className="font-medium mb-1">
+                              Credential Subject:
+                            </div>
                             <div className="bg-gray-50 p-2 rounded">
-                              {Object.entries(cred.credentialSubject).map(([key, value]: [string, any]) => (
-                                <div key={key} className="grid grid-cols-2 gap-2">
-                                  <div className="font-medium">{key}:</div>
-                                  <div>{String(value)}</div>
-                                </div>
-                              ))}
+                              {Object.entries(cred.credentialSubject).map(
+                                ([key, value]: [string, any]) => (
+                                  <div
+                                    key={key}
+                                    className="grid grid-cols-2 gap-2"
+                                  >
+                                    <div className="font-medium">{key}:</div>
+                                    <div>{String(value)}</div>
+                                  </div>
+                                )
+                              )}
                             </div>
                           </div>
                         </div>
@@ -824,9 +892,25 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                   >
                     {isLoadingCredentials ? (
                       <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Loading Credentials...
                       </span>
@@ -839,7 +923,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
             </div>
           )}
         </div>
-      )}
+      }
     </div>
   );
 }
