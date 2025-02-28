@@ -23,6 +23,7 @@ export interface ProfileData {
   linkedin?: string;
   telegram?: string;
   twitter?: string;
+  preferredToken?: string; // Default will be "USDC"
 }
 
 interface SavedFace {
@@ -59,6 +60,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     linkedin: "",
     telegram: "",
     twitter: "",
+    preferredToken: "USDC",
   });
 
   const [detectedFaces, setDetectedFaces] = useState<DetectedFace[]>([]);
@@ -114,7 +116,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       setSelectedImage(imageUrl);
       setSelectedFaceIndex(null);
       setDetectedFaces([]);
-      setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "" });
+      setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC" });
     }
   };
 
@@ -140,7 +142,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           setSelectedImage(imageSrc);
           setSelectedFaceIndex(null);
           setDetectedFaces([]);
-          setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "" });
+          setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC" });
           setIsSpinning(true);
 
           // We need to wait for the image to be set before detecting faces
@@ -168,7 +170,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     setSelectedImage(null);
     setSelectedFaceIndex(null);
     setDetectedFaces([]);
-    setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "" });
+    setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC" });
     setIsSpinning(false);
 
     setTimeout(() => {
@@ -212,7 +214,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           label:
             index === 0
               ? profile
-              : { name: `Face ${index + 1}`, linkedin: "", telegram: "", twitter: "" },
+              : { name: `Face ${index + 1}`, linkedin: "", telegram: "", twitter: "", preferredToken: "USDC" },
         })
       );
 
@@ -565,6 +567,39 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1DA1F2" className="w-5 h-5">
                         <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.054 10.054 0 01-3.127 1.195 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
                       </svg>
+                    </div>
+                  </div>
+                  
+                  {/* Preferred Token Selection */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Preferred Token for Transactions
+                    </label>
+                    <div className="flex items-center">
+                      <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#2775CA" className="w-5 h-5">
+                          <circle cx="12" cy="12" r="10" />
+                          <path fill="white" d="M12.75 14.4v1.2h2.1v1.2h-2.1v1.5h-1.5v-1.5h-2.1v-1.2h2.1v-1.2h-2.1v-1.2h1.5l-2.1-2.1 1.05-1.05 2.55 2.55 2.55-2.55 1.05 1.05-2.1 2.1h1.5v1.2h-2.1z" />
+                        </svg>
+                      </div>
+                      <select
+                        value={profile.preferredToken || "USDC"}
+                        onChange={(e) =>
+                          !isFaceRegistered &&
+                          setProfile((prev) => ({
+                            ...prev,
+                            preferredToken: e.target.value,
+                          }))
+                        }
+                        className={`px-2 py-1 pl-9 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""} border-blue-500 focus:ring-blue-500 focus:border-blue-500`}
+                        disabled={isFaceRegistered || isRegistering}
+                      >
+                        <option value="USDC">USDC</option>
+                        <option value="ETH">ETH</option>
+                        <option value="USDT">USDT</option>
+                        <option value="DAI">DAI</option>
+                        <option value="WBTC">WBTC</option>
+                      </select>
                     </div>
                   </div>
                 </div>
