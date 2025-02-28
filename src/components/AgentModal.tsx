@@ -73,6 +73,9 @@ export default function AgentModal({
     // Determine step type
     const getStepType = (message: string): StepType => {
       const lowerMessage = message.toLowerCase();
+      // Check for transaction success first
+      if (lowerMessage.includes("transaction successful")) return "token-swap";
+      // Then check other conditions
       if (lowerMessage.includes("scan") || lowerMessage.includes("face"))
         return "face-scan";
       if (
