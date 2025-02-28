@@ -15,13 +15,18 @@ import {
   UNICHAIN_FACEBUDDY_ADDRESS,
   UNICHAIN_ETH_ADDRESS,
   UNICHAIN_POOL_KEY,
+  UNICHAIN_USDC_ADDRESS,
 } from "../constants";
 import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
 import Webcam from "react-webcam";
 import { facebuddyabi } from "../facebuddyabi";
-import { useAccount } from "wagmi";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useContractRead,
+} from "wagmi";
 
 export interface SavedFace {
   label: ProfileData;
@@ -56,12 +61,18 @@ type AgentResponse = {
   };
 };
 
+interface Step {
+  label: string;
+  isLoading: boolean;
+  type: "scan" | "agent" | "connection" | "token" | "transaction" | "hash";
+}
+
 export default function FaceRecognition({ savedFaces }: Props) {
   const { address } = useAccount();
   const webcamRef = useRef<Webcam>(null);
   const [isWebcamLoading, setIsWebcamLoading] = useState(true);
   const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
-  const [agentSteps, setAgentSteps] = useState<string[]>([]);
+  const [agentSteps, setAgentSteps] = useState<Step[]>([]);
   const [currentAddress, setCurrentAddress] = useState<string | null>(null);
   const [currentTranscript, setCurrentTranscript] = useState<string>("");
   const [transactionAmount, setTransactionAmount] = useState<string | null>(
@@ -76,6 +87,20 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { data: hash, isPending, writeContract } = useWriteContract();
+
+  // Add contract read for preferred token
+  const { data: preferredTokenAddress, refetch } = useReadContract({
+    address: UNICHAIN_FACEBUDDY_ADDRESS,
+    abi: facebuddyabi,
+    functionName: "preferredToken",
+    args: [matchedProfile?.name as `0x${string}`],
+  });
+
+  useEffect(() => {
+    refetch();
+  }, [matchedProfile]);
+  console.log("preferredTokenAddress:", preferredTokenAddress);
+  console.log("currentAddress:", currentAddress);
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -94,8 +119,17 @@ export default function FaceRecognition({ savedFaces }: Props) {
     if (isConfirmed && hash) {
       const uniscanUrl = `https://uniscan.xyz/tx/${hash}`;
       setAgentSteps((prevSteps) => [
-        ...prevSteps,
-        `Transaction successful: <a href="${uniscanUrl}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline">${hash}</a>`,
+        ...prevSteps.slice(0, -1),
+        {
+          label: "Transaction confirmed",
+          isLoading: false,
+          type: "transaction",
+        },
+        {
+          label: `<a href="${uniscanUrl}" target="_blank" rel="noopener noreferrer" class="hover:underline">View on Uniscan</a>`,
+          isLoading: false,
+          type: "hash",
+        },
       ]);
     }
   }, [isConfirmed, hash]);
@@ -166,74 +200,144 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
     switch (functionCall.functionName) {
       case "sendTransaction":
-        if (address) {
-          // Add swap step
-          setAgentSteps((prevSteps) => [
-            ...prevSteps,
-            "Initiating transfer with automatic token swap...",
-          ]);
-
-          // Get the requested USD amount from the function call
+        if (profile.name as `0x${string}`) {
+          // 4.1: Grab amount from JSON
           const requestedUsdAmount = parseFloat(
             functionCall.args.amount || "0"
           );
+          setAgentSteps((prevSteps) => [
+            ...prevSteps,
+            {
+              label: `Grabbing amount: $${requestedUsdAmount.toFixed(2)}`,
+              isLoading: false,
+              type: "token",
+            },
+          ]);
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
-          // Get current ETH price
+          // 4.2: Read preferred token
+          setAgentSteps((prevSteps) => [
+            ...prevSteps,
+            {
+              label: "Reading preferred token...",
+              isLoading: true,
+              type: "token",
+            },
+          ]);
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          const { data: updatedPreferredToken } = await refetch();
+
+          console.log("preferredTokenAddress: MEEP", updatedPreferredToken);
+          const tokenInfo = getTokenInfo(
+            updatedPreferredToken as `0x${string}`
+          );
+          setAgentSteps((prevSteps) => [
+            ...prevSteps.slice(0, -1),
+            {
+              label: `Preferred Token: <span class="inline-flex items-center"><img src="${tokenInfo.icon}" alt="${tokenInfo.symbol}" class="w-4 h-4 mr-1" />${tokenInfo.symbol}</span>`,
+              isLoading: false,
+              type: "token",
+            },
+          ]);
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          // 4.3 & 4.4: Handle transaction
           const currentEthPrice = await getEthPrice();
           if (!currentEthPrice) {
             setAgentSteps((prevSteps) => [
               ...prevSteps,
-              "Error: Could not fetch ETH price",
+              {
+                label: "Error: Could not fetch ETH price",
+                isLoading: false,
+                type: "transaction",
+              },
             ]);
             return;
           }
 
-          // Calculate ETH amount based on USD amount
           const ethAmount = requestedUsdAmount / currentEthPrice;
-          const amountInWei = BigInt(Math.floor(ethAmount * 1e18)); // Convert to wei
+          const amountInWei = BigInt(Math.floor(ethAmount * 1e18));
 
-          // Call swapAndSendPreferredToken
+          const isEth = updatedPreferredToken === UNICHAIN_ETH_ADDRESS;
+          setAgentSteps((prevSteps) => [
+            ...prevSteps,
+            {
+              label: isEth
+                ? `Sending ${ethAmount.toFixed(6)} ETH`
+                : `Swapping and sending ${ethAmount.toFixed(6)} ETH in USDC on Uniswap v4`,
+              isLoading: true,
+              type: "transaction",
+            },
+          ]);
+
           writeContract({
             abi: facebuddyabi,
             address: UNICHAIN_FACEBUDDY_ADDRESS,
             functionName: "swapAndSendPreferredToken",
             args: [
-              profile.name as `0x${string}`, // recipient address
-              UNICHAIN_ETH_ADDRESS as `0x${string}`, // input token (ETH)
-              amountInWei, // calculated amount in wei
+              profile.name as `0x${string}`,
+              UNICHAIN_ETH_ADDRESS as `0x${string}`,
+              amountInWei,
               {
                 ...UNICHAIN_POOL_KEY,
                 currency0: UNICHAIN_POOL_KEY.currency0 as `0x${string}`,
                 currency1: UNICHAIN_POOL_KEY.currency1 as `0x${string}`,
                 hooks:
                   "0x0000000000000000000000000000000000000000" as `0x${string}`,
-              }, // pool key with proper types
-              BigInt(0), // minAmountOut (0 for now, should be calculated in production)
-              BigInt(Math.floor(Date.now() / 1000) + 3600), // deadline (1 hour)
+              },
+              BigInt(0),
+              BigInt(Math.floor(Date.now() / 1000) + 3600),
             ],
-            value: amountInWei, // Send ETH value
+            value: amountInWei,
           });
+        }
+        break;
 
-          // Update UI
-          const preferredToken = profile.preferredToken || "USDC";
+      case "connectOnLinkedin":
+        if (profile?.linkedin) {
           setAgentSteps((prevSteps) => [
             ...prevSteps,
-            `Sending $${requestedUsdAmount.toFixed(2)} (${ethAmount.toFixed(6)} ETH) to be swapped to ${preferredToken} for ${profile.name}`,
+            {
+              label: "Connecting on LinkedIn...",
+              isLoading: true,
+              type: "connection",
+            },
+          ]);
+          window.open(`https://linkedin.com/in/${profile.linkedin}`, "_blank");
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setAgentSteps((prevSteps) => [
+            ...prevSteps.slice(0, -1),
+            {
+              label: "Connected on LinkedIn",
+              isLoading: false,
+              type: "connection",
+            },
           ]);
         }
         break;
-      case "connectOnLinkedin":
-        if (profile?.linkedin) {
-          window.open(`https://linkedin.com/in/${profile.linkedin}`, "_blank");
-        }
-        break;
+
       case "connectOnTelegram":
         if (profile?.telegram) {
+          setAgentSteps((prevSteps) => [
+            ...prevSteps,
+            {
+              label: "Connecting on Telegram...",
+              isLoading: true,
+              type: "connection",
+            },
+          ]);
           window.open(`https://t.me/${profile.telegram}`, "_blank");
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setAgentSteps((prevSteps) => [
+            ...prevSteps.slice(0, -1),
+            {
+              label: "Connected on Telegram",
+              isLoading: false,
+              type: "connection",
+            },
+          ]);
         }
         break;
-      default:
-        console.log("Unknown function call:", functionCall.functionName);
     }
   };
 
@@ -305,44 +409,28 @@ export default function FaceRecognition({ savedFaces }: Props) {
     console.log("=== AGENT REQUEST STARTED ===");
     console.log("Transcript:", text);
 
-    // Stop speech recognition when agent is started
     SpeechRecognition.stopListening();
-
-    // Open the modal
     setIsAgentModalOpen(true);
-
-    // Save the transcript
     setCurrentTranscript(text);
-
-    // Reset agent steps - start with an empty array
     setAgentSteps([]);
-
-    // Reset transaction amount
     setTransactionAmount(null);
 
     // Start with face scanning step
-    setAgentSteps(["Scanning for faces..."]);
+    setAgentSteps([
+      { label: "Scanning for faces...", isLoading: true, type: "scan" },
+    ]);
 
-    // Step 1: Scan for faces
     try {
-      // Capture the current frame from webcam
       if (webcamRef.current) {
         const imageSrc = webcamRef.current.getScreenshot();
 
         if (imageSrc) {
-          // Create an image element from the screenshot
           const imageElement = await createImageFromDataUrl(imageSrc);
-
-          // Add a small delay for visual effect - make face scanning feel more realistic
           await new Promise((resolve) => setTimeout(resolve, 1000));
-
-          // Detect faces in the image
           const detectedFaces = await detectFacesInImage(
             imageElement,
             savedFaces
           );
-
-          // Find the largest face
           const largestFace = findLargestFace(detectedFaces);
 
           if (
@@ -350,22 +438,21 @@ export default function FaceRecognition({ savedFaces }: Props) {
             largestFace.matchedProfile &&
             largestFace.match.label !== "unknown"
           ) {
-            // Draw face on canvas
             await drawFaceOnCanvas(imageSrc, largestFace);
-
-            // Set current address and matched profile for later use
             setCurrentAddress(largestFace.matchedProfile.name);
             setMatchedProfile(largestFace.matchedProfile);
 
-            // Update face scanning step with result
-            setAgentSteps([`Face scanned: ${largestFace.matchedProfile.name}`]);
-
-            // Step 2: Send request to agent
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            // Update steps to show face scan complete and start agent call
             setAgentSteps([
-              `Face scanned: ${largestFace.matchedProfile.name}`,
-              "Prompting agent...",
+              {
+                label: `Face Found: ${largestFace.matchedProfile.name}`,
+                isLoading: false,
+                type: "scan",
+              },
+              { label: "Calling agent...", isLoading: true, type: "agent" },
             ]);
+
+            await new Promise((resolve) => setTimeout(resolve, 500)); // Minimum step duration
 
             try {
               const requestBody = {
@@ -377,149 +464,82 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 "https://ai-quickstart.onrender.com/api/generate",
                 {
                   method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
+                  headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(requestBody),
                 }
               );
 
               if (!res.ok) {
-                const errorText = await res.text();
                 throw new Error(
-                  `Failed to get response from agent: ${res.status} ${errorText}`
+                  `Failed to get response from agent: ${res.status}`
                 );
               }
 
               const data: AgentResponse = await res.json();
-
               console.log("Response:", data);
 
-              // Step 3: Process agent response
-              const responseText =
-                data.content.text.length > 100
-                  ? data.content.text.substring(0, 97) + "..."
+              // Update steps to show agent response
+              const truncatedResponse =
+                data.content.text.length > 50
+                  ? data.content.text.substring(0, 47) + "..."
                   : data.content.text;
 
-              // Prepare face scan message with Human ID if available
-              const faceScanMessage = largestFace.matchedProfile.humanId
-                ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
-                : `Face scanned: ${largestFace.matchedProfile.name}`;
-
-              await new Promise((resolve) => setTimeout(resolve, 500));
-              setAgentSteps([
-                faceScanMessage,
-                `Agent response: ${responseText}`,
+              await new Promise((resolve) => setTimeout(resolve, 500)); // Minimum step duration
+              setAgentSteps((prevSteps) => [
+                ...prevSteps.slice(0, -1),
+                {
+                  label: `Agent response received: ${truncatedResponse}`,
+                  isLoading: false,
+                  type: "agent",
+                },
               ]);
 
-              // Check if the response is "no action required"
-              if (
-                data.content.text.toLowerCase().includes("no action required")
-              ) {
-                // Immediately display "No action required" and stop
-                setAgentSteps([
-                  faceScanMessage,
-                  `Agent response: ${responseText}`,
-                  "No action required",
-                ]);
-              }
-              // Step 4: Handle function call if present
-              else if (data.content.functionCall) {
+              if (data.content.functionCall) {
                 const functionCall = data.content.functionCall;
-                const functionName = functionCall.functionName;
-
-                // Handle the function call
-                handleFunctionCall(functionCall, largestFace.matchedProfile);
-
-                // Show executing step
-                await new Promise((resolve) => setTimeout(resolve, 500));
-                setAgentSteps([
-                  faceScanMessage,
-                  `Agent response: ${responseText}`,
-                  `Executing ${functionName}...`,
-                ]);
-
-                // Different handling based on function type
-                if (functionName === "sendTransaction") {
-                  // For transactions, we'll show the transaction component in the modal
-                  // The actual transaction UI will be rendered in the modal
-                  const preferredToken =
-                    largestFace.matchedProfile.preferredToken || "USDC";
-                  await new Promise((resolve) => setTimeout(resolve, 500));
-                  setAgentSteps([
-                    faceScanMessage,
-                    `Agent response: ${responseText}`,
-                    `Swapped ETH to ${functionCall.args.amount} ${preferredToken} and sent to ${largestFace.matchedProfile.name}`,
-                  ]);
-                } else if (
-                  functionName === "connectOnLinkedin" ||
-                  functionName === "connectOnTelegram"
-                ) {
-                  // For social connections, we'll show a success message
-                  const platform =
-                    functionName === "connectOnLinkedin"
-                      ? "LinkedIn"
-                      : "Telegram";
-                  await new Promise((resolve) => setTimeout(resolve, 1000));
-                  setAgentSteps([
-                    faceScanMessage,
-                    `Agent response: ${responseText}`,
-                    `Connected to ${largestFace.matchedProfile.name} on ${platform}`,
-                  ]);
-                } else {
-                  // For unknown functions, generate a random transaction hash for visual effect
-                  const txHash = `0x${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`;
-
-                  await new Promise((resolve) => setTimeout(resolve, 1000));
-                  setAgentSteps([
-                    faceScanMessage,
-                    `Agent response: ${responseText}`,
-                    `Transaction complete: ${txHash.substring(0, 10)}...`,
-                    `Connection established with ${largestFace.matchedProfile.name}`,
-                  ]);
-                }
-              } else {
-                // Completion without function call and not "no action required"
-                await new Promise((resolve) => setTimeout(resolve, 500));
-                setAgentSteps([
-                  faceScanMessage,
-                  `Agent response: ${responseText}`,
-                  "Processing request...",
-                ]);
-
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                setAgentSteps([
-                  faceScanMessage,
-                  `Agent response: ${responseText}`,
-                  "No action required",
-                ]);
+                await handleFunctionCall(
+                  functionCall,
+                  largestFace.matchedProfile
+                );
               }
             } catch (error) {
-              // Define face scan message for error case
-              const faceScanMessage = largestFace.matchedProfile.humanId
-                ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
-                : `Face scanned: ${largestFace.matchedProfile.name}`;
-
-              setAgentSteps([
-                faceScanMessage,
-                `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`,
+              setAgentSteps((prevSteps) => [
+                ...prevSteps.slice(0, -1),
+                {
+                  label: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+                  isLoading: false,
+                  type: "agent",
+                },
               ]);
             }
           } else {
-            // Update the face scanning step with no face detected
-            setAgentSteps(["No recognized faces detected"]);
+            setAgentSteps([
+              {
+                label: "No recognized faces detected",
+                isLoading: false,
+                type: "scan",
+              },
+            ]);
           }
         } else {
-          setAgentSteps(["Failed to capture image"]);
+          setAgentSteps([
+            {
+              label: "Failed to capture image",
+              isLoading: false,
+              type: "scan",
+            },
+          ]);
         }
       }
     } catch (error) {
       console.log("Error in face detection:", error);
       setAgentSteps([
-        `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`,
+        {
+          label: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+          isLoading: false,
+          type: "scan",
+        },
       ]);
     } finally {
-      // Reset transcript after processing
       resetTranscript();
       console.log("=== AGENT REQUEST COMPLETED ===");
     }
@@ -551,6 +571,25 @@ export default function FaceRecognition({ savedFaces }: Props) {
       SpeechRecognition.stopListening();
     };
   }, [browserSupportsSpeechRecognition]);
+
+  // Function to get token symbol and icon from address
+  const getTokenInfo = (address: `0x${string}`) => {
+    console.log("bro this is the addy i got:", address);
+    if (
+      address === undefined ||
+      address.toLowerCase() === UNICHAIN_ETH_ADDRESS.toLowerCase() ||
+      address.toLowerCase() === "0x0000000000000000000000000000000000000000"
+    ) {
+      return {
+        symbol: "ETH",
+        icon: "/eth.png",
+      };
+    }
+    return {
+      symbol: "USDC",
+      icon: "/usdc.png",
+    };
+  };
 
   return (
     <div className="flex flex-col items-center gap-4 w-full h-screen">

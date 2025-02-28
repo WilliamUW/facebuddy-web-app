@@ -26,7 +26,7 @@ export const unichainSepolia: Chain = {
 };
 
 export const unichainMainnet: Chain = {
-  id: 88_888,
+  id: 130,
   name: "Unichain",
   nativeCurrency: {
     decimals: 18,
@@ -35,16 +35,20 @@ export const unichainMainnet: Chain = {
   },
   rpcUrls: {
     default: {
-      http: ["https://rpc.unichain.io"],
+      http: [
+        "https://unichain-mainnet.g.alchemy.com/v2/cCmdllUM3oiBjOpStn0RrTb8eifa87te",
+      ],
     },
     public: {
-      http: ["https://rpc.unichain.io"],
+      http: [
+        "https://unichain-mainnet.g.alchemy.com/v2/cCmdllUM3oiBjOpStn0RrTb8eifa87te",
+      ],
     },
   },
   blockExplorers: {
     default: {
       name: "Unichain Explorer",
-      url: "https://explorer.unichain.io",
+      url: "https://uniscan.xyz",
     },
   },
   testnet: false,
