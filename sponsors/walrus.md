@@ -12,3 +12,4 @@ Face Storage:
 https://github.com/WilliamUW/facebuddy-web-app/blob/faade49d336570d5f3198cdbec0d9d42ae66cac7/src/components/FaceRegistration.tsx#L132-L144
 
 Face Retrieval:
+https://github.com/WilliamUW/facebuddy-web-app/blob/72f78f23db06639094df4b59360dc9f856307141/src/app/page.tsx#L70-L85
