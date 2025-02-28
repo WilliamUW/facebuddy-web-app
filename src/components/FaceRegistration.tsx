@@ -390,26 +390,22 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           abi: facebuddyabi,
           address: UNICHAIN_FACEBUDDY_ADDRESS,
           functionName: "setPreferredToken",
-          args: [tokenAddress],
+          args: [tokenAddress, profile.name as `0x${string}`],
         });
 
-        // Then approve USDC spending for FaceBuddy contract if USDC is preferred or default
-        if (
-          profile.preferredToken === "USDC" ||
-          profile.preferredToken === undefined
-        ) {
-          await writeContract({
-            abi: USDC_ABI,
-            address: UNICHAIN_USDC_ADDRESS,
-            functionName: "approve",
-            args: [
-              UNICHAIN_FACEBUDDY_ADDRESS,
-              BigInt(
-                "115792089237316195423570985008687907853269984665640564039457584007913129639935"
-              ),
-            ], // max uint256
-          });
-        }
+        // Approve faxebuddy usdc sending
+        await writeContract({
+          abi: USDC_ABI,
+          address: UNICHAIN_USDC_ADDRESS,
+          functionName: "approve",
+          args: [
+            UNICHAIN_FACEBUDDY_ADDRESS,
+            BigInt(
+              "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+            ),
+          ], // max uint256
+        });
+        
       }
 
       const updatedFaces = detectedFaces.map((face, index) =>

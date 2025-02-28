@@ -45,7 +45,10 @@ export const facebuddyabi = [
   {
     type: "function",
     name: "setPreferredToken",
-    inputs: [{ name: "token", type: "address", internalType: "address" }],
+    inputs: [
+      { name: "token", type: "address", internalType: "address" },
+      { name: "who", type: "address", internalType: "address" },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
