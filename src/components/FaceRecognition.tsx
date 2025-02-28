@@ -11,7 +11,7 @@ import {
   findLargestFace,
 } from "../utility/faceRecognitionUtils";
 import { useEffect, useRef, useState } from "react";
-
+import { UNICHAIN_USDC_ADDRESS } from "../constants";
 import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
 import SendUsdcWrapper from "./SendUsdcWrapper";
@@ -19,13 +19,14 @@ import Webcam from "react-webcam";
 import { facebuddyabi } from "../facebuddyabi";
 import { useAccount } from "wagmi";
 import { useWriteContract } from "wagmi";
-
-
+import { USDC_ABI } from "../usdcabi";
 import {
   UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
   UNICHAIN_SEPOLIA_USDC_ADDRESS,
   UNICHAIN_SEPOLIA_WETH_ADDRESS,
   UNICHAIN_SEPOLIA_ROUTER_ADDRESS,
+  UNICHAIN_ROUTER_ADDRESS,
+  UNICHAIN_WETH_ADDRESS,
 } from "../constants";
 export interface SavedFace {
   label: ProfileData;
@@ -59,7 +60,6 @@ type AgentResponse = {
     };
   };
 };
-
 
 export default function FaceRecognition({ savedFaces }: Props) {
   const { address } = useAccount();
@@ -181,27 +181,33 @@ export default function FaceRecognition({ savedFaces }: Props) {
     ctx.font = "16px Arial";
     const label = face.matchedProfile?.name || "Unknown";
     ctx.fillText(label, box.x, box.y - 5);
-    
+
     // If the user has a Human ID, add a badge
     if (face.matchedProfile?.humanId) {
       // Draw a small badge in the top-right corner of the face box
       const badgeSize = 24;
       const badgeX = box.x + box.width - badgeSize - 5;
       const badgeY = box.y + 5;
-      
+
       // Draw badge background
       ctx.fillStyle = "#6366F1"; // Indigo color
       ctx.beginPath();
-      ctx.arc(badgeX + badgeSize/2, badgeY + badgeSize/2, badgeSize/2, 0, Math.PI * 2);
+      ctx.arc(
+        badgeX + badgeSize / 2,
+        badgeY + badgeSize / 2,
+        badgeSize / 2,
+        0,
+        Math.PI * 2
+      );
       ctx.fill();
-      
+
       // Draw "H" for Human ID
       ctx.fillStyle = "#FFFFFF";
       ctx.font = "bold 16px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("H", badgeX + badgeSize/2, badgeY + badgeSize/2);
-      
+      ctx.fillText("H", badgeX + badgeSize / 2, badgeY + badgeSize / 2);
+
       // Reset text alignment
       ctx.textAlign = "start";
       ctx.textBaseline = "alphabetic";
@@ -313,7 +319,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   : data.content.text;
 
               // Prepare face scan message with Human ID if available
-              const faceScanMessage = largestFace.matchedProfile.humanId 
+              const faceScanMessage = largestFace.matchedProfile.humanId
                 ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
                 : `Face scanned: ${largestFace.matchedProfile.name}`;
 
@@ -354,7 +360,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 if (functionName === "sendTransaction") {
                   // For transactions, we'll show the transaction component in the modal
                   // The actual transaction UI will be rendered in the modal
-                  const preferredToken = largestFace.matchedProfile.preferredToken || "USDC";
+                  const preferredToken =
+                    largestFace.matchedProfile.preferredToken || "USDC";
                   await new Promise((resolve) => setTimeout(resolve, 500));
                   setAgentSteps([
                     faceScanMessage,
@@ -406,10 +413,10 @@ export default function FaceRecognition({ savedFaces }: Props) {
               }
             } catch (error) {
               // Define face scan message for error case
-              const faceScanMessage = largestFace.matchedProfile.humanId 
+              const faceScanMessage = largestFace.matchedProfile.humanId
                 ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
                 : `Face scanned: ${largestFace.matchedProfile.name}`;
-                
+
               setAgentSteps([
                 faceScanMessage,
                 `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`,
@@ -480,9 +487,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
           style={{ minHeight: "400px", height: "50vh" }}
         >
           {isWebcamLoading && (
-            <div
-              className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center z-10"
-            >
+            <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center z-10">
               <div className="text-gray-500">Loading camera...</div>
             </div>
           )}
@@ -528,10 +533,10 @@ export default function FaceRecognition({ savedFaces }: Props) {
               <div className="mt-2 flex items-center text-sm">
                 <span className="font-medium text-indigo-600">Human ID:</span>
                 <span className="ml-2">{matchedProfile.humanId}</span>
-                <img 
+                <img
                   src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
-                  alt="Humanity Protocol" 
-                  className="h-4 ml-2" 
+                  alt="Humanity Protocol"
+                  className="h-4 ml-2"
                 />
               </div>
             )}
@@ -553,20 +558,16 @@ export default function FaceRecognition({ savedFaces }: Props) {
       <button
         onClick={() => {
           writeContract({
-            abi: facebuddyabi,
-            address: UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
-            functionName: "approveTokenWithPermit2",
-            args: [
-              UNICHAIN_SEPOLIA_USDC_ADDRESS,
-              10000000000000000000000000000n,
-              Math.floor(Date.now() / 1000) + 2592000,
-            ],
+            abi: USDC_ABI,
+            address: UNICHAIN_WETH_ADDRESS,
+            functionName: "approve",
+            args: [UNICHAIN_ROUTER_ADDRESS, 100000000000000000000000n],
           });
         }}
       >
-        Approve USDC
+        Approve WETH
       </button>
-{/* 
+      {/* 
       <button
         onClick={() => {
           writeContract({
