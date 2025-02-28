@@ -58,7 +58,7 @@ export const referenceFaces = [
       0.10952962189912796, -0.016944631934165955,
     ],
     label: {
-      name: "0x0E946badbC710bADCf40b2E061E68b20f4aCf0fC",
+      name: "0x0E5d299236647563649526cfa25c39d6848101f5",
       linkedin: "heywilliamwang",
       telegram: "heywilliamwang",
       twitter: "heywilliamwang",

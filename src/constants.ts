@@ -19,17 +19,16 @@ export const mintABI = [
 // USDC contract address on Base Sepolia
 export const USDC_CONTRACT_ADDRESS = '0x5deac602762362fe5f135fa5904351916053cf70';
 
-// ERC20 ABI for the transfer function
+// ERC20 ABI for the token functions
 export const USDC_ABI = [
   {
-    constant: false,
     inputs: [
       {
-        name: '_to',
+        name: 'to',
         type: 'address',
       },
       {
-        name: '_value',
+        name: 'value',
         type: 'uint256',
       },
     ],
@@ -40,11 +39,46 @@ export const USDC_ABI = [
         type: 'bool',
       },
     ],
-    payable: false,
     stateMutability: 'nonpayable',
     type: 'function',
   },
+  {
+    inputs: [],
+    name: 'decimals',
+    outputs: [
+      {
+        name: '',
+        type: 'uint8',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'symbol',
+    outputs: [
+      {
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'name',
+    outputs: [
+      {
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  }
 ] as const;
 
-// USDC has 6 decimals
-export const USDC_DECIMALS = 6;
+// USDC on Base Sepolia has 18 decimals (unlike mainnet USDC which has 6)
+export const USDC_DECIMALS = 18;
