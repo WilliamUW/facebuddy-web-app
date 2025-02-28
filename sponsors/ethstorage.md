@@ -4,7 +4,21 @@ EthStorage is a layer 2 solution that provides programmable dynamic storage base
 The bounty pertains to the development of a decentralized Social Network using Web3:// and EthStorage.
 
 Explanation for why FaceBuddy satisfies the requirements:
+
 FaceBuddy leverages ETHStorage’s decentralized and scalable storage to handle the large amounts of agent interaction log data generated during user flows that can scale to billions, allowing users to see who they connected with and who paid them, all on chain.
+
+ETHStorage Demo:
+
+
+Uploading ETHStorage Demo.mov…
+
+
+ETHStorage Code Walkthrough:
+
+
+Uploading ETHStorage Code Walkthrough.mov…
+
+
 
 ETHStorage Code:
 https://github.com/WilliamUW/facebuddy-opacity-agent/blob/master/src/agent/ethStorage.ts#L48-L105
