@@ -74,7 +74,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [isFaceRegistered, setIsFaceRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
-  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const [credentials, setCredentials] = useState<any>(null);
   const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
   const [showTransactions, setShowTransactions] = useState(false);
