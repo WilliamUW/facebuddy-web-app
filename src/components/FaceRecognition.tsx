@@ -169,6 +169,31 @@ export default function FaceRecognition({ savedFaces }: Props) {
     ctx.font = "16px Arial";
     const label = face.matchedProfile?.name || "Unknown";
     ctx.fillText(label, box.x, box.y - 5);
+    
+    // If the user has a Human ID, add a badge
+    if (face.matchedProfile?.humanId) {
+      // Draw a small badge in the top-right corner of the face box
+      const badgeSize = 24;
+      const badgeX = box.x + box.width - badgeSize - 5;
+      const badgeY = box.y + 5;
+      
+      // Draw badge background
+      ctx.fillStyle = "#6366F1"; // Indigo color
+      ctx.beginPath();
+      ctx.arc(badgeX + badgeSize/2, badgeY + badgeSize/2, badgeSize/2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw "H" for Human ID
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 16px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("H", badgeX + badgeSize/2, badgeY + badgeSize/2);
+      
+      // Reset text alignment
+      ctx.textAlign = "start";
+      ctx.textBaseline = "alphabetic";
+    }
 
     // Save the canvas as image
     setDetectedFaceImage(canvas.toDataURL());
@@ -274,9 +299,14 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   ? data.content.text.substring(0, 97) + "..."
                   : data.content.text;
 
+              // Prepare face scan message with Human ID if available
+              const faceScanMessage = largestFace.matchedProfile.humanId 
+                ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
+                : `Face scanned: ${largestFace.matchedProfile.name}`;
+
               await new Promise((resolve) => setTimeout(resolve, 500));
               setAgentSteps([
-                `Face scanned: ${largestFace.matchedProfile.name}`,
+                faceScanMessage,
                 `Agent response: ${responseText}`,
               ]);
 
@@ -286,7 +316,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
               ) {
                 // Immediately display "No action required" and stop
                 setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
+                  faceScanMessage,
                   `Agent response: ${responseText}`,
                   "No action required",
                 ]);
@@ -302,7 +332,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 // Show executing step
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
+                  faceScanMessage,
                   `Agent response: ${responseText}`,
                   `Executing ${functionName}...`,
                 ]);
@@ -314,7 +344,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   const preferredToken = largestFace.matchedProfile.preferredToken || "USDC";
                   await new Promise((resolve) => setTimeout(resolve, 500));
                   setAgentSteps([
-                    `Face scanned: ${largestFace.matchedProfile.name}`,
+                    faceScanMessage,
                     `Agent response: ${responseText}`,
                     `Ready to send ${functionCall.args.amount} ${preferredToken} to ${largestFace.matchedProfile.name}`,
                   ]);
@@ -329,7 +359,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                       : "Telegram";
                   await new Promise((resolve) => setTimeout(resolve, 1000));
                   setAgentSteps([
-                    `Face scanned: ${largestFace.matchedProfile.name}`,
+                    faceScanMessage,
                     `Agent response: ${responseText}`,
                     `Connected to ${largestFace.matchedProfile.name} on ${platform}`,
                   ]);
@@ -339,7 +369,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
                   await new Promise((resolve) => setTimeout(resolve, 1000));
                   setAgentSteps([
-                    `Face scanned: ${largestFace.matchedProfile.name}`,
+                    faceScanMessage,
                     `Agent response: ${responseText}`,
                     `Transaction complete: ${txHash.substring(0, 10)}...`,
                     `Connection established with ${largestFace.matchedProfile.name}`,
@@ -349,21 +379,26 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 // Completion without function call and not "no action required"
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
+                  faceScanMessage,
                   `Agent response: ${responseText}`,
                   "Processing request...",
                 ]);
 
                 await new Promise((resolve) => setTimeout(resolve, 1000));
                 setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
+                  faceScanMessage,
                   `Agent response: ${responseText}`,
                   "No action required",
                 ]);
               }
             } catch (error) {
+              // Define face scan message for error case
+              const faceScanMessage = largestFace.matchedProfile.humanId 
+                ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
+                : `Face scanned: ${largestFace.matchedProfile.name}`;
+                
               setAgentSteps([
-                `Face scanned: ${largestFace.matchedProfile.name}`,
+                faceScanMessage,
                 `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`,
               ]);
             }
@@ -476,6 +511,17 @@ export default function FaceRecognition({ savedFaces }: Props) {
               alt="Detected face"
               className="w-full rounded-lg shadow-sm"
             />
+            {matchedProfile?.humanId && (
+              <div className="mt-2 flex items-center text-sm">
+                <span className="font-medium text-indigo-600">Human ID:</span>
+                <span className="ml-2">{matchedProfile.humanId}</span>
+                <img 
+                  src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
+                  alt="Humanity Protocol" 
+                  className="h-4 ml-2" 
+                />
+              </div>
+            )}
           </div>
         )}
 

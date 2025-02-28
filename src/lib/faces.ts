@@ -63,6 +63,7 @@ export const referenceFaces = [
       telegram: "heywilliamwang",
       twitter: "heywilliamwang",
       preferredToken: "USDC",
+      humanId: "williamwang",
     },
   },
   {
@@ -129,6 +130,7 @@ export const referenceFaces = [
       telegram: "xdmello",
       twitter: "0xdmello",
       preferredToken: "USDC",
+      humanId: "xdmello",
     },
   },
 ];

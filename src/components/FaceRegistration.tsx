@@ -24,6 +24,7 @@ export interface ProfileData {
   telegram?: string;
   twitter?: string;
   preferredToken?: string; // Default will be "USDC"
+  humanId?: string; // Optional Human ID field
 }
 
 interface SavedFace {
@@ -61,6 +62,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     telegram: "",
     twitter: "",
     preferredToken: "USDC",
+    humanId: "",
   });
 
   const [detectedFaces, setDetectedFaces] = useState<DetectedFace[]>([]);
@@ -116,7 +118,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       setSelectedImage(imageUrl);
       setSelectedFaceIndex(null);
       setDetectedFaces([]);
-      setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC" });
+      setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC", humanId: "" });
     }
   };
 
@@ -142,7 +144,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           setSelectedImage(imageSrc);
           setSelectedFaceIndex(null);
           setDetectedFaces([]);
-          setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC" });
+          setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC", humanId: "" });
           setIsSpinning(true);
 
           // We need to wait for the image to be set before detecting faces
@@ -170,7 +172,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     setSelectedImage(null);
     setSelectedFaceIndex(null);
     setDetectedFaces([]);
-    setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC" });
+    setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "", preferredToken: "USDC", humanId: "" });
     setIsSpinning(false);
 
     setTimeout(() => {
@@ -214,7 +216,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           label:
             index === 0
               ? profile
-              : { name: `Face ${index + 1}`, linkedin: "", telegram: "", twitter: "", preferredToken: "USDC" },
+              : { name: `Face ${index + 1}`, linkedin: "", telegram: "", twitter: "", preferredToken: "USDC", humanId: "" },
         })
       );
 
@@ -602,6 +604,43 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                       </select>
                     </div>
                   </div>
+                  
+                  {/* Human ID Field */}
+                  <div className="relative mt-3">
+                    <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
+                      <span>Human ID</span>
+                      <span className="ml-1 text-xs text-gray-500">(optional)</span>
+                      <img 
+                        src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
+                        alt="Humanity Protocol" 
+                        className="h-5 ml-2" 
+                      />
+                    </label>
+                    <div className="flex items-center">
+                      <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#6366F1" className="w-5 h-5">
+                          <path fillRule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        value={profile.humanId || ""}
+                        onChange={(e) =>
+                          !isFaceRegistered &&
+                          setProfile((prev) => ({
+                            ...prev,
+                            humanId: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter your Human ID (if you have one)"
+                        className={`px-2 py-1 pl-9 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""} border-indigo-400 focus:ring-indigo-500 focus:border-indigo-500`}
+                        disabled={isFaceRegistered || isRegistering}
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Verify your identity with Humanity Protocol
+                    </p>
+                  </div>
                 </div>
               </div>
               {!isFaceRegistered && (
@@ -738,6 +777,20 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                             
                             <div className="font-medium">ID:</div>
                             <div className="truncate">{cred.id}</div>
+                            
+                            {profile.humanId && (
+                              <>
+                                <div className="font-medium">Human ID:</div>
+                                <div className="flex items-center">
+                                  <span>{profile.humanId}</span>
+                                  <img 
+                                    src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
+                                    alt="Humanity Protocol" 
+                                    className="h-4 ml-2" 
+                                  />
+                                </div>
+                              </>
+                            )}
                           </div>
                           
                           <div className="mt-2">
