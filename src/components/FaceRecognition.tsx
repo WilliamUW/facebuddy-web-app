@@ -16,6 +16,7 @@ import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
 import SendUsdcWrapper from "./SendUsdcWrapper";
 import Webcam from "react-webcam";
+import { useAccount } from "wagmi";
 
 export interface SavedFace {
   label: ProfileData;
@@ -51,6 +52,7 @@ type AgentResponse = {
 };
 
 export default function FaceRecognition({ savedFaces }: Props) {
+  const { address } = useAccount();
   const webcamRef = useRef<Webcam>(null);
   const [isWebcamLoading, setIsWebcamLoading] = useState(true);
   const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
@@ -269,7 +271,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
             try {
               const requestBody = {
                 prompt: text + JSON.stringify(largestFace.matchedProfile),
-                userAddress: largestFace.matchedProfile.name,
+                userAddress: address,
               };
 
               const res = await fetch(
