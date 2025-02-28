@@ -1210,7 +1210,318 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                     </div>
                   )}
                 </div>
-              ) : null}
+              ) : (
+                <div className="mb-4">
+                  {credentials ? (
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">Your Credentials</h3>
+                        <button
+                          onClick={handleListCredentials}
+                          disabled={isLoadingCredentials}
+                          className={`px-4 py-2 rounded-full text-white flex items-center ${
+                            isLoadingCredentials
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all duration-200"
+                          }`}
+                        >
+                          {isLoadingCredentials ? (
+                            <>
+                              <svg
+                                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                              </svg>
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                className="w-4 h-4 mr-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                ></path>
+                              </svg>
+                              Refresh Credentials
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {credentials.error ? (
+                        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                          <div className="flex">
+                            <div className="flex-shrink-0">
+                              <svg
+                                className="h-5 w-5 text-red-400"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                            <div className="ml-3">
+                              <p className="text-sm text-red-700">
+                                {credentials.error}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : credentials.data && credentials.data.length > 0 ? (
+                        <div>
+                          <div className="bg-gradient-to-r from-teal-50 to-emerald-50 p-4 rounded-lg mb-4 shadow-sm">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-sm text-gray-500">Identity</p>
+                                <p className="font-mono text-sm truncate max-w-xs">
+                                  {profile.name || address}
+                                </p>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-3xl font-bold text-emerald-600">
+                                  {credentials.data.length}
+                                </div>
+                                <p className="text-sm text-gray-500">Credentials</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            {credentials.data.map((cred: any, index: number) => {
+                              // Format dates
+                              const validFrom = new Date(cred.validFrom);
+                              const validUntil = cred.validUntil ? new Date(cred.validUntil) : null;
+                              
+                              const formattedValidFrom = validFrom.toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              });
+                              
+                              const formattedValidUntil = validUntil 
+                                ? validUntil.toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })
+                                : "No expiration";
+                              
+                              // Check if credential is expired
+                              const isExpired = validUntil ? validUntil < new Date() : false;
+                              
+                              // Determine if credential is active
+                              const isActive = !isExpired && validFrom <= new Date();
+                              
+                              // Set colors based on status
+                              const bgGradient = isActive 
+                                ? "from-emerald-50 to-teal-50" 
+                                : isExpired 
+                                  ? "from-red-50 to-orange-50" 
+                                  : "from-blue-50 to-indigo-50";
+                              
+                              const borderColor = isActive 
+                                ? "border-emerald-200" 
+                                : isExpired 
+                                  ? "border-red-200" 
+                                  : "border-blue-200";
+                              
+                              const statusColor = isActive 
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-200" 
+                                : isExpired 
+                                  ? "bg-red-100 text-red-800 border-red-200" 
+                                  : "bg-blue-100 text-blue-800 border-blue-200";
+                              
+                              const statusText = isActive 
+                                ? "Active" 
+                                : isExpired 
+                                  ? "Expired" 
+                                  : "Pending";
+                              
+                              return (
+                                <div 
+                                  key={index} 
+                                  className={`bg-gradient-to-r ${bgGradient} border ${borderColor} rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1`}
+                                >
+                                  <div className="flex items-start">
+                                    <div className="bg-white p-3 rounded-full mr-4 shadow-md relative overflow-hidden">
+                                      {/* Animated background effect */}
+                                      <div className="absolute inset-0 opacity-20">
+                                        <div className="absolute inset-0 bg-white rounded-full animate-pulse"></div>
+                                      </div>
+                                      
+                                      <img 
+                                        src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp" 
+                                        alt="Humanity Protocol" 
+                                        className="h-6 w-6 relative z-10"
+                                      />
+                                    </div>
+                                    
+                                    <div className="flex-1">
+                                      <div className="flex justify-between items-start">
+                                        <h4 className="font-medium text-gray-800 text-lg">
+                                          {cred.type && cred.type.length > 0 
+                                            ? cred.type[cred.type.length - 1].replace(/([A-Z])/g, ' $1').trim() 
+                                            : "Verified Credential"}
+                                        </h4>
+                                        <div className="text-right">
+                                          <div className="text-sm text-gray-500">Issued: {formattedValidFrom}</div>
+                                          <div className={`text-sm ${isExpired ? "text-red-500" : "text-gray-500"}`}>
+                                            {isExpired ? "Expired: " : "Valid until: "}{formattedValidUntil}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="mt-4 grid grid-cols-2 gap-4">
+                                        <div className="bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
+                                          <p className="text-xs text-gray-500 uppercase tracking-wider">Issuer</p>
+                                          <p className="font-medium text-indigo-600 truncate">
+                                            {cred.issuer}
+                                          </p>
+                                        </div>
+                                        
+                                        <div className="bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
+                                          <p className="text-xs text-gray-500 uppercase tracking-wider">ID</p>
+                                          <p className="font-mono text-xs truncate text-gray-700">
+                                            {cred.id}
+                                          </p>
+                                        </div>
+                                        
+                                        {profile.humanId && (
+                                          <div className="col-span-2 bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
+                                            <p className="text-xs text-gray-500 uppercase tracking-wider">Human ID</p>
+                                            <div className="flex items-center">
+                                              <img
+                                                src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
+                                                alt="Humanity Protocol"
+                                                className="h-4 mr-2"
+                                              />
+                                              <p className="font-medium text-indigo-600">
+                                                {profile.humanId}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        
+                                        <div className="col-span-2 bg-white bg-opacity-60 p-3 rounded-lg shadow-sm mt-2">
+                                          <div className="flex justify-between items-center mb-2">
+                                            <p className="text-xs text-gray-500 uppercase tracking-wider">Credential Subject</p>
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColor}`}>
+                                              {statusText}
+                                            </span>
+                                          </div>
+                                          <div className="grid grid-cols-2 gap-2">
+                                            {Object.entries(cred.credentialSubject).map(
+                                              ([key, value]: [string, any], i: number) => (
+                                                <div
+                                                  key={i}
+                                                  className={`p-2 ${i % 2 === 0 ? "bg-gray-50" : "bg-white"} rounded`}
+                                                >
+                                                  <div className="text-xs text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</div>
+                                                  <div className="font-medium text-gray-800 break-words">{String(value)}</div>
+                                                </div>
+                                              )
+                                            )}
+                                          </div>
+                                        </div>
+                                        
+                                        <div className="col-span-2 flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
+                                          <div className="flex items-center">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                              </svg>
+                                              Verified
+                                            </span>
+                                          </div>
+                                          
+                                          <button className="px-3 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
+                                            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            View Full Details
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="relative w-20 h-20 mx-auto mb-4">
+                            <svg className="absolute inset-0 text-gray-300 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <svg className="absolute inset-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                          <h3 className="mt-2 text-lg font-medium text-gray-900">No credentials found</h3>
+                          <p className="mt-1 text-sm text-gray-500 max-w-md mx-auto">
+                            You don't have any credentials yet. Credentials verify your identity and attributes.
+                          </p>
+                          <button className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors duration-200">
+                            Get Your First Credential
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-16 bg-gradient-to-b from-gray-50 to-white rounded-lg border border-gray-200 shadow-sm">
+                      <div className="relative w-24 h-24 mx-auto mb-6">
+                        <div className="absolute inset-0 bg-teal-100 rounded-full animate-ping opacity-30"></div>
+                        <div className="absolute inset-0 bg-teal-50 rounded-full animate-pulse"></div>
+                        <svg className="absolute inset-0 m-auto h-12 w-12 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <h3 className="mt-2 text-xl font-medium text-gray-900">No credential data</h3>
+                      <p className="mt-2 text-base text-gray-500 max-w-md mx-auto">
+                        Click the button below to fetch your credentials and verify your identity.
+                      </p>
+                      <button 
+                        onClick={handleListCredentials}
+                        className="mt-6 px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-full hover:from-teal-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1 flex items-center mx-auto"
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        Fetch Credentials
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
