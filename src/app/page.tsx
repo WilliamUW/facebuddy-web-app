@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import ChainSelector from "src/components/ChainSelector";
-import ChatInterface from "src/components/ChatInterface";
 import FaceRegistration from "src/components/FaceRegistration";
 import Footer from "src/components/Footer";
 import { GetCIDResponse } from "pinata-web3";
