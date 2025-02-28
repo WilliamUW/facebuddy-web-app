@@ -20,6 +20,7 @@ import { facebuddyabi } from "../facebuddyabi";
 import { useAccount } from "wagmi";
 import { useWriteContract } from "wagmi";
 import { USDC_ABI } from "../usdcabi";
+import { ROUTER_ABI } from "../routerabi";
 import {
   UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
   UNICHAIN_SEPOLIA_USDC_ADDRESS,
@@ -135,7 +136,31 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
     switch (functionCall.functionName) {
       case "sendTransaction":
-        if (functionCall.args.amount) {
+        if (functionCall.args.amount && address) {
+          // Add swap step before setting transaction amount
+          setAgentSteps((prevSteps) => [
+            ...prevSteps,
+            "Swapping WETH to USDC...",
+          ]);
+
+          // Call the swap function
+          writeContract({
+            abi: ROUTER_ABI,
+            address: UNICHAIN_ROUTER_ADDRESS,
+            functionName: "exactOutputSingle",
+            args: [
+              {
+                tokenIn: UNICHAIN_WETH_ADDRESS,
+                tokenOut: UNICHAIN_USDC_ADDRESS,
+                fee: 500,
+                recipient: address,
+                amountOut: 200000n, // 0.2 USDC (6 decimals)
+                amountInMaximum: 1000000000000000000000n, // 1000 ETH max input
+                sqrtPriceLimitX96: 0n, // 0 for no limit
+              },
+            ],
+          });
+
           setTransactionAmount(functionCall.args.amount);
         }
         break;
