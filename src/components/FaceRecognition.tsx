@@ -16,7 +16,16 @@ import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
 import SendUsdcWrapper from "./SendUsdcWrapper";
 import Webcam from "react-webcam";
+import { facebuddyabi } from "../facebuddyabi";
+import { useAccount } from "wagmi";
+import { useWriteContract } from "wagmi";
 
+import {
+  UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
+  UNICHAIN_SEPOLIA_USDC_ADDRESS,
+  UNICHAIN_SEPOLIA_WETH_ADDRESS,
+  UNICHAIN_SEPOLIA_ROUTER_ADDRESS,
+} from "../constants";
 export interface SavedFace {
   label: ProfileData;
   descriptor: Float32Array;
@@ -50,6 +59,7 @@ type AgentResponse = {
   };
 };
 
+
 export default function FaceRecognition({ savedFaces }: Props) {
   const webcamRef = useRef<Webcam>(null);
   const [isWebcamLoading, setIsWebcamLoading] = useState(true);
@@ -67,7 +77,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
     null
   );
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
+  const { writeContract } = useWriteContract();
   // Speech recognition setup
   const {
     transcript,
@@ -486,6 +496,40 @@ export default function FaceRecognition({ savedFaces }: Props) {
           </div>
         )}
       </AgentModal>
+
+      <button
+        onClick={() => {
+          writeContract({
+            abi: facebuddyabi,
+            address: UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
+            functionName: "approveTokenWithPermit2",
+            args: [
+              UNICHAIN_SEPOLIA_USDC_ADDRESS,
+              10000000000000000000000000000n,
+              Math.floor(Date.now() / 1000) + 2592000,
+            ],
+          });
+        }}
+      >
+        Approve USDC
+      </button>
+
+      <button
+        onClick={() => {
+          writeContract({
+            abi: facebuddyabi,
+            address: UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
+            functionName: "swapExactInputSingle",
+            args: [
+              UNICHAIN_SEPOLIA_USDC_ADDRESS,
+              10000000000000000000000000000n,
+              Math.floor(Date.now() / 1000) + 2592000,
+            ],
+          });
+        }}
+      >
+        Swap USDC to WETH
+      </button>
     </div>
   );
 }
