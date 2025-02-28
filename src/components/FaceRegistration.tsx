@@ -22,6 +22,7 @@ export interface ProfileData {
   name: string;
   linkedin?: string;
   telegram?: string;
+  twitter?: string;
 }
 
 interface SavedFace {
@@ -57,6 +58,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     name: address ?? "",
     linkedin: "",
     telegram: "",
+    twitter: "",
   });
 
   const [detectedFaces, setDetectedFaces] = useState<DetectedFace[]>([]);
@@ -112,7 +114,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       setSelectedImage(imageUrl);
       setSelectedFaceIndex(null);
       setDetectedFaces([]);
-      setProfile({ name: address ?? "", linkedin: "", telegram: "" });
+      setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "" });
     }
   };
 
@@ -138,7 +140,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           setSelectedImage(imageSrc);
           setSelectedFaceIndex(null);
           setDetectedFaces([]);
-          setProfile({ name: address ?? "", linkedin: "", telegram: "" });
+          setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "" });
           setIsSpinning(true);
 
           // We need to wait for the image to be set before detecting faces
@@ -166,7 +168,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     setSelectedImage(null);
     setSelectedFaceIndex(null);
     setDetectedFaces([]);
-    setProfile({ name: address ?? "", linkedin: "", telegram: "" });
+    setProfile({ name: address ?? "", linkedin: "", telegram: "", twitter: "" });
     setIsSpinning(false);
 
     setTimeout(() => {
@@ -210,7 +212,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           label:
             index === 0
               ? profile
-              : { name: `Face ${index + 1}`, linkedin: "", telegram: "" },
+              : { name: `Face ${index + 1}`, linkedin: "", telegram: "", twitter: "" },
         })
       );
 
@@ -502,34 +504,69 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                     className={`px-2 py-1 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""}`}
                     disabled={isFaceRegistered || isRegistering}
                   />
-                  <input
-                    type="text"
-                    value={profile.linkedin || ""}
-                    onChange={(e) =>
-                      !isFaceRegistered &&
-                      setProfile((prev) => ({
-                        ...prev,
-                        linkedin: e.target.value,
-                      }))
-                    }
-                    placeholder="LinkedIn username (optional)"
-                    className={`px-2 py-1 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""}`}
-                    disabled={isFaceRegistered || isRegistering}
-                  />
-                  <input
-                    type="text"
-                    value={profile.telegram || ""}
-                    onChange={(e) =>
-                      !isFaceRegistered &&
-                      setProfile((prev) => ({
-                        ...prev,
-                        telegram: e.target.value,
-                      }))
-                    }
-                    placeholder="Telegram username (optional)"
-                    className={`px-2 py-1 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""}`}
-                    disabled={isFaceRegistered || isRegistering}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={profile.linkedin || ""}
+                      onChange={(e) =>
+                        !isFaceRegistered &&
+                        setProfile((prev) => ({
+                          ...prev,
+                          linkedin: e.target.value,
+                        }))
+                      }
+                      placeholder="LinkedIn username (optional)"
+                      className={`px-2 py-1 pl-9 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""} border-blue-400 focus:ring-blue-500 focus:border-blue-500`}
+                      disabled={isFaceRegistered || isRegistering}
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0077B5" className="w-5 h-5">
+                        <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={profile.telegram || ""}
+                      onChange={(e) =>
+                        !isFaceRegistered &&
+                        setProfile((prev) => ({
+                          ...prev,
+                          telegram: e.target.value,
+                        }))
+                      }
+                      placeholder="Telegram username (optional)"
+                      className={`px-2 py-1 pl-9 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""} border-blue-300 focus:ring-blue-400 focus:border-blue-400`}
+                      disabled={isFaceRegistered || isRegistering}
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0088cc" className="w-5 h-5">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.515 7.143c-.112.54-.53.664-.854.413l-2.355-1.735-1.138 1.093c-.125.126-.23.232-.468.232l.167-2.378 4.326-3.908c.189-.168-.041-.262-.291-.094L7.564 12.75l-2.295-.714c-.498-.155-.507-.498.103-.736l8.964-3.453c.41-.155.771.103.643.632z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={profile.twitter || ""}
+                      onChange={(e) =>
+                        !isFaceRegistered &&
+                        setProfile((prev) => ({
+                          ...prev,
+                          twitter: e.target.value,
+                        }))
+                      }
+                      placeholder="Twitter username (optional)"
+                      className={`px-2 py-1 pl-9 border rounded w-full ${isFaceRegistered ? "bg-gray-100 text-gray-500" : ""} border-blue-400 focus:ring-blue-400 focus:border-blue-400`}
+                      disabled={isFaceRegistered || isRegistering}
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1DA1F2" className="w-5 h-5">
+                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.054 10.054 0 01-3.127 1.195 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
               {!isFaceRegistered && (
