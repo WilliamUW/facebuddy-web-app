@@ -2,10 +2,7 @@
 
 import * as faceapi from "face-api.js";
 
-import {
-  UNICHAIN_FACEBUDDY_ADDRESS,
-  UNICHAIN_USDC_ADDRESS,
-} from "../constants";
+
 import {
   createImageFromDataUrl,
   detectFacesInImage,
@@ -20,8 +17,8 @@ import Webcam from "react-webcam";
 import { facebuddyabi } from "../facebuddyabi";
 import { storeStringAndGetBlobId } from "../utility/walrus";
 import { useAccount } from "wagmi";
-import { useWriteContract } from "wagmi";
-
+import { useWriteContract, useChainId } from "wagmi";
+import { faceBuddyConfig } from "../constants";
 const WebcamComponent = () => <Webcam />;
 const videoConstraints = {
   width: 1280,
@@ -58,7 +55,7 @@ interface Props {
 export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const { address } = useAccount();
   const { writeContract } = useWriteContract();
-
+  const chainId = useChainId();
   const webcamRef = useRef<Webcam>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -385,26 +382,29 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       if (profile.preferredToken) {
         const tokenAddress =
           profile.preferredToken === "USDC"
-            ? UNICHAIN_USDC_ADDRESS // USDC address
+            ? faceBuddyConfig[chainId].usdcAddress // USDC address
             : profile.preferredToken === "ETH"
               ? "0x0000000000000000000000000000000000000000" // Native ETH address
-              : UNICHAIN_USDC_ADDRESS; // Default to USDC for other tokens
+              : faceBuddyConfig[chainId].usdcAddress; // Default to USDC for other tokens
 
         // First set the preferred token
         await writeContract({
           abi: facebuddyabi,
-          address: UNICHAIN_FACEBUDDY_ADDRESS,
+          address: faceBuddyConfig[chainId].faceBuddyAddress as `0x${string}`,
           functionName: "setPreferredToken",
-          args: [tokenAddress, profile.name as `0x${string}`],
+          args: [
+            tokenAddress as `0x${string}`,
+            profile.name as `0x${string}`,
+          ],
         });
 
         // Approve faxebuddy usdc sending
         await writeContract({
           abi: USDC_ABI,
-          address: UNICHAIN_USDC_ADDRESS,
+          address: faceBuddyConfig[chainId].usdcAddress as `0x${string}`,
           functionName: "approve",
           args: [
-            UNICHAIN_FACEBUDDY_ADDRESS,
+            faceBuddyConfig[chainId].faceBuddyAddress as `0x${string}`,
             BigInt(
               "115792089237316195423570985008687907853269984665640564039457584007913129639935"
             ),
