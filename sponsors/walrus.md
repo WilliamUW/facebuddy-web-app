@@ -7,6 +7,11 @@ FaceBuddy leverages Walrus's decentralized, efficient, and scalable storage to h
 
 Demo:
 
+
+https://github.com/user-attachments/assets/b7e6f115-1223-48e9-9827-21e12b3240cc
+
+
+
 Code Walkthrough:
 
 
