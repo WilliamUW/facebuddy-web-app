@@ -1,24 +1,26 @@
 "use client";
 
 import * as faceapi from "face-api.js";
-import React from "react";
+
+import {
+  UNICHAIN_FACEBUDDY_ADDRESS,
+  UNICHAIN_USDC_ADDRESS,
+} from "../constants";
 import {
   createImageFromDataUrl,
   detectFacesInImage,
   findLargestFace,
 } from "../utility/faceRecognitionUtils";
+import { issueCredentials, listCredentials } from "../utility/humanityProtocol";
 import { useEffect, useRef, useState } from "react";
-import {
-  UNICHAIN_FACEBUDDY_ADDRESS,
-  UNICHAIN_USDC_ADDRESS,
-} from "../constants";
+
+import React from "react";
 import { USDC_ABI } from "../usdcabi";
 import Webcam from "react-webcam";
 import { facebuddyabi } from "../facebuddyabi";
+import { storeStringAndGetBlobId } from "../utility/walrus";
 import { useAccount } from "wagmi";
 import { useWriteContract } from "wagmi";
-import { storeStringAndGetBlobId } from "../utility/walrus";
-import { issueCredentials, listCredentials } from "../utility/humanityProtocol";
 
 const WebcamComponent = () => <Webcam />;
 const videoConstraints = {
@@ -134,8 +136,11 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       descriptor: Array.from(face.descriptor), // Convert Float32Array to regular array
     }));
 
-    const hash = await storeStringAndGetBlobId(JSON.stringify(serializedData));
-    console.log("data uploaded " + hash);
+    const hash = storeStringAndGetBlobId(JSON.stringify(serializedData)).then(
+        (hash) => {
+            console.log("data uploaded " + hash);
+        }
+    )
   };
 
   useEffect(() => {
