@@ -88,6 +88,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     recipientAddress?: string;
     amount?: string;
     ticker?: string;
+    username?: string;  // Add username for social media connections
   }
 
   interface FunctionCall {
@@ -995,14 +996,75 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                       {transactionData.transactions.length > 0 ? (
                         <div className="space-y-4">
                           {transactionData.transactions.map((tx: Transaction, index: number) => {
-                            // Determine colors based on transaction type
-                            const isSend = tx.result.functionCall?.functionName === "sendTransaction";
-                            const bgGradient = isSend 
-                              ? "from-green-50 to-emerald-50" 
-                              : "from-amber-50 to-yellow-50";
-                            const iconBg = isSend ? "bg-green-100" : "bg-amber-100";
-                            const iconColor = isSend ? "text-green-500" : "text-amber-500";
-                            const borderColor = isSend ? "border-green-200" : "border-amber-200";
+                            // Determine transaction type and styling
+                            const txType = tx.result.functionCall?.functionName || "";
+                            const isSocialConnection = txType.startsWith("connectOn");
+                            const socialPlatform = isSocialConnection ? txType.replace("connectOn", "") : "";
+                            
+                            // Set colors and icons based on transaction type
+                            let bgGradient, iconBg, iconColor, borderColor, platformIcon;
+                            
+                            if (isSocialConnection) {
+                              if (socialPlatform === "Telegram") {
+                                bgGradient = "from-blue-50 to-sky-50";
+                                iconBg = "bg-blue-100";
+                                iconColor = "text-blue-500";
+                                borderColor = "border-blue-200";
+                                platformIcon = (
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0088cc" className="h-6 w-6 relative z-10">
+                                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.515 7.143c-.112.54-.53.664-.854.413l-2.355-1.735-1.138 1.093c-.125.126-.23.232-.468.232l.167-2.378 4.326-3.908c.189-.168-.041-.262-.291-.094L7.564 12.75l-2.295-.714c-.498-.155-.507-.498.103-.736l8.964-3.453c.41-.155.771.103.643.632z" />
+                                  </svg>
+                                );
+                              } else if (socialPlatform === "Linkedin") {
+                                bgGradient = "from-blue-50 to-indigo-50";
+                                iconBg = "bg-blue-100";
+                                iconColor = "text-blue-700";
+                                borderColor = "border-blue-200";
+                                platformIcon = (
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0077B5" className="h-6 w-6 relative z-10">
+                                    <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z" />
+                                  </svg>
+                                );
+                              } else if (socialPlatform === "Twitter") {
+                                bgGradient = "from-blue-50 to-cyan-50";
+                                iconBg = "bg-blue-100";
+                                iconColor = "text-blue-400";
+                                borderColor = "border-blue-200";
+                                platformIcon = (
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1DA1F2" className="h-6 w-6 relative z-10">
+                                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.054 10.054 0 01-3.127 1.195 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
+                                  </svg>
+                                );
+                              } else {
+                                bgGradient = "from-purple-50 to-violet-50";
+                                iconBg = "bg-purple-100";
+                                iconColor = "text-purple-500";
+                                borderColor = "border-purple-200";
+                                platformIcon = (
+                                  <svg className={`h-6 w-6 ${iconColor} relative z-10`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                                  </svg>
+                                );
+                              }
+                            } else {
+                              // Default for financial transactions
+                              const isSend = txType === "sendTransaction";
+                              bgGradient = isSend 
+                                ? "from-green-50 to-emerald-50" 
+                                : "from-amber-50 to-yellow-50";
+                              iconBg = isSend ? "bg-green-100" : "bg-amber-100";
+                              iconColor = isSend ? "text-green-500" : "text-amber-500";
+                              borderColor = isSend ? "border-green-200" : "border-amber-200";
+                              platformIcon = isSend ? (
+                                <svg className={`h-6 w-6 ${iconColor} relative z-10`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                </svg>
+                              ) : (
+                                <svg className={`h-6 w-6 ${iconColor} relative z-10`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                </svg>
+                              );
+                            }
                             
                             // Format date
                             const txDate = new Date(tx.timestamp);
@@ -1016,7 +1078,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                               minute: '2-digit'
                             });
 
-                            // Get token icon based on ticker
+                            // Get token icon based on ticker (for financial transactions)
                             const ticker = tx.result.functionCall?.args.ticker || "USDC";
                             const tokenIconMap: Record<string, { icon: string, color: string }> = {
                               "USDC": { 
@@ -1055,15 +1117,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                                       <div className="absolute inset-0 bg-white rounded-full animate-pulse"></div>
                                     </div>
                                     
-                                    {isSend ? (
-                                      <svg className={`h-6 w-6 ${iconColor} relative z-10`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                      </svg>
-                                    ) : (
-                                      <svg className={`h-6 w-6 ${iconColor} relative z-10`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                                      </svg>
-                                    )}
+                                    {platformIcon}
                                   </div>
                                   
                                   <div className="flex-1">
@@ -1080,11 +1134,12 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                                     <div className="mt-4 grid grid-cols-2 gap-4">
                                       <div className="bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
                                         <p className="text-xs text-gray-500 uppercase tracking-wider">Function</p>
-                                        <p className={`font-medium ${tokenInfo.color}`}>
+                                        <p className={`font-medium ${isSocialConnection ? iconColor : tokenInfo.color}`}>
                                           {tx.result.functionCall?.functionName || "N/A"}
                                         </p>
                                       </div>
                                       
+                                      {/* For financial transactions - show amount */}
                                       {tx.result.functionCall?.args.amount && (
                                         <div className="bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
                                           <p className="text-xs text-gray-500 uppercase tracking-wider">Amount</p>
@@ -1104,6 +1159,19 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                                         </div>
                                       )}
                                       
+                                      {/* For social connections - show username */}
+                                      {tx.result.functionCall?.args.username && (
+                                        <div className="bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
+                                          <p className="text-xs text-gray-500 uppercase tracking-wider">Username</p>
+                                          <div className="flex items-center">
+                                            <span className={`font-medium ${iconColor}`}>
+                                              @{tx.result.functionCall.args.username}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      )}
+                                      
+                                      {/* For financial transactions - show recipient */}
                                       {tx.result.functionCall?.args.recipientAddress && (
                                         <div className="col-span-2 bg-white bg-opacity-60 p-3 rounded-lg shadow-sm">
                                           <p className="text-xs text-gray-500 uppercase tracking-wider">Recipient</p>
@@ -1120,6 +1188,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                                         </div>
                                       )}
                                       
+                                      {/* Action buttons and status */}
                                       <div className="col-span-2 flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
                                         <div className="flex items-center">
                                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
@@ -1150,13 +1219,28 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                                           </div>
                                         </div>
                                         
-                                        <button className="px-3 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
-                                          <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                          </svg>
-                                          View Details
-                                        </button>
+                                        {/* Action button based on transaction type */}
+                                        {isSocialConnection ? (
+                                          <a 
+                                            href={`https://${socialPlatform.toLowerCase()}.com/${tx.result.functionCall?.args.username}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`px-3 py-1 ${iconBg} hover:bg-opacity-80 ${iconColor} rounded-md text-sm font-medium transition-colors duration-200 flex items-center`}
+                                          >
+                                            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                            Visit Profile
+                                          </a>
+                                        ) : (
+                                          <button className="px-3 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
+                                            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View Details
+                                          </button>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
@@ -1463,7 +1547,8 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                                           
                                           <button className="px-3 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
                                             <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                             View Full Details
                                           </button>
