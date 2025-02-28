@@ -73,6 +73,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const [detectedFaceImage, setDetectedFaceImage] = useState<string | null>(
     null
   );
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { data: hash, isPending, writeContract } = useWriteContract();
 
@@ -137,8 +138,27 @@ export default function FaceRecognition({ savedFaces }: Props) {
     };
   }, [transcript, resetTranscript, isAgentModalOpen]);
 
+  // Add this function after the useEffect hooks
+  const getEthPrice = async () => {
+    try {
+      const response = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
+        {
+          headers: {
+            "x-cg-demo-api-key": "CG-F4id9SW5jrwmuhUPK4Es27Ek",
+          },
+        }
+      );
+      const data = await response.json();
+      return data.ethereum.usd;
+    } catch (error) {
+      console.error("Error fetching ETH price:", error);
+      return null;
+    }
+  };
+
   // Function to handle function calls
-  const handleFunctionCall = (
+  const handleFunctionCall = async (
     functionCall: AgentResponse["content"]["functionCall"],
     profile: ProfileData
   ) => {
@@ -153,7 +173,23 @@ export default function FaceRecognition({ savedFaces }: Props) {
             "Initiating transfer with automatic token swap...",
           ]);
 
-          const ethAmount = 0.000089; // Hardcoded amount in ETH
+          // Get the requested USD amount from the function call
+          const requestedUsdAmount = parseFloat(
+            functionCall.args.amount || "0"
+          );
+
+          // Get current ETH price
+          const currentEthPrice = await getEthPrice();
+          if (!currentEthPrice) {
+            setAgentSteps((prevSteps) => [
+              ...prevSteps,
+              "Error: Could not fetch ETH price",
+            ]);
+            return;
+          }
+
+          // Calculate ETH amount based on USD amount
+          const ethAmount = requestedUsdAmount / currentEthPrice;
           const amountInWei = BigInt(Math.floor(ethAmount * 1e18)); // Convert to wei
 
           // Call swapAndSendPreferredToken
@@ -161,11 +197,10 @@ export default function FaceRecognition({ savedFaces }: Props) {
             abi: facebuddyabi,
             address: UNICHAIN_FACEBUDDY_ADDRESS,
             functionName: "swapAndSendPreferredToken",
-
             args: [
               profile.name as `0x${string}`, // recipient address
               UNICHAIN_ETH_ADDRESS as `0x${string}`, // input token (ETH)
-              amountInWei, // hardcoded amount in wei
+              amountInWei, // calculated amount in wei
               {
                 ...UNICHAIN_POOL_KEY,
                 currency0: UNICHAIN_POOL_KEY.currency0 as `0x${string}`,
@@ -183,7 +218,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
           const preferredToken = profile.preferredToken || "USDC";
           setAgentSteps((prevSteps) => [
             ...prevSteps,
-            `Sending ${ethAmount} ETH to be swapped to ${preferredToken} for ${profile.name}`,
+            `Sending $${requestedUsdAmount.toFixed(2)} (${ethAmount.toFixed(6)} ETH) to be swapped to ${preferredToken} for ${profile.name}`,
           ]);
         }
         break;
