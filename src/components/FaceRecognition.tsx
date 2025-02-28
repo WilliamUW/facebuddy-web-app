@@ -21,7 +21,7 @@ import { ProfileData } from "./FaceRegistration";
 import Webcam from "react-webcam";
 import { facebuddyabi } from "../facebuddyabi";
 import { useAccount } from "wagmi";
-import { useWriteContract } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 export interface SavedFace {
   label: ProfileData;
@@ -74,7 +74,12 @@ export default function FaceRecognition({ savedFaces }: Props) {
     null
   );
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { writeContract } = useWriteContract();
+  const { data: hash, isPending, writeContract } = useWriteContract();
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
   // Speech recognition setup
   const {
     transcript,
@@ -82,6 +87,17 @@ export default function FaceRecognition({ savedFaces }: Props) {
     resetTranscript,
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
+
+  // Add effect to handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed && hash) {
+      const uniscanUrl = `https://uniscan.xyz/tx/${hash}`;
+      setAgentSteps((prevSteps) => [
+        ...prevSteps,
+        `Transaction successful: <a href="${uniscanUrl}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline">${hash}</a>`,
+      ]);
+    }
+  }, [isConfirmed, hash]);
 
   // Reset transcript after a period of silence
   useEffect(() => {
@@ -145,6 +161,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
             abi: facebuddyabi,
             address: UNICHAIN_FACEBUDDY_ADDRESS,
             functionName: "swapAndSendPreferredToken",
+
             args: [
               profile.name as `0x${string}`, // recipient address
               UNICHAIN_ETH_ADDRESS as `0x${string}`, // input token (ETH)
@@ -397,7 +414,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   setAgentSteps([
                     faceScanMessage,
                     `Agent response: ${responseText}`,
-                    `Ready to send ${functionCall.args.amount} ${preferredToken} to ${largestFace.matchedProfile.name}`,
+                    `Swapped ETH to ${functionCall.args.amount} ${preferredToken} and sent to ${largestFace.matchedProfile.name}`,
                   ]);
                 } else if (
                   functionName === "connectOnLinkedin" ||

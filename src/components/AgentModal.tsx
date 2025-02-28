@@ -231,9 +231,10 @@ export default function AgentModal({
                     )}
                   </div>
                   <div className="flex-grow">
-                    <p className="font-medium text-sm transition-all duration-300">
-                      {step.message}
-                    </p>
+                    <p
+                      className="font-medium text-sm transition-all duration-300"
+                      dangerouslySetInnerHTML={{ __html: step.message }}
+                    />
                   </div>
                 </div>
               </div>
