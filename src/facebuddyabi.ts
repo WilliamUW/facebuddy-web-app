@@ -8,17 +8,8 @@ export const facebuddyabi = [
     ],
     stateMutability: "nonpayable",
   },
-  {
-    type: "function",
-    name: "approveTokenWithPermit2",
-    inputs: [
-      { name: "token", type: "address", internalType: "address" },
-      { name: "amount", type: "uint160", internalType: "uint160" },
-      { name: "expiration", type: "uint48", internalType: "uint48" },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
+  { type: "fallback", stateMutability: "payable" },
+  { type: "receive", stateMutability: "payable" },
   {
     type: "function",
     name: "permit2",
@@ -37,12 +28,51 @@ export const facebuddyabi = [
   },
   {
     type: "function",
+    name: "preferredToken",
+    inputs: [{ name: "", type: "address", internalType: "address" }],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "router",
     inputs: [],
     outputs: [
       { name: "", type: "address", internalType: "contract UniversalRouter" },
     ],
     stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "setPreferredToken",
+    inputs: [{ name: "token", type: "address", internalType: "address" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "swapAndSendPreferredToken",
+    inputs: [
+      { name: "recipient", type: "address", internalType: "address" },
+      { name: "inputToken", type: "address", internalType: "address" },
+      { name: "amount", type: "uint256", internalType: "uint256" },
+      {
+        name: "poolKey",
+        type: "tuple",
+        internalType: "struct PoolKey",
+        components: [
+          { name: "currency0", type: "address", internalType: "Currency" },
+          { name: "currency1", type: "address", internalType: "Currency" },
+          { name: "fee", type: "uint24", internalType: "uint24" },
+          { name: "tickSpacing", type: "int24", internalType: "int24" },
+          { name: "hooks", type: "address", internalType: "contract IHooks" },
+        ],
+      },
+      { name: "minAmountOut", type: "uint128", internalType: "uint128" },
+      { name: "deadline", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [],
+    stateMutability: "payable",
   },
   {
     type: "function",
@@ -63,8 +93,9 @@ export const facebuddyabi = [
       { name: "amountIn", type: "uint128", internalType: "uint128" },
       { name: "minAmountOut", type: "uint128", internalType: "uint128" },
       { name: "deadline", type: "uint256", internalType: "uint256" },
+      { name: "zeroForOne", type: "bool", internalType: "bool" },
     ],
-    outputs: [{ name: "amountOut", type: "uint256", internalType: "uint256" }],
-    stateMutability: "nonpayable",
+    outputs: [],
+    stateMutability: "payable",
   },
 ] as const;
