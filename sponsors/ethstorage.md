@@ -10,13 +10,19 @@ FaceBuddy leverages ETHStorage’s decentralized and scalable storage to handle 
 ETHStorage Demo:
 
 
-Uploading ETHStorage Demo.mov…
+
+https://github.com/user-attachments/assets/b334b9b7-a5b3-46c0-a17a-df64c908f251
+
+
 
 
 ETHStorage Code Walkthrough:
 
 
-Uploading ETHStorage Code Walkthrough.mov…
+
+https://github.com/user-attachments/assets/794fc0f0-b45c-42e3-a1dc-811de379c8c9
+
+
 
 
 
