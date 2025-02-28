@@ -27,7 +27,7 @@ import {
   useWaitForTransactionReceipt,
   useContractRead,
 } from "wagmi";
-
+import { getFaceBuddyConfig } from "../constants";
 export interface SavedFace {
   label: ProfileData;
   descriptor: Float32Array;

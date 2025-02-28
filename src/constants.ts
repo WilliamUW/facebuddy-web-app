@@ -1,3 +1,7 @@
+import { useChainId } from "wagmi";
+import { unichainSepolia } from "./chains";
+import { base, unichain } from "wagmi/chains";
+
 export const BASE_SEPOLIA_CHAIN_ID = 84532;
 export const mintContractAddress = "0xA3e40bBe8E8579Cd2619Ef9C6fEA362b760dac9f";
 export const mintABI = [
@@ -16,45 +20,30 @@ export const mintABI = [
   },
 ] as const;
 
-// USDC contract address on Unichain
-export const USDC_CONTRACT_ADDRESS =
-  "0x078d782b760474a361dda0af3839290b0ef57ad6";
-
-export const USDC_DECIMALS = 6;
-
-export const UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS =
-  "0x62431207530999d4389EF59007CEedBE38900d5D";
-export const UNICHAIN_SEPOLIA_USDC_ADDRESS =
-  "0x078d782b760474a361dda0af3839290b0ef57ad6";
-export const UNICHAIN_SEPOLIA_ETH_ADDRESS =
-  "0x0000000000000000000000000000000000000000";
-export const UNICHAIN_SEPOLIA_ROUTER_ADDRESS =
-  "0x73855d06de49d0fe4a9c42636ba96c62da12ff9c";
-
-export const UNICHAIN_FACEBUDDY_ADDRESS =
-  "0x62431207530999d4389EF59007CEedBE38900d5D";
-export const UNICHAIN_USDC_ADDRESS =
-  "0x078d782b760474a361dda0af3839290b0ef57ad6";
-export const UNICHAIN_ETH_ADDRESS =
-  "0x0000000000000000000000000000000000000000";
-export const UNICHAIN_ROUTER_ADDRESS =
-  "0x73855d06de49d0fe4a9c42636ba96c62da12ff9c";
-
-export const UNICHAIN_SEPOLIA_POOL_KEY = {
-  currency0: UNICHAIN_SEPOLIA_ETH_ADDRESS,
-  currency1: UNICHAIN_SEPOLIA_USDC_ADDRESS,
-  fee: 3000,
-  tickSpacing: 60,
-  hooks: 0x0000000000000000000000000000000000000000,
-};
-
-export const UNICHAIN_POOL_KEY = {
-  currency0: UNICHAIN_ETH_ADDRESS,
-  currency1: UNICHAIN_USDC_ADDRESS,
-  fee: 3000,
-  tickSpacing: 60,
-  hooks: 0x0000000000000000000000000000000000000000,
-};
+export const faceBuddyConfig = {
+  [unichain.id]: {
+    faceBuddyAddress: "0x62431207530999d4389EF59007CEedBE38900d5D",
+    usdcAddress: "0x078d782b760474a361dda0af3839290b0ef57ad6",
+    poolKey: {
+      currency0: "0x0000000000000000000000000000000000000000",
+      currency1: "0x078d782b760474a361dda0af3839290b0ef57ad6",
+      fee: 3000,
+      tickSpacing: 60,
+      hooks: "0x0000000000000000000000000000000000000000",
+    },
+  },
+  [base.id]: {
+    faceBuddyAddress: "0xf83e6AF69B226d9446fB8C17CA9f258b91F0202D",
+    usdcAddress: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+    poolKey: {
+      currency0: "0x0000000000000000000000000000000000000000",
+      currency1: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      fee: 3000,
+      tickSpacing: 60,
+      hooks: "0x0000000000000000000000000000000000000000",
+    },
+  },
+} as const;
 
 // ERC20 ABI for the token functions
 export const USDC_ABI = [
