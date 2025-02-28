@@ -17,7 +17,7 @@ export const mintABI = [
 ] as const;
 
 // USDC contract address on Base Sepolia
-export const USDC_CONTRACT_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+export const USDC_CONTRACT_ADDRESS = "0x078d782b760474a361dda0af3839290b0ef57ad6";
 
 // ERC20 ABI for the token functions
 export const USDC_ABI = [
@@ -97,8 +97,7 @@ export const UNICHAIN_USDC_ADDRESS =
   "0x078d782b760474a361dda0af3839290b0ef57ad6";
 export const UNICHAIN_WETH_ADDRESS =
   "0x4200000000000000000000000000000000000006";
-export const UNICHAIN_ROUTER_ADDRESS =
-  "0xef740bf23acae26f6492b10de645d6b98dc8eaf3";
+export const UNICHAIN_ROUTER_ADDRESS = "0x73855d06de49d0fe4a9c42636ba96c62da12ff9c";
 
 export const UNICHAIN_SEPOLIA_POOL_KEY = {
   currency0: UNICHAIN_SEPOLIA_USDC_ADDRESS,
