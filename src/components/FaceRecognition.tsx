@@ -112,7 +112,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
   // Add effect to handle transaction confirmation
   useEffect(() => {
     if (isConfirmed && hash) {
-      const uniscanUrl = `https://uniscan.xyz/tx/${hash}`;
+      
       setAgentSteps((prevSteps) => [
         ...prevSteps.slice(0, -1),
         {
@@ -121,7 +121,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
           type: "transaction",
         },
         {
-          label: `<a href="${uniscanUrl}" target="_blank" rel="noopener noreferrer" class="hover:underline">View on Uniscan</a>`,
+          label: `<a href="${faceBuddyConfig[chainId].blockExplorer}/tx/${hash}" target="_blank" rel="noopener noreferrer" class="hover:underline">View on ${faceBuddyConfig[chainId].blockExplorer}</a>`,
           isLoading: false,
           type: "hash",
         },

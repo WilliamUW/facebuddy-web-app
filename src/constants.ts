@@ -31,6 +31,7 @@ interface PoolKey {
 interface ChainConfig {
   faceBuddyAddress: string;
   usdcAddress: string;
+  blockExplorer: string;
   poolKey: PoolKey;
 }
 
@@ -49,6 +50,7 @@ export const faceBuddyConfig: FaceBuddyConfig = {
       tickSpacing: 60,
       hooks: "0x0000000000000000000000000000000000000000",
     },
+    blockExplorer: "https://uniscan.xyz",
   },
   [base.id]: {
     faceBuddyAddress: "0xf83e6AF69B226d9446fB8C17CA9f258b91F0202D",
@@ -60,6 +62,7 @@ export const faceBuddyConfig: FaceBuddyConfig = {
       tickSpacing: 60,
       hooks: "0x0000000000000000000000000000000000000000",
     },
+    blockExplorer: "https://basescan.org",
   },
 };
 
