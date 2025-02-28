@@ -25,4 +25,5 @@ Humanity Protocol Code Walkthrough:
 https://github.com/user-attachments/assets/68ee4df4-38cf-4d23-aea9-30f8c625e8e9
 
 Humanity Protocol API Code:
-https://github.com/WilliamUW/facebuddy-web-app/blob/main/src/utility/humanityProtocol.ts
+
+https://github.com/WilliamUW/facebuddy-web-app/blob/5b83bf80fa8f9c2a81f748063b88e15349e6c7c3/src/utility/humanityProtocol.ts#L1-L45
