@@ -1,6 +1,6 @@
 Uniswap v4 Contracts: https://github.com/xavierdmello/FaceBuddyUniswapContracts
 
-Unichain Mainnet + Uniswap v4 Deployment: https://uniscan.xyz/address/0x7D87aC5cA156cceAa0Ac0D0b115c7be961660058
+Unichain Mainnet + Uniswap v4 Deployment: https://uniscan.xyz/address/0xa28b8Edbba96984e54d502317B318Ab457AE06C0
 # **FaceBuddy** 🤖💸  
 > **Pay anyone—just with their face.**  
 
