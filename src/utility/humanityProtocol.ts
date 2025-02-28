@@ -41,5 +41,5 @@ export async function listCredentials(holderDid: string) {
 
   const data = await response.json();
   console.log(data);
-  return data;
+  return data.credentials;
 }
