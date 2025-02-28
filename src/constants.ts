@@ -80,5 +80,5 @@ export const USDC_ABI = [
   }
 ] as const;
 
-// USDC on Base Sepolia has 18 decimals (unlike mainnet USDC which has 6)
+// Base Sepolia USDC has 18 decimals
 export const USDC_DECIMALS = 18;
