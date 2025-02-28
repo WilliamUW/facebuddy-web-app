@@ -1,7 +1,7 @@
 "use client";
 
 import { ProfileData } from "./FaceRegistration";
-import SendEthWrapper from "./SendEthWrapper";
+import SendUsdcWrapper from "./SendUsdcWrapper";
 import { useState } from "react";
 
 type ChatResponse = {
@@ -149,7 +149,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
           )}
           {!isLoading && transactionAmount && profile?.name && (
             <div className="mt-4">
-              <SendEthWrapper 
+              <SendUsdcWrapper 
                 recipientAddress={profile.name as `0x${string}`}
                 initialUsdAmount={transactionAmount}
               />

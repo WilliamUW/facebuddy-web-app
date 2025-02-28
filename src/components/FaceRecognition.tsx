@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "react";
 
 import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
-import SendEthWrapper from "./SendEthWrapper";
+import SendUsdcWrapper from "./SendUsdcWrapper";
 import Webcam from "react-webcam";
 
 export interface SavedFace {
@@ -266,6 +266,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
               const data: AgentResponse = await res.json();
 
+              console.log("Response:", data);
+
               // Step 3: Process agent response
               const responseText =
                 data.content.text.length > 100
@@ -474,11 +476,10 @@ export default function FaceRecognition({ savedFaces }: Props) {
           </div>
         )}
 
-        {/* Render SendEthWrapper if there's a transaction amount and matched profile */}
-        {transactionAmount && matchedProfile?.name && (
-          <div className="mt-4 p-4 bg-white rounded-lg shadow-sm">
-            <h3 className="text-lg font-medium mb-2">Complete Transaction</h3>
-            <SendEthWrapper
+        {/* Render SendUsdcWrapper if there's a transaction amount and matched profile */}
+        {transactionAmount && matchedProfile && (
+          <div className="mt-4">
+            <SendUsdcWrapper
               recipientAddress={matchedProfile.name as `0x${string}`}
               initialUsdAmount={transactionAmount}
             />

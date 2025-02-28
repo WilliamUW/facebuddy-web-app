@@ -1,6 +1,7 @@
 'use client';
 
 import type { Address, ContractFunctionParameters } from 'viem';
+import { BASE_SEPOLIA_CHAIN_ID, USDC_ABI, USDC_CONTRACT_ADDRESS, USDC_DECIMALS } from '../constants';
 import {
   Transaction,
   TransactionButton,
@@ -12,48 +13,14 @@ import type {
   TransactionError,
   TransactionResponse,
 } from '@coinbase/onchainkit/transaction';
-import { useEffect, useState } from 'react';
 
-import { BASE_SEPOLIA_CHAIN_ID } from '../constants';
 import { parseUnits } from 'viem';
-
-// USDC contract address on Base Sepolia
-const USDC_CONTRACT_ADDRESS = '0x5deac602762362fe5f135fa5904351916053cf70';
-
-// ERC20 ABI for the transfer function
-const USDC_ABI = [
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_to',
-        type: 'address',
-      },
-      {
-        name: '_value',
-        type: 'uint256',
-      },
-    ],
-    name: 'transfer',
-    outputs: [
-      {
-        name: '',
-        type: 'bool',
-      },
-    ],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-] as const;
+import { useState } from 'react';
 
 export default function SendUsdcWrapper({ recipientAddress, initialUsdAmount }: { recipientAddress: Address, initialUsdAmount?: string }) {
   const [usdAmount, setUsdAmount] = useState<string>(initialUsdAmount || '1.00');
   const [shouldAutoInitiate, setShouldAutoInitiate] = useState(!!initialUsdAmount);
   const [hasInitiatedTransaction, setHasInitiatedTransaction] = useState(false);
-
-  // USDC has 6 decimals
-  const USDC_DECIMALS = 6;
 
   // Calculate USDC amount (1:1 with USD)
   const usdcAmount = !isNaN(parseFloat(usdAmount)) ? usdAmount : '0';

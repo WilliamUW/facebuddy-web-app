@@ -26,10 +26,10 @@ export async function readFromBlobId(blobId: string) {
 
 export async function storeStringAndGetBlobId(data: string) {
   try {
-    console.log("store walrus start: " + data.slice(0, 100) + "...");
+    console.log("store walrus start: ", data);
     // Make the API call to store the string
     const response = await fetch(
-      `https://publisher.walrus-testnet.walrus.space/v1/blobs?epochs=1`,
+      `https://publisher.walrus-testnet.walrus.space/v1/blobs?epochs=5`,
       {
         method: "PUT",
         headers: {
@@ -38,10 +38,6 @@ export async function storeStringAndGetBlobId(data: string) {
         body: data,
       }
     );
-    // const response = await fetch(`${PUBLISHER}/v1/store`, {
-    //   method: 'PUT',
-    //   body:  Buffer.from(data),
-    // });
 
     // Check if the response is ok (status code in the range 200-299)
     if (!response.ok) {
