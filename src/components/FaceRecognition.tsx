@@ -311,11 +311,12 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 if (functionName === "sendTransaction") {
                   // For transactions, we'll show the transaction component in the modal
                   // The actual transaction UI will be rendered in the modal
+                  const preferredToken = largestFace.matchedProfile.preferredToken || "USDC";
                   await new Promise((resolve) => setTimeout(resolve, 500));
                   setAgentSteps([
                     `Face scanned: ${largestFace.matchedProfile.name}`,
                     `Agent response: ${responseText}`,
-                    `Ready to send ${functionCall.args.amount} to ${largestFace.matchedProfile.name}`,
+                    `Ready to send ${functionCall.args.amount} ${preferredToken} to ${largestFace.matchedProfile.name}`,
                   ]);
                 } else if (
                   functionName === "connectOnLinkedin" ||
@@ -482,6 +483,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
             <SendUsdcWrapper
               recipientAddress={matchedProfile.name as `0x${string}`}
               initialUsdAmount={transactionAmount}
+              tokenType={matchedProfile.preferredToken || "USDC"}
             />
           </div>
         )}

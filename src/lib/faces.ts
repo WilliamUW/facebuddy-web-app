@@ -62,6 +62,7 @@ export const referenceFaces = [
       linkedin: "heywilliamwang",
       telegram: "heywilliamwang",
       twitter: "heywilliamwang",
+      preferredToken: "USDC",
     },
   },
   {
@@ -127,6 +128,7 @@ export const referenceFaces = [
       linkedin: "xdmello",
       telegram: "xdmello",
       twitter: "0xdmello",
+      preferredToken: "USDC",
     },
   },
 ];
