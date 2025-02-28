@@ -2,7 +2,7 @@ $6,000: Walrus Tusked Champion
 
 We want to see a working project that compiles and builds without obvious errors with well-documented readmes. A successful project should have at least 2-3 major user flows that integrate with Walrus and anyone could execute these flows without encountering non-recoverable errors. Successful project teams would also account for internet disruptions and provide backup options for demos.
 
-Explanation for why FaceBuddy satisfies the requirements:
+### Explanation for why FaceBuddy satisfies the requirements:
 FaceBuddy leverages Walrus's decentralized, efficient, and scalable storage to handle the large amounts of facial hash data generated during processing. This ensures reliable data availability and resilience, enabling seamless execution of user flows without errors that can scale to billions.
 
 Demo:
@@ -14,7 +14,7 @@ https://github.com/user-attachments/assets/712fc657-25cb-4d54-98d1-25fc9df7a08b
 
 
 
-Code:
+Walrus API Call Code:
 https://github.com/WilliamUW/facebuddy-web-app/blob/main/src/utility/walrus.ts
 
 Face Storage:
