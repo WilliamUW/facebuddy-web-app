@@ -415,38 +415,40 @@ export default function FaceRecognition({ savedFaces }: Props) {
   }, [browserSupportsSpeechRecognition]);
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
-      <h2 className="text-xl font-bold">Connect by Face</h2>
+    <div className="flex flex-col items-center gap-4 w-full h-screen">
+      <h2 className="text-xl font-bold mt-4">Connect by Face</h2>
 
       {/* Transcript display */}
-      <div className="w-full max-w-[900px] bg-white p-4 rounded-xl shadow-sm mb-2">
+      <div className="w-full max-w-[900px] bg-white p-3 rounded-xl shadow-sm">
         <p className="text-lg font-medium text-center">
           {transcript || "Speak to see your words here..."}
         </p>
       </div>
 
-      {/* Webcam view */}
-      <div className="w-full max-w-[900px] relative">
-        {isWebcamLoading && (
-          <div
-            className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center z-10"
-            style={{ aspectRatio: "16/9" }}
-          >
-            <div className="text-gray-500">Loading camera...</div>
-          </div>
-        )}
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          screenshotFormat="image/jpeg"
-          videoConstraints={{
-            facingMode: "user",
-            aspectRatio: 16 / 9,
-          }}
-          onUserMedia={() => setIsWebcamLoading(false)}
-          className="w-full rounded-xl"
-          style={{ aspectRatio: "16/9" }}
-        />
+      {/* Webcam view - takes up remaining space */}
+      <div className="w-full max-w-[900px] flex-grow relative">
+        <div
+          className="rounded-xl overflow-hidden h-full relative"
+          style={{ height: "calc(100vh - 160px)" }}
+        >
+          {isWebcamLoading && (
+            <div
+              className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center z-10"
+            >
+              <div className="text-gray-500">Loading camera...</div>
+            </div>
+          )}
+          <Webcam
+            ref={webcamRef}
+            audio={false}
+            screenshotFormat="image/jpeg"
+            videoConstraints={{
+              facingMode: "user",
+            }}
+            onUserMedia={() => setIsWebcamLoading(false)}
+            className="w-full h-full object-cover rounded-xl"
+          />
+        </div>
       </div>
 
       {/* Hidden canvas for face labeling */}
