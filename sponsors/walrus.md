@@ -5,6 +5,15 @@ We want to see a working project that compiles and builds without obvious errors
 Explanation for why FaceBuddy satisfies the requirements:
 FaceBuddy leverages Walrus's decentralized, efficient, and scalable storage to handle the large amounts of facial hash data generated during processing. This ensures reliable data availability and resilience, enabling seamless execution of user flows without errors that can scale to billions.
 
+Demo:
+
+Code Walkthrough:
+
+
+https://github.com/user-attachments/assets/712fc657-25cb-4d54-98d1-25fc9df7a08b
+
+
+
 Code:
 https://github.com/WilliamUW/facebuddy-web-app/blob/main/src/utility/walrus.ts
 
