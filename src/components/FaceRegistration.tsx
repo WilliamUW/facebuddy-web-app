@@ -840,8 +840,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       {/* Credentials Accordion - Only show when face is registered */}
       {
         <div className="w-full max-w-[900px] border rounded-lg overflow-hidden">
-
-          {isAccordionOpen && (
             <div className="p-4 bg-white">
               {/* Tabs for Credentials and Transactions */}
               <div className="mb-4 border-b">
@@ -1585,7 +1583,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                 </div>
               )}
             </div>
-          )}
+          
         </div>
       }
     </div>
