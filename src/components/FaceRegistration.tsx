@@ -75,7 +75,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [isFaceRegistered, setIsFaceRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const [credentials, setCredentials] = useState<any>(null);
   const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
   const [showTransactions, setShowTransactions] = useState(false);
@@ -450,8 +450,8 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
         {/* Left side: Webcam or captured image */}
         <div className="flex-1 w-full md:w-auto">
           <div
-            className="rounded-xl overflow-hidden h-full relative"
-            style={{ minHeight: "400px" }}
+            className="rounded-xl overflow-hidden relative"
+            style={{ minHeight: "400px", height: "50vh" }}
           >
             {webcamError ? (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl absolute inset-0 flex flex-col items-center justify-center">

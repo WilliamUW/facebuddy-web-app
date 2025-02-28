@@ -463,8 +463,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
       {/* Webcam view - takes up remaining space */}
       <div className="w-full max-w-[900px] flex-grow relative">
         <div
-          className="rounded-xl overflow-hidden h-full relative"
-          style={{ height: "calc(100vh - 160px)" }}
+          className="rounded-xl overflow-hidden relative"
+          style={{ minHeight: "400px", height: "50vh" }}
         >
           {isWebcamLoading && (
             <div
