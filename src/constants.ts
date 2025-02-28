@@ -116,3 +116,5 @@ export const USDC_ABI = [
     type: "function",
   },
 ] as const;
+
+export const latestWalrusBlobId = "3qInv3LRy2SjMiyzztKP6LbvauzHrDOf4wo3YEAB8ls";

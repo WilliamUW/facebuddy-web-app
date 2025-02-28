@@ -17,6 +17,7 @@ import WalletWrapper from "src/components/WalletWrapper";
 import Webcam from "react-webcam";
 import dynamic from "next/dynamic";
 import { getFileContent } from "src/utility/faceDataStorage";
+import {latestWalrusBlobId} from "src/constants";
 import { readFromBlobId } from "src/utility/walrus";
 import {referenceFaces} from "src/lib/faces";
 import { useAccount } from "wagmi";
@@ -68,7 +69,7 @@ export default function Page() {
     async function populateFaces() {
       try {
         const jsonContent = await readFromBlobId(
-          "3qInv3LRy2SjMiyzztKP6LbvauzHrDOf4wo3YEAB8ls"
+         latestWalrusBlobId
         );
 
         const parsedContent = JSON.parse(jsonContent as string);
