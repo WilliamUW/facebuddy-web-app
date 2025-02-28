@@ -17,8 +17,7 @@ export const mintABI = [
 ] as const;
 
 // USDC contract address on Base Sepolia
-export const USDC_CONTRACT_ADDRESS =
-  "0x5deac602762362fe5f135fa5904351916053cf70";
+export const USDC_CONTRACT_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
 
 // ERC20 ABI for the token functions
 export const USDC_ABI = [
@@ -81,8 +80,8 @@ export const USDC_ABI = [
   },
 ] as const;
 
-// USDC on Base Sepolia has 18 decimals (unlike mainnet USDC which has 6)
-export const USDC_DECIMALS = 18;
+// Base Sepolia USDC has 18 decimals
+export const USDC_DECIMALS = 6;
 
 export const UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS =
   "0x9B645605dE434Ee7d243306bf880eE6454be8f63";

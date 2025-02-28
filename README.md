@@ -1,5 +1,7 @@
 bun i && bun run dev
 
+Agent Backend: https://github.com/WilliamUW/facebuddy-opacity-agent
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/coinbase/onchainkit/main/site/docs/public/logo/v0-27.png">

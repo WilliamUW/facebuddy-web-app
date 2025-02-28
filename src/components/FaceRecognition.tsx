@@ -20,6 +20,7 @@ import { facebuddyabi } from "../facebuddyabi";
 import { useAccount } from "wagmi";
 import { useWriteContract } from "wagmi";
 
+
 import {
   UNICHAIN_SEPOLIA_FACEBUDDY_ADDRESS,
   UNICHAIN_SEPOLIA_USDC_ADDRESS,
@@ -61,6 +62,7 @@ type AgentResponse = {
 
 
 export default function FaceRecognition({ savedFaces }: Props) {
+  const { address } = useAccount();
   const webcamRef = useRef<Webcam>(null);
   const [isWebcamLoading, setIsWebcamLoading] = useState(true);
   const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
@@ -179,6 +181,31 @@ export default function FaceRecognition({ savedFaces }: Props) {
     ctx.font = "16px Arial";
     const label = face.matchedProfile?.name || "Unknown";
     ctx.fillText(label, box.x, box.y - 5);
+    
+    // If the user has a Human ID, add a badge
+    if (face.matchedProfile?.humanId) {
+      // Draw a small badge in the top-right corner of the face box
+      const badgeSize = 24;
+      const badgeX = box.x + box.width - badgeSize - 5;
+      const badgeY = box.y + 5;
+      
+      // Draw badge background
+      ctx.fillStyle = "#6366F1"; // Indigo color
+      ctx.beginPath();
+      ctx.arc(badgeX + badgeSize/2, badgeY + badgeSize/2, badgeSize/2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw "H" for Human ID
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 16px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("H", badgeX + badgeSize/2, badgeY + badgeSize/2);
+      
+      // Reset text alignment
+      ctx.textAlign = "start";
+      ctx.textBaseline = "alphabetic";
+    }
 
     // Save the canvas as image
     setDetectedFaceImage(canvas.toDataURL());
@@ -254,6 +281,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
             try {
               const requestBody = {
                 prompt: text + JSON.stringify(largestFace.matchedProfile),
+                userAddress: address,
               };
 
               const res = await fetch(
@@ -284,9 +312,14 @@ export default function FaceRecognition({ savedFaces }: Props) {
                   ? data.content.text.substring(0, 97) + "..."
                   : data.content.text;
 
+              // Prepare face scan message with Human ID if available
+              const faceScanMessage = largestFace.matchedProfile.humanId 
+                ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
+                : `Face scanned: ${largestFace.matchedProfile.name}`;
+
               await new Promise((resolve) => setTimeout(resolve, 500));
               setAgentSteps([
-                `Face scanned: ${largestFace.matchedProfile.name}`,
+                faceScanMessage,
                 `Agent response: ${responseText}`,
               ]);
 
@@ -296,7 +329,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
               ) {
                 // Immediately display "No action required" and stop
                 setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
+                  faceScanMessage,
                   `Agent response: ${responseText}`,
                   "No action required",
                 ]);
@@ -312,7 +345,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 // Show executing step
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
+                  faceScanMessage,
                   `Agent response: ${responseText}`,
                   `Executing ${functionName}...`,
                 ]);
@@ -321,11 +354,12 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 if (functionName === "sendTransaction") {
                   // For transactions, we'll show the transaction component in the modal
                   // The actual transaction UI will be rendered in the modal
+                  const preferredToken = largestFace.matchedProfile.preferredToken || "USDC";
                   await new Promise((resolve) => setTimeout(resolve, 500));
                   setAgentSteps([
-                    `Face scanned: ${largestFace.matchedProfile.name}`,
+                    faceScanMessage,
                     `Agent response: ${responseText}`,
-                    `Ready to send ${functionCall.args.amount} to ${largestFace.matchedProfile.name}`,
+                    `Ready to send ${functionCall.args.amount} ${preferredToken} to ${largestFace.matchedProfile.name}`,
                   ]);
                 } else if (
                   functionName === "connectOnLinkedin" ||
@@ -338,7 +372,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                       : "Telegram";
                   await new Promise((resolve) => setTimeout(resolve, 1000));
                   setAgentSteps([
-                    `Face scanned: ${largestFace.matchedProfile.name}`,
+                    faceScanMessage,
                     `Agent response: ${responseText}`,
                     `Connected to ${largestFace.matchedProfile.name} on ${platform}`,
                   ]);
@@ -348,7 +382,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
                   await new Promise((resolve) => setTimeout(resolve, 1000));
                   setAgentSteps([
-                    `Face scanned: ${largestFace.matchedProfile.name}`,
+                    faceScanMessage,
                     `Agent response: ${responseText}`,
                     `Transaction complete: ${txHash.substring(0, 10)}...`,
                     `Connection established with ${largestFace.matchedProfile.name}`,
@@ -358,21 +392,26 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 // Completion without function call and not "no action required"
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
+                  faceScanMessage,
                   `Agent response: ${responseText}`,
                   "Processing request...",
                 ]);
 
                 await new Promise((resolve) => setTimeout(resolve, 1000));
                 setAgentSteps([
-                  `Face scanned: ${largestFace.matchedProfile.name}`,
+                  faceScanMessage,
                   `Agent response: ${responseText}`,
                   "No action required",
                 ]);
               }
             } catch (error) {
+              // Define face scan message for error case
+              const faceScanMessage = largestFace.matchedProfile.humanId 
+                ? `Face scanned: ${largestFace.matchedProfile.name} (Human ID: ${largestFace.matchedProfile.humanId})`
+                : `Face scanned: ${largestFace.matchedProfile.name}`;
+                
               setAgentSteps([
-                `Face scanned: ${largestFace.matchedProfile.name}`,
+                faceScanMessage,
                 `Error: ${error instanceof Error ? error.message.substring(0, 50) : "Unknown error"}`,
               ]);
             }
@@ -424,38 +463,40 @@ export default function FaceRecognition({ savedFaces }: Props) {
   }, [browserSupportsSpeechRecognition]);
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
-      <h2 className="text-xl font-bold">Connect by Face</h2>
+    <div className="flex flex-col items-center gap-4 w-full h-screen">
+      <h2 className="text-xl font-bold mt-4">Connect by Face</h2>
 
       {/* Transcript display */}
-      <div className="w-full max-w-[900px] bg-white p-4 rounded-xl shadow-sm mb-2">
+      <div className="w-full max-w-[900px] bg-white p-3 rounded-xl shadow-sm">
         <p className="text-lg font-medium text-center">
           {transcript || "Speak to see your words here..."}
         </p>
       </div>
 
-      {/* Webcam view */}
-      <div className="w-full max-w-[900px] relative">
-        {isWebcamLoading && (
-          <div
-            className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center z-10"
-            style={{ aspectRatio: "16/9" }}
-          >
-            <div className="text-gray-500">Loading camera...</div>
-          </div>
-        )}
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          screenshotFormat="image/jpeg"
-          videoConstraints={{
-            facingMode: "user",
-            aspectRatio: 16 / 9,
-          }}
-          onUserMedia={() => setIsWebcamLoading(false)}
-          className="w-full rounded-xl"
-          style={{ aspectRatio: "16/9" }}
-        />
+      {/* Webcam view - takes up remaining space */}
+      <div className="w-full max-w-[900px] flex-grow relative">
+        <div
+          className="rounded-xl overflow-hidden relative"
+          style={{ minHeight: "400px", height: "50vh" }}
+        >
+          {isWebcamLoading && (
+            <div
+              className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center z-10"
+            >
+              <div className="text-gray-500">Loading camera...</div>
+            </div>
+          )}
+          <Webcam
+            ref={webcamRef}
+            audio={false}
+            screenshotFormat="image/jpeg"
+            videoConstraints={{
+              facingMode: "user",
+            }}
+            onUserMedia={() => setIsWebcamLoading(false)}
+            className="w-full h-full object-cover rounded-xl"
+          />
+        </div>
       </div>
 
       {/* Hidden canvas for face labeling */}
@@ -483,6 +524,17 @@ export default function FaceRecognition({ savedFaces }: Props) {
               alt="Detected face"
               className="w-full rounded-lg shadow-sm"
             />
+            {matchedProfile?.humanId && (
+              <div className="mt-2 flex items-center text-sm">
+                <span className="font-medium text-indigo-600">Human ID:</span>
+                <span className="ml-2">{matchedProfile.humanId}</span>
+                <img 
+                  src="https://dropsearn.fra1.cdn.digitaloceanspaces.com/media/projects/logos/humanity-protocol_logo_1740112698.webp"
+                  alt="Humanity Protocol" 
+                  className="h-4 ml-2" 
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -492,6 +544,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
             <SendUsdcWrapper
               recipientAddress={matchedProfile.name as `0x${string}`}
               initialUsdAmount={transactionAmount}
+              tokenType={matchedProfile.preferredToken || "USDC"}
             />
           </div>
         )}

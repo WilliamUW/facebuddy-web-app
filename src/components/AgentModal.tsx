@@ -43,13 +43,28 @@ export default function AgentModal({
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
+      
+      // Add ESC key event listener
+      const handleEscKey = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          onClose();
+        }
+      };
+      
+      // Add the event listener
+      document.addEventListener('keydown', handleEscKey);
+      
+      // Clean up the event listener
+      return () => {
+        document.removeEventListener('keydown', handleEscKey);
+      };
     } else {
       const timer = setTimeout(() => {
         setIsVisible(false);
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   // Process steps when they change
   useEffect(() => {

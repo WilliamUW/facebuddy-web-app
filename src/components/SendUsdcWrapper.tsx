@@ -23,12 +23,20 @@ interface EthereumProvider {
   isMetaMask?: boolean;
 }
 
-export default function SendUsdcWrapper({ recipientAddress, initialUsdAmount }: { recipientAddress: Address, initialUsdAmount?: string }) {
+export default function SendUsdcWrapper({ 
+  recipientAddress, 
+  initialUsdAmount,
+  tokenType = "USDC" 
+}: { 
+  recipientAddress: Address, 
+  initialUsdAmount?: string,
+  tokenType?: string 
+}) {
   const [usdAmount, setUsdAmount] = useState<string>(initialUsdAmount || '1.00');
   const [shouldAutoInitiate, setShouldAutoInitiate] = useState(!!initialUsdAmount);
   const [hasInitiatedTransaction, setHasInitiatedTransaction] = useState(false);
-  const [tokenSymbol, setTokenSymbol] = useState<string>('USDC');
-  const [tokenName, setTokenName] = useState<string>('Base Sepolia USDC');
+  const [tokenSymbol, setTokenSymbol] = useState<string>(tokenType);
+  const [tokenName, setTokenName] = useState<string>(`Base Sepolia ${tokenType}`);
   const [tokenDecimals, setTokenDecimals] = useState<number>(USDC_DECIMALS);
   const [isLoadingTokenInfo, setIsLoadingTokenInfo] = useState<boolean>(true);
 
@@ -50,12 +58,12 @@ export default function SendUsdcWrapper({ recipientAddress, initialUsdAmount }: 
         
         // Use the constants for now
         setTokenDecimals(USDC_DECIMALS);
-        setTokenSymbol('USDC');
-        setTokenName('Base Sepolia USDC');
+        setTokenSymbol(tokenType);
+        setTokenName(`Base Sepolia ${tokenType}`);
         
         console.log('Token details loaded:', {
-          name: 'Base Sepolia USDC',
-          symbol: 'USDC',
+          name: `Base Sepolia ${tokenType}`,
+          symbol: tokenType,
           decimals: USDC_DECIMALS
         });
       } catch (error) {
@@ -66,7 +74,7 @@ export default function SendUsdcWrapper({ recipientAddress, initialUsdAmount }: 
     };
     
     fetchTokenDetails();
-  }, []);
+  }, [tokenType]);
 
   // Calculate USDC amount (1:1 with USD)
   const usdcAmount = !isNaN(parseFloat(usdAmount)) ? usdAmount : '0';
