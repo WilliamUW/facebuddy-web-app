@@ -15,13 +15,18 @@ import {
   UNICHAIN_FACEBUDDY_ADDRESS,
   UNICHAIN_ETH_ADDRESS,
   UNICHAIN_POOL_KEY,
+  UNICHAIN_USDC_ADDRESS,
 } from "../constants";
 import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
 import Webcam from "react-webcam";
 import { facebuddyabi } from "../facebuddyabi";
 import { useAccount } from "wagmi";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useContractRead,
+} from "wagmi";
 
 export interface SavedFace {
   label: ProfileData;
@@ -76,6 +81,14 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { data: hash, isPending, writeContract } = useWriteContract();
+
+  // Add contract read for preferred token
+  const { data: preferredTokenAddress } = useContractRead({
+    address: UNICHAIN_FACEBUDDY_ADDRESS,
+    abi: facebuddyabi,
+    functionName: "preferredToken",
+    args: currentAddress ? [currentAddress as `0x${string}`] : undefined,
+  });
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -357,13 +370,22 @@ export default function FaceRecognition({ savedFaces }: Props) {
             setCurrentAddress(largestFace.matchedProfile.name);
             setMatchedProfile(largestFace.matchedProfile);
 
-            // Update face scanning step with result
-            setAgentSteps([`Face scanned: ${largestFace.matchedProfile.name}`]);
+            // Get token info
+            const tokenInfo = getTokenInfo(
+              preferredTokenAddress || UNICHAIN_USDC_ADDRESS
+            );
+
+            // Update face scanning step with result and preferred token
+            setAgentSteps([
+              `Face scanned: ${largestFace.matchedProfile.name}`,
+              `Recipient's preferred token: <span class="inline-flex items-center"><img src="${tokenInfo.icon}" alt="${tokenInfo.symbol}" class="w-4 h-4 mr-1" />${tokenInfo.symbol}</span>`,
+            ]);
 
             // Step 2: Send request to agent
             await new Promise((resolve) => setTimeout(resolve, 500));
             setAgentSteps([
               `Face scanned: ${largestFace.matchedProfile.name}`,
+              `Recipient's preferred token: <span class="inline-flex items-center"><img src="${tokenInfo.icon}" alt="${tokenInfo.symbol}" class="w-4 h-4 mr-1" />${tokenInfo.symbol}</span>`,
               "Prompting agent...",
             ]);
 
@@ -551,6 +573,20 @@ export default function FaceRecognition({ savedFaces }: Props) {
       SpeechRecognition.stopListening();
     };
   }, [browserSupportsSpeechRecognition]);
+
+  // Function to get token symbol and icon from address
+  const getTokenInfo = (address: string) => {
+    if (address === UNICHAIN_ETH_ADDRESS) {
+      return {
+        symbol: "ETH",
+        icon: "/eth.png",
+      };
+    }
+    return {
+      symbol: "USDC",
+      icon: "/usdc.png",
+    };
+  };
 
   return (
     <div className="flex flex-col items-center gap-4 w-full h-screen">
