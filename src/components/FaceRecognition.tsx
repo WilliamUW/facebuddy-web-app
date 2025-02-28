@@ -11,12 +11,7 @@ import {
   findLargestFace,
 } from "../utility/faceRecognitionUtils";
 import { useEffect, useRef, useState } from "react";
-import {
-  UNICHAIN_FACEBUDDY_ADDRESS,
-  UNICHAIN_ETH_ADDRESS,
-  UNICHAIN_POOL_KEY,
-  UNICHAIN_USDC_ADDRESS,
-} from "../constants";
+import { faceBuddyConfig } from "../constants";
 import AgentModal from "./AgentModal";
 import { ProfileData } from "./FaceRegistration";
 import Webcam from "react-webcam";
@@ -25,9 +20,8 @@ import { useAccount, useReadContract } from "wagmi";
 import {
   useWriteContract,
   useWaitForTransactionReceipt,
-  useContractRead,
+  useChainId,
 } from "wagmi";
-import { getFaceBuddyConfig } from "../constants";
 export interface SavedFace {
   label: ProfileData;
   descriptor: Float32Array;
@@ -78,6 +72,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const [transactionAmount, setTransactionAmount] = useState<string | null>(
     null
   );
+  const chainId = useChainId();
   const [matchedProfile, setMatchedProfile] = useState<ProfileData | null>(
     null
   );
@@ -90,7 +85,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
   // Add contract read for preferred token
   const { data: preferredTokenAddress, refetch } = useReadContract({
-    address: UNICHAIN_FACEBUDDY_ADDRESS,
+    address: faceBuddyConfig[chainId].faceBuddyAddress as `0x${string}`,
     abi: facebuddyabi,
     functionName: "preferredToken",
     args: [matchedProfile?.name as `0x${string}`],
@@ -258,7 +253,9 @@ export default function FaceRecognition({ savedFaces }: Props) {
           const ethAmount = requestedUsdAmount / currentEthPrice;
           const amountInWei = BigInt(Math.floor(ethAmount * 1e18));
 
-          const isEth = updatedPreferredToken === UNICHAIN_ETH_ADDRESS;
+          const isEth =
+            updatedPreferredToken ===
+            "0x0000000000000000000000000000000000000000";
           setAgentSteps((prevSteps) => [
             ...prevSteps,
             {
@@ -272,16 +269,18 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
           writeContract({
             abi: facebuddyabi,
-            address: UNICHAIN_FACEBUDDY_ADDRESS,
+            address: faceBuddyConfig[chainId].faceBuddyAddress as `0x${string}`,
             functionName: "swapAndSendPreferredToken",
             args: [
               profile.name as `0x${string}`,
-              UNICHAIN_ETH_ADDRESS as `0x${string}`,
+              "0x0000000000000000000000000000000000000000" as `0x${string}`,
               amountInWei,
               {
-                ...UNICHAIN_POOL_KEY,
-                currency0: UNICHAIN_POOL_KEY.currency0 as `0x${string}`,
-                currency1: UNICHAIN_POOL_KEY.currency1 as `0x${string}`,
+                ...faceBuddyConfig[chainId].poolKey,
+                currency0: faceBuddyConfig[chainId].poolKey
+                  .currency0 as `0x${string}`,
+                currency1: faceBuddyConfig[chainId].poolKey
+                  .currency1 as `0x${string}`,
                 hooks:
                   "0x0000000000000000000000000000000000000000" as `0x${string}`,
               },
@@ -577,7 +576,6 @@ export default function FaceRecognition({ savedFaces }: Props) {
     console.log("bro this is the addy i got:", address);
     if (
       address === undefined ||
-      address.toLowerCase() === UNICHAIN_ETH_ADDRESS.toLowerCase() ||
       address.toLowerCase() === "0x0000000000000000000000000000000000000000"
     ) {
       return {

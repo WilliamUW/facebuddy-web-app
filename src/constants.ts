@@ -20,7 +20,25 @@ export const mintABI = [
   },
 ] as const;
 
-export const faceBuddyConfig = {
+interface PoolKey {
+  currency0: string;
+  currency1: string;
+  fee: number;
+  tickSpacing: number;
+  hooks: string;
+}
+
+interface ChainConfig {
+  faceBuddyAddress: string;
+  usdcAddress: string;
+  poolKey: PoolKey;
+}
+
+type FaceBuddyConfig = {
+  [chainId: number]: ChainConfig;
+};
+
+export const faceBuddyConfig: FaceBuddyConfig = {
   [unichain.id]: {
     faceBuddyAddress: "0x62431207530999d4389EF59007CEedBE38900d5D",
     usdcAddress: "0x078d782b760474a361dda0af3839290b0ef57ad6",
@@ -43,7 +61,7 @@ export const faceBuddyConfig = {
       hooks: "0x0000000000000000000000000000000000000000",
     },
   },
-} as const;
+};
 
 // ERC20 ABI for the token functions
 export const USDC_ABI = [

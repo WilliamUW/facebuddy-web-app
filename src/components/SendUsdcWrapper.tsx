@@ -1,12 +1,7 @@
 "use client";
 
 import type { Address, ContractFunctionParameters } from "viem";
-import {
-  BASE_SEPOLIA_CHAIN_ID,
-  USDC_ABI,
-  USDC_CONTRACT_ADDRESS,
-  USDC_DECIMALS,
-} from "../constants";
+import { BASE_SEPOLIA_CHAIN_ID, USDC_ABI } from "../constants";
 import {
   Transaction,
   TransactionButton,
@@ -19,9 +14,10 @@ import type {
   TransactionResponse,
 } from "@coinbase/onchainkit/transaction";
 import { useEffect, useState } from "react";
-
+const USDC_DECIMALS = 6;
 import { parseUnits } from "viem";
-
+import { useChainId } from "wagmi";
+import { faceBuddyConfig } from "../constants";
 // Define Ethereum provider interface
 interface EthereumProvider {
   request: (args: { method: string; params?: any }) => Promise<any>;
@@ -37,6 +33,7 @@ export default function SendUsdcWrapper({
   initialUsdAmount?: string;
   tokenType?: string;
 }) {
+  const chainId = useChainId();
   const [usdAmount, setUsdAmount] = useState<string>(
     initialUsdAmount || "1.00"
   );
@@ -102,7 +99,7 @@ export default function SendUsdcWrapper({
     usdcAmount && parseFloat(usdcAmount) > 0 && shouldAutoInitiate
       ? ([
           {
-            address: USDC_CONTRACT_ADDRESS,
+            address: faceBuddyConfig[chainId].usdcAddress as `0x${string}`,
             abi: USDC_ABI,
             functionName: "transfer",
             args: [recipientAddress, parseUnits(usdcAmount, tokenDecimals)],
@@ -133,7 +130,7 @@ export default function SendUsdcWrapper({
           params: {
             type: "ERC20",
             options: {
-              address: USDC_CONTRACT_ADDRESS,
+              address: faceBuddyConfig[chainId].usdcAddress as `0x${string}`,
               symbol: tokenSymbol,
               decimals: tokenDecimals,
               name: tokenName,
@@ -221,8 +218,8 @@ export default function SendUsdcWrapper({
                 {tokenName} ({tokenSymbol})
               </p>
               <p className="text-gray-500 text-xs">
-                Contract: {USDC_CONTRACT_ADDRESS.slice(0, 6)}...
-                {USDC_CONTRACT_ADDRESS.slice(-4)}
+                Contract: {faceBuddyConfig[chainId].usdcAddress.slice(0, 6)}...
+                {faceBuddyConfig[chainId].usdcAddress.slice(-4)}
               </p>
             </div>
             <button
