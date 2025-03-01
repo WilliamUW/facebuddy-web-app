@@ -1,6 +1,7 @@
-import { useChainId } from "wagmi";
-import { unichainSepolia } from "./chains";
 import { base, unichain } from "wagmi/chains";
+
+import { unichainSepolia } from "./chains";
+import { useChainId } from "wagmi";
 
 export const BASE_SEPOLIA_CHAIN_ID = 84532;
 export const mintContractAddress = "0xA3e40bBe8E8579Cd2619Ef9C6fEA362b760dac9f";
@@ -127,4 +128,4 @@ export const USDC_ABI = [
   },
 ] as const;
 
-export const latestWalrusBlobId = "3qInv3LRy2SjMiyzztKP6LbvauzHrDOf4wo3YEAB8ls";
+export const latestWalrusBlobId = "012FioMpNIKAcu8tTXC8Q7cU__PLc5VaO81J9lEGy3g";
