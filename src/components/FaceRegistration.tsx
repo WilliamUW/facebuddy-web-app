@@ -2,7 +2,6 @@
 
 import * as faceapi from "face-api.js";
 
-
 import {
   createImageFromDataUrl,
   detectFacesInImage,
@@ -10,7 +9,7 @@ import {
 } from "../utility/faceRecognitionUtils";
 import { issueCredentials, listCredentials } from "../utility/humanityProtocol";
 import { useEffect, useRef, useState } from "react";
-
+import { base } from "viem/chains";
 import React from "react";
 import { USDC_ABI } from "../usdcabi";
 import Webcam from "react-webcam";
@@ -25,7 +24,7 @@ const videoConstraints = {
   height: 720,
   facingMode: "user",
 };
-
+import RegisterWrapper from "./RegisterWrapper";
 export interface ProfileData {
   name: string;
   linkedin?: string;
@@ -134,10 +133,10 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     }));
 
     const hash = storeStringAndGetBlobId(JSON.stringify(serializedData)).then(
-        (hash) => {
-            console.log("data uploaded " + hash);
-        }
-    )
+      (hash) => {
+        console.log("data uploaded " + hash);
+      }
+    );
   };
 
   useEffect(() => {
@@ -392,10 +391,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
           abi: facebuddyabi,
           address: faceBuddyConfig[chainId].faceBuddyAddress as `0x${string}`,
           functionName: "setPreferredToken",
-          args: [
-            tokenAddress as `0x${string}`,
-            profile.name as `0x${string}`,
-          ],
+          args: [tokenAddress as `0x${string}`, profile.name as `0x${string}`],
         });
 
         // Approve faxebuddy usdc sending
@@ -410,7 +406,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
             ),
           ], // max uint256
         });
-        
       }
 
       const updatedFaces = detectedFaces.map((face, index) =>
@@ -443,7 +438,60 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     } catch (error) {
       console.error("Error saving face:", error);
       setIsRegistering(false);
-      alert("Error saving face. Please try again.");
+    }
+  };
+
+  const saveFace2 = async () => {
+    if (
+      !imageRef.current ||
+      !isModelLoaded ||
+      !profile.name ||
+      selectedFaceIndex === null
+    ) {
+      alert("Please enter at least a name and select a face");
+      return;
+    }
+
+    // Start the registration process with loading spinner
+    setIsRegistering(true);
+
+    try {
+      const selectedFace = detectedFaces[selectedFaceIndex];
+      if (!selectedFace) {
+        setIsRegistering(false);
+        return;
+      }
+
+      const updatedFaces = detectedFaces.map((face, index) =>
+        index === selectedFaceIndex ? { ...face, label: profile } : face
+      );
+      setDetectedFaces(updatedFaces);
+
+      const savedFace: SavedFace = {
+        label: profile,
+        descriptor: selectedFace.descriptor,
+      };
+
+      // Save the face data
+      onFaceSaved([savedFace]);
+
+      // Upload face data
+      await uploadFaceData(updatedFaces);
+
+      await issueCredentials(profile.name, profile);
+
+      // Generate random processing time between 1-3 seconds
+      const processingTime = Math.floor(Math.random() * 2000) + 1000;
+
+      // Show loading spinner for the random duration
+      setTimeout(() => {
+        // Update UI after the random processing time
+        setIsRegistering(false);
+        setIsFaceRegistered(true);
+      }, processingTime);
+    } catch (error) {
+      console.error("Error saving face:", error);
+      setIsRegistering(false);
     }
   };
 
@@ -622,7 +670,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                   </p>
                 </div>
               )}
-
               <div>
                 <h3 className="text-sm font-semibold mb-2">
                   {isFaceRegistered ? "Face Registered!" : "Register Your Face"}
@@ -804,19 +851,35 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                   </div>
                 </div>
               </div>
-              {!isFaceRegistered && (
-                <button
-                  onClick={saveFace}
-                  disabled={!profile.name || isRegistering}
-                  className={`px-4 py-2 rounded w-full mt-4 ${
-                    !profile.name || isRegistering
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  } text-white`}
-                >
-                  {isRegistering ? "Registering..." : "Register Face"}
-                </button>
-              )}
+
+              {!isFaceRegistered &&
+                (chainId == base.id ? (
+                  <RegisterWrapper
+                    token={
+                      profile.preferredToken === "USDC"
+                        ? (faceBuddyConfig[chainId]
+                            .usdcAddress as `0x${string}`)
+                        : profile.preferredToken === "ETH"
+                          ? "0x0000000000000000000000000000000000000000"
+                          : (faceBuddyConfig[chainId]
+                              .usdcAddress as `0x${string}`)
+                    }
+                    who={profile.name as `0x${string}`}
+                    onSentTx={saveFace2}
+                  />
+                ) : (
+                  <button
+                    onClick={saveFace}
+                    disabled={!profile.name || isRegistering}
+                    className={`px-4 py-2 rounded w-full mt-4 ${
+                      !profile.name || isRegistering
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600"
+                    } text-white`}
+                  >
+                    {isRegistering ? "Registering..." : "Register Face"}
+                  </button>
+                ))}
             </div>
           ) : (
             <div className="border rounded-lg p-4 bg-white flex-grow flex flex-col items-center justify-center relative md:order-1 order-2">
@@ -1025,9 +1088,12 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                     {transactionData.transactions.length > 0 ? (
                       <div className="space-y-4">
                         {[...transactionData.transactions]
-                          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                          .map(
-                          (tx: Transaction, index: number) => {
+                          .sort(
+                            (a, b) =>
+                              new Date(b.timestamp).getTime() -
+                              new Date(a.timestamp).getTime()
+                          )
+                          .map((tx: Transaction, index: number) => {
                             // Determine transaction type and styling
                             const txType =
                               tx.result.functionCall?.functionName || "";
@@ -1433,8 +1499,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                                 </div>
                               </div>
                             );
-                          }
-                        )}
+                          })}
                       </div>
                     ) : (
                       <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">

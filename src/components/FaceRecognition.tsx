@@ -22,11 +22,12 @@ import {
   useWaitForTransactionReceipt,
   useChainId,
 } from "wagmi";
+import TransactionWrapper from "./FaceBuddyWrapper";
 export interface SavedFace {
   label: ProfileData;
   descriptor: Float32Array;
 }
-
+import { base } from "viem/chains";
 interface Props {
   savedFaces: SavedFace[];
 }
@@ -79,6 +80,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const [detectedFaceImage, setDetectedFaceImage] = useState<string | null>(
     null
   );
+  const [transactionComponent, setTransactionComponent] =
+    useState<React.ReactNode | null>(null);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { data: hash, isPending, writeContract } = useWriteContract();
@@ -112,7 +115,6 @@ export default function FaceRecognition({ savedFaces }: Props) {
   // Add effect to handle transaction confirmation
   useEffect(() => {
     if (isConfirmed && hash) {
-      
       setAgentSteps((prevSteps) => [
         ...prevSteps.slice(0, -1),
         {
@@ -267,28 +269,69 @@ export default function FaceRecognition({ savedFaces }: Props) {
             },
           ]);
 
-          writeContract({
-            abi: facebuddyabi,
-            address: faceBuddyConfig[chainId].faceBuddyAddress as `0x${string}`,
-            functionName: "swapAndSendPreferredToken",
-            args: [
-              profile.name as `0x${string}`,
-              "0x0000000000000000000000000000000000000000" as `0x${string}`,
-              amountInWei,
-              {
-                ...faceBuddyConfig[chainId].poolKey,
-                currency0: faceBuddyConfig[chainId].poolKey
-                  .currency0 as `0x${string}`,
-                currency1: faceBuddyConfig[chainId].poolKey
-                  .currency1 as `0x${string}`,
-                hooks:
-                  "0x0000000000000000000000000000000000000000" as `0x${string}`,
-              },
-              BigInt(0),
-              BigInt(Math.floor(Date.now() / 1000) + 3600),
-            ],
-            value: amountInWei,
-          });
+          if (chainId === base.id) {
+            console.log("profile.name:", profile.name);
+            // Store TransactionWrapper component in state
+            setTransactionComponent(
+              <TransactionWrapper
+                recipient={profile.name as `0x${string}`}
+                inputToken={
+                  "0x0000000000000000000000000000000000000000" as `0x${string}`
+                }
+                amount={amountInWei}
+                poolKey={{
+                  ...faceBuddyConfig[chainId].poolKey,
+                  currency0: faceBuddyConfig[chainId].poolKey
+                    .currency0 as `0x${string}`,
+                  currency1: faceBuddyConfig[chainId].poolKey
+                    .currency1 as `0x${string}`,
+                  hooks:
+                    "0x0000000000000000000000000000000000000000" as `0x${string}`,
+                  fee: BigInt(faceBuddyConfig[chainId].poolKey.fee),
+                  tickSpacing: BigInt(
+                    faceBuddyConfig[chainId].poolKey.tickSpacing
+                  ),
+                }}
+                minAmountOut={BigInt(0)}
+                deadline={BigInt(Math.floor(Date.now() / 1000) + 3600)}
+                value={amountInWei}
+                onSentTx={() => {
+                  setAgentSteps((prevSteps) => [
+                    ...prevSteps.slice(0, -1),
+                    {
+                      label: "Transaction sent",
+                      isLoading: false,
+                      type: "transaction",
+                    },
+                  ]);
+                }}
+              />
+            );
+          } else {
+            writeContract({
+              abi: facebuddyabi,
+              address: faceBuddyConfig[chainId]
+                .faceBuddyAddress as `0x${string}`,
+              functionName: "swapAndSendPreferredToken",
+              args: [
+                profile.name as `0x${string}`,
+                "0x0000000000000000000000000000000000000000" as `0x${string}`,
+                amountInWei,
+                {
+                  ...faceBuddyConfig[chainId].poolKey,
+                  currency0: faceBuddyConfig[chainId].poolKey
+                    .currency0 as `0x${string}`,
+                  currency1: faceBuddyConfig[chainId].poolKey
+                    .currency1 as `0x${string}`,
+                  hooks:
+                    "0x0000000000000000000000000000000000000000" as `0x${string}`,
+                },
+                BigInt(0),
+                BigInt(Math.floor(Date.now() / 1000) + 3600),
+              ],
+              value: amountInWei,
+            });
+          }
         }
         break;
 
@@ -661,6 +704,10 @@ export default function FaceRecognition({ savedFaces }: Props) {
               </div>
             )}
           </div>
+        )}
+        {/* Show transaction component if available */}
+        {transactionComponent && (
+          <div className="mt-4">{transactionComponent}</div>
         )}
       </AgentModal>
     </div>

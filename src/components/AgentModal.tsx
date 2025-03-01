@@ -87,7 +87,7 @@ export default function AgentModal({
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {step.isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
                 ) : (
                   <div className="relative flex-shrink-0 w-5 h-5">
                     <div className="absolute inset-0 bg-white rounded-full"></div>
@@ -99,7 +99,7 @@ export default function AgentModal({
                   </div>
                 )}
                 <span
-                  className="text-sm"
+                  className="text-sm flex-1"
                   dangerouslySetInnerHTML={{ __html: step.label }}
                 ></span>
               </div>

@@ -18,7 +18,13 @@ function OnchainProviders({ children }: Props) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <OnchainKitProvider apiKey={NEXT_PUBLIC_CDP_API_KEY} chain={base}>
+        <OnchainKitProvider
+          apiKey={NEXT_PUBLIC_CDP_API_KEY}
+          chain={base}
+          config={{
+            paymaster: process.env.NEXT_PUBLIC_PAYMASTER_AND_BUNDLER_ENDPOINT,
+          }}
+        >
           <RainbowKitProvider modalSize="compact" showRecentTransactions={true}>
             {children}
           </RainbowKitProvider>
