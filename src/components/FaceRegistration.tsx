@@ -8,23 +8,25 @@ import {
   findLargestFace,
 } from "../utility/faceRecognitionUtils";
 import { issueCredentials, listCredentials } from "../utility/humanityProtocol";
+import { useChainId, useWriteContract } from "wagmi";
 import { useEffect, useRef, useState } from "react";
-import { base } from "viem/chains";
+
 import React from "react";
+import RegisterWrapper from "./RegisterWrapper";
 import { USDC_ABI } from "../usdcabi";
 import Webcam from "react-webcam";
+import { base } from "viem/chains";
+import { faceBuddyConfig } from "../constants";
 import { facebuddyabi } from "../facebuddyabi";
 import { storeStringAndGetBlobId } from "../utility/walrus";
 import { useAccount } from "wagmi";
-import { useWriteContract, useChainId } from "wagmi";
-import { faceBuddyConfig } from "../constants";
+
 const WebcamComponent = () => <Webcam />;
 const videoConstraints = {
   width: 1280,
   height: 720,
   facingMode: "user",
 };
-import RegisterWrapper from "./RegisterWrapper";
 export interface ProfileData {
   name: string;
   linkedin?: string;
@@ -422,9 +424,9 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       onFaceSaved([savedFace]);
 
       // Upload face data
-      await uploadFaceData(updatedFaces);
+      uploadFaceData(updatedFaces);
 
-      await issueCredentials(profile.name, profile);
+      issueCredentials(profile.name, profile);
 
       // Generate random processing time between 1-3 seconds
       const processingTime = Math.floor(Math.random() * 2000) + 1000;
@@ -476,9 +478,9 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
       onFaceSaved([savedFace]);
 
       // Upload face data
-      await uploadFaceData(updatedFaces);
+      uploadFaceData(updatedFaces);
 
-      await issueCredentials(profile.name, profile);
+      issueCredentials(profile.name, profile);
 
       // Generate random processing time between 1-3 seconds
       const processingTime = Math.floor(Math.random() * 2000) + 1000;
