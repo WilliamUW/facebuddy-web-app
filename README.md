@@ -4,6 +4,24 @@ Unichain Mainnet + Uniswap v4 Deployment: https://uniscan.xyz/address/0xa28b8Edb
 # **FaceBuddy** 🤖💸  
 > **Pay anyone—just with their face.**  
 
+---
+
+## 🏗 **Getting Started**  
+```sh
+bun i && bun run dev
+```
+
+### **Agent Backend**  
+🔗 [FaceBuddy-Opacity Agent](https://github.com/WilliamUW/facebuddy-opacity-agent)  
+
+---
+
+## 🎤 **Presentation**  
+📊 **Check out our slides!**  
+🔗 [FaceBuddy Pitch Deck](https://docs.google.com/presentation/d/1RVs_foW1B6GwXitRPJlFmM_yVQ9-lM0x9NVgwuXKFlE/edit#slide=id.g3322bda7de7_0_40)  
+
+---
+
 ## 🌍 **The Problem**  
 📌 **1.4 billion** unbanked (World Bank)  
 📌 **3.4 billion** without smartphones  
@@ -42,28 +60,6 @@ FaceBuddy enables **seamless payments** to anyone—**even without a phone or in
 
 🚀 **Bringing the next billion on-chain!**  
 
----
-
-## 🏗 **Getting Started**  
-### **1️⃣ Install dependencies**  
-```sh
-bun i
-```
-### **2️⃣ Run the dev server**  
-```sh
-bun run dev
-```
-
-### **Agent Backend**  
-🔗 [FaceBuddy-Opacity Agent](https://github.com/WilliamUW/facebuddy-opacity-agent)  
-
----
-
-## 🎤 **Presentation**  
-📊 **Check out our slides!**  
-🔗 [FaceBuddy Pitch Deck](https://docs.google.com/presentation/d/1RVs_foW1B6GwXitRPJlFmM_yVQ9-lM0x9NVgwuXKFlE/edit#slide=id.g3322bda7de7_0_40)  
-
----
 
 ## 💡 **Why FaceBuddy?**  
 🏦 **Banking for the unbanked**  
