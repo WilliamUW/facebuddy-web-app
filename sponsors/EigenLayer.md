@@ -1,15 +1,30 @@
-$20,000: Best AI application or agent on EigenLayer
+## 🤖 $20,000: Best AI Application or Agent on EigenLayer  
 
-Build an AI application or agent that leverages EigenLayer or an EigenLayer AVS, such as implementing verifiable inference, verifiable agent, AI model governance system, AI agent reputation system, or anything else you can imagine.
+**Challenge:**  
+Build an **AI application or agent** that utilizes **EigenLayer** or an **EigenLayer AVS**, implementing concepts such as:  
+- **Verifiable inference**  
+- **Verifiable agent**  
+- **AI model governance system**  
+- **AI agent reputation system**  
+- Or any other innovative application  
 
-$10,000: Best Eigen App
+**Why FaceBuddy?**  
+FaceBuddy leverages **EigenLayer's AVS infrastructure** through the **Opacity Adapter** to create a **verifiable agent**. This enables seamless user interactions, such as:  
+- **Sending transactions** to potentially **billions of scanned individuals**  
+- **Connecting** with users on platforms like **Telegram or LinkedIn** with a **single command**  
 
-Build an app using an EigenLayer AVS or EigenDA rollup.
+🔗 **Code Repository:**  
+[GitHub - FaceBuddy Opacity Agent](https://github.com/WilliamUW/facebuddy-opacity-agent/blob/master/src/agent/createAgent.ts)  
 
-Explanation for why FaceBuddy satisfies the requirements:
+---
 
-FaceBuddy leverages EigenLayer's AVS infrastructure through Opacity Adapter to create a verifiable agent that enables seamless user interactions, such as sending transactions to potentially billions of scanned individuals and connecting on platforms like Telegram or LinkedIn with a single command. 
+## 🏗️ $10,000: Best Eigen App  
 
-Code:
+**Challenge:**  
+Build an application using **an EigenLayer AVS** or an **EigenDA rollup**.  
 
-https://github.com/WilliamUW/facebuddy-opacity-agent/blob/master/src/agent/createAgent.ts
+**Why FaceBuddy?**  
+FaceBuddy integrates **EigenLayer's AVS infrastructure** via **Opacity Adapter**, enabling a **verifiable agent** that facilitates frictionless, verifiable interactions for billions of users.  
+
+🔗 **Code Repository:**  
+[GitHub - FaceBuddy Opacity Agent](https://github.com/WilliamUW/facebuddy-opacity-agent/blob/master/src/agent/createAgent.ts)  
