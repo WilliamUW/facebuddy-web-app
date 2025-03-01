@@ -1,4 +1,11 @@
 "use client";
+
+import type { Address, ContractFunctionParameters } from "viem";
+import {
+  BASE_SEPOLIA_CHAIN_ID,
+  mintABI,
+  mintContractAddress,
+} from "../constants";
 import {
   Transaction,
   TransactionButton,
@@ -10,15 +17,10 @@ import type {
   TransactionError,
   TransactionResponse,
 } from "@coinbase/onchainkit/transaction";
-import type { Address, ContractFunctionParameters } from "viem";
-import {
-  BASE_SEPOLIA_CHAIN_ID,
-  mintABI,
-  mintContractAddress,
-} from "../constants";
+
 import { base } from "viem/chains";
-import { facebuddyabi } from "../facebuddyabi";
 import { faceBuddyConfig } from "../constants";
+import { facebuddyabi } from "../facebuddyabi";
 type PoolKey = {
   currency0: Address;
   currency1: Address;
@@ -76,7 +78,6 @@ export default function TransactionWrapper({
         onSuccess={handleSuccess}
       >
         <TransactionButton
-          onClick={() => console.log("transact clicked, save face")}
           className="mt-0 mr-auto ml-auto max-w-full text-[white]"
         />
         <TransactionStatus>
