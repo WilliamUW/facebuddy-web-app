@@ -851,7 +851,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
                   </div>
                 </div>
               </div>
-              console,l
+
               {!isFaceRegistered &&
                 (chainId == base.id ? (
                   <RegisterWrapper
