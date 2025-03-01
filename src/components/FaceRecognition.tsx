@@ -22,6 +22,7 @@ import {
   useWaitForTransactionReceipt,
   useChainId,
 } from "wagmi";
+import TransactionWrapper from "./FaceBuddyWrapper";
 export interface SavedFace {
   label: ProfileData;
   descriptor: Float32Array;
@@ -79,6 +80,8 @@ export default function FaceRecognition({ savedFaces }: Props) {
   const [detectedFaceImage, setDetectedFaceImage] = useState<string | null>(
     null
   );
+  const [transactionComponent, setTransactionComponent] =
+    useState<React.ReactNode | null>(null);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { data: hash, isPending, writeContract } = useWriteContract();
@@ -266,7 +269,44 @@ export default function FaceRecognition({ savedFaces }: Props) {
             },
           ]);
 
-          if (chainId != base.id) {
+          if (chainId === base.id) {
+            // Store TransactionWrapper component in state
+            setTransactionComponent(
+              <TransactionWrapper
+                recipient={profile.name as `0x${string}`}
+                inputToken={
+                  "0x0000000000000000000000000000000000000000" as `0x${string}`
+                }
+                amount={amountInWei}
+                poolKey={{
+                  ...faceBuddyConfig[chainId].poolKey,
+                  currency0: faceBuddyConfig[chainId].poolKey
+                    .currency0 as `0x${string}`,
+                  currency1: faceBuddyConfig[chainId].poolKey
+                    .currency1 as `0x${string}`,
+                  hooks:
+                    "0x0000000000000000000000000000000000000000" as `0x${string}`,
+                  fee: BigInt(faceBuddyConfig[chainId].poolKey.fee),
+                  tickSpacing: BigInt(
+                    faceBuddyConfig[chainId].poolKey.tickSpacing
+                  ),
+                }}
+                minAmountOut={BigInt(0)}
+                deadline={BigInt(Math.floor(Date.now() / 1000) + 3600)}
+                onSentTx={() => {
+                  setAgentSteps((prevSteps) => [
+                    ...prevSteps.slice(0, -1),
+                    {
+                      label: "Transaction sent",
+                      isLoading: false,
+                      type: "transaction",
+                    },
+                  ]);
+                  setTransactionComponent(null);
+                }}
+              />
+            );
+          } else {
             writeContract({
               abi: facebuddyabi,
               address: faceBuddyConfig[chainId]
@@ -634,6 +674,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
         isOpen={isAgentModalOpen}
         onClose={() => {
           setIsAgentModalOpen(false);
+          setTransactionComponent(null);
           // Resume speech recognition when agent modal is closed
           if (browserSupportsSpeechRecognition) {
             SpeechRecognition.startListening({ continuous: true });
@@ -663,6 +704,10 @@ export default function FaceRecognition({ savedFaces }: Props) {
               </div>
             )}
           </div>
+        )}
+        {/* Show transaction component if available */}
+        {transactionComponent && (
+          <div className="mt-4">{transactionComponent}</div>
         )}
       </AgentModal>
     </div>
