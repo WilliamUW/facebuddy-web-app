@@ -273,10 +273,12 @@ export default function FaceRecognition({ savedFaces }: Props) {
 
           if (chainId === base.id) {
             console.log("profile.name:", profile.name);
+            console.log("matchedProfile?.name:", matchedProfile?.name);
+            console.log("functionCall.args.recipientAddress:", functionCall.args.recipientAddress);
             // Store TransactionWrapper component in state
             setTransactionComponent(
               <TransactionWrapper
-                recipient={matchedProfile?.name as `0x${string}`}
+                recipient={functionCall.args.recipientAddress as `0x${string}`}
                 inputToken={
                   "0x0000000000000000000000000000000000000000" as `0x${string}`
                 }
@@ -309,14 +311,16 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 }}
               />
             );
+            console.log("matchedProfile?.name:", matchedProfile?.name);
           } else {
+            console.log("matchedProfile?.name:", matchedProfile?.name);
             writeContract({
               abi: facebuddyabi,
               address: faceBuddyConfig[chainId]
                 .faceBuddyAddress as `0x${string}`,
               functionName: "swapAndSendPreferredToken",
               args: [
-                matchedProfile?.name as `0x${string}`,
+                functionCall.args.recipientAddress as `0x${string}`,
                 "0x0000000000000000000000000000000000000000" as `0x${string}`,
                 amountInWei,
                 {
