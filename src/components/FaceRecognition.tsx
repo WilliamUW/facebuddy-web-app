@@ -26,7 +26,7 @@ export interface SavedFace {
   label: ProfileData;
   descriptor: Float32Array;
 }
-
+import { base } from "viem/chains";
 interface Props {
   savedFaces: SavedFace[];
 }
@@ -112,7 +112,6 @@ export default function FaceRecognition({ savedFaces }: Props) {
   // Add effect to handle transaction confirmation
   useEffect(() => {
     if (isConfirmed && hash) {
-      
       setAgentSteps((prevSteps) => [
         ...prevSteps.slice(0, -1),
         {
@@ -267,28 +266,31 @@ export default function FaceRecognition({ savedFaces }: Props) {
             },
           ]);
 
-          writeContract({
-            abi: facebuddyabi,
-            address: faceBuddyConfig[chainId].faceBuddyAddress as `0x${string}`,
-            functionName: "swapAndSendPreferredToken",
-            args: [
-              profile.name as `0x${string}`,
-              "0x0000000000000000000000000000000000000000" as `0x${string}`,
-              amountInWei,
-              {
-                ...faceBuddyConfig[chainId].poolKey,
-                currency0: faceBuddyConfig[chainId].poolKey
-                  .currency0 as `0x${string}`,
-                currency1: faceBuddyConfig[chainId].poolKey
-                  .currency1 as `0x${string}`,
-                hooks:
-                  "0x0000000000000000000000000000000000000000" as `0x${string}`,
-              },
-              BigInt(0),
-              BigInt(Math.floor(Date.now() / 1000) + 3600),
-            ],
-            value: amountInWei,
-          });
+          if (chainId != base.id) {
+            writeContract({
+              abi: facebuddyabi,
+              address: faceBuddyConfig[chainId]
+                .faceBuddyAddress as `0x${string}`,
+              functionName: "swapAndSendPreferredToken",
+              args: [
+                profile.name as `0x${string}`,
+                "0x0000000000000000000000000000000000000000" as `0x${string}`,
+                amountInWei,
+                {
+                  ...faceBuddyConfig[chainId].poolKey,
+                  currency0: faceBuddyConfig[chainId].poolKey
+                    .currency0 as `0x${string}`,
+                  currency1: faceBuddyConfig[chainId].poolKey
+                    .currency1 as `0x${string}`,
+                  hooks:
+                    "0x0000000000000000000000000000000000000000" as `0x${string}`,
+                },
+                BigInt(0),
+                BigInt(Math.floor(Date.now() / 1000) + 3600),
+              ],
+              value: amountInWei,
+            });
+          }
         }
         break;
 

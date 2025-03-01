@@ -17,13 +17,39 @@ import {
   mintContractAddress,
 } from "../constants";
 import { base } from "viem/chains";
-export default function TransactionWrapper({ address }: { address: Address }) {
+import { facebuddyabi } from "../facebuddyabi";
+import { faceBuddyConfig } from "../constants";
+type PoolKey = {
+  currency0: Address;
+  currency1: Address;
+  fee: bigint;
+  tickSpacing: bigint;
+  hooks: Address;
+};
+
+export default function TransactionWrapper({
+  recipient,
+  inputToken,
+  amount,
+  poolKey,
+  minAmountOut,
+  deadline,
+  onSentTx,
+}: {
+  recipient: Address;
+  inputToken: Address;
+  amount: bigint;
+  poolKey: PoolKey;
+  minAmountOut: bigint;
+  deadline: bigint;
+  onSentTx: () => void;
+}) {
   const contracts = [
     {
-      address: mintContractAddress,
-      abi: mintABI,
-      functionName: "mint",
-      args: [address],
+      address: faceBuddyConfig[base.id].faceBuddyAddress,
+      abi: facebuddyabi,
+      functionName: "swapAndSendPreferredToken",
+      args: [recipient, inputToken, amount, poolKey, minAmountOut, deadline],
     },
   ] as unknown as ContractFunctionParameters[];
 
@@ -33,17 +59,18 @@ export default function TransactionWrapper({ address }: { address: Address }) {
 
   const handleSuccess = (response: TransactionResponse) => {
     console.log("Transaction successful", response);
+    onSentTx();
   };
 
   return (
     <div className="flex w-[450px]">
       <Transaction
+        isSponsored={true}
         contracts={contracts}
         className="w-[450px]"
         chainId={base.id}
         onError={handleError}
         onSuccess={handleSuccess}
-     
       >
         <TransactionButton className="mt-0 mr-auto ml-auto w-[450px] max-w-full text-[white]" />
         <TransactionStatus>
