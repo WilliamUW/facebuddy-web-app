@@ -130,7 +130,7 @@
       "telegram": "xdmello",
       "twitter": "0xdmello",
       "preferredToken": "USDC",
-      "humanId": "xdmello"
+      "humanId": "xavierdmello"
     }
   }
 ]
