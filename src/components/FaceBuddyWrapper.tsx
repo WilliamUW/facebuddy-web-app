@@ -62,7 +62,7 @@ export default function TransactionWrapper({
 
   const handleSuccess = (response: TransactionResponse) => {
     console.log("Transaction successful", response);
-    onSentTx();
+    // onSentTx();
   };
 
   return (
@@ -75,7 +75,10 @@ export default function TransactionWrapper({
         onError={handleError}
         onSuccess={handleSuccess}
       >
-        <TransactionButton className="mt-0 mr-auto ml-auto max-w-full text-[white]" />
+        <TransactionButton
+          onClick={() => console.log("transact clicked, save face")}
+          className="mt-0 mr-auto ml-auto max-w-full text-[white]"
+        />
         <TransactionStatus>
           <TransactionStatusLabel />
           <TransactionStatusAction />
