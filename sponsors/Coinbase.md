@@ -1,18 +1,27 @@
-$3,000: CDP Regen Prize
+## 💰 $25,000: Build an AI-Powered App on Base
 
-We want you to build something with a relation to the ReFi movement, which includes concepts like environmental focus, sustainable economics, decentralized governance, transparency and accountability, and financial inclusion. 
+**Challenge:**  
+Build new AI agents and applications on Base that can perform useful onchain actions using Coinbase's AgentKit and other Coinbase developer platform tools.
 
-Explanation for why FaceBuddy satisfies the requirements:
+**Why FaceBuddy?**  
+FaceBuddy leverages **Coinbase's Smart Wallet** through **OnchainKit Wallet Connect** to onboard the next billion users onchain. It provides easy access to a **self-custodial wallet**, allowing users to receive payments **without financial barriers** or reliance on traditional banking infrastructure. Additionally, FaceBuddy utilizes **Base’s paymaster** to enable **gas-free USDC transfers**.
 
-FaceBuddy leverages Coinbase's Smart Wallet through OnchainKit Wallet Connect to provide the 1.4 billion unbanked individuals with easy access to a self-custodial wallet, enabling them to receive payments regardless of financial status or lack of traditional banking infrastructure. This approach promotes financial inclusion, transparency, and decentralized governance, aligning with the principles of the ReFi movement.
+---
 
-$2,000: Consumer Crypto Prize
+## 🌱 $3,000: CDP Regen Prize  
 
-📝 Requirements
-We built CDP to make it possible to build amazing crypto applications that aren’t solely for financial applications but anything in need of onchain rails. Your tasks is to:
+**Challenge:**  
+Build something that aligns with the **ReFi (Regenerative Finance) movement**, incorporating principles such as **environmental sustainability, decentralized governance, transparency, accountability, and financial inclusion**.
 
-(1) Use CDP SDK and OnchainKit in a meaningful way in an innovative consumer crypto application, (2) Think Big, working backwards from a vision that would bring a billion users onchain.
+**Why FaceBuddy?**  
+FaceBuddy addresses **financial inclusion** by providing **1.4 billion unbanked individuals** access to a **self-custodial wallet** via **Coinbase's Smart Wallet** and **OnchainKit Wallet Connect**. This enables seamless payments **without traditional banking constraints**, promoting **transparency, decentralized governance, and economic empowerment**—all core principles of the **ReFi movement**.
 
-Explanation for why FaceBuddy satisfies the requirements:
+---
 
-FaceBuddy leverages Coinbase's Smart Wallet through OnchainKit Wallet Connect to onboard the next billion users onchain with easy access to a self-custodial wallet, enabling them to receive payments regardless of financial status or lack of traditional banking infrastructure. This approach promotes financial inclusion, transparency, and decentralized governance, aligning with the principles of the ReFi movement.
+## 🏆 $2,000: Consumer Crypto Prize  
+
+**Challenge:**  
+The goal is to create **innovative consumer crypto applications** beyond financial transactions using **CDP SDK** and **OnchainKit**. The application should have a **big vision**, aiming to bring **a billion users onchain**.
+
+**Why FaceBuddy?**  
+FaceBuddy utilizes **Coinbase's Smart Wallet** and **OnchainKit Wallet Connect** to onboard the next billion users onchain. By providing an easy-to-use **self-custodial wallet**, it ensures **accessible payments** for users **regardless of financial status** or banking access. This aligns with the **vision of expanding crypto adoption** through user-friendly and impactful solutions.

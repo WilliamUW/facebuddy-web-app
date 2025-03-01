@@ -1,29 +1,38 @@
-$6,000: Walrus Tusked Champion
+## 🦣 $6,000: Walrus Tusked Champion  
 
-We want to see a working project that compiles and builds without obvious errors with well-documented readmes. A successful project should have at least 2-3 major user flows that integrate with Walrus and anyone could execute these flows without encountering non-recoverable errors. Successful project teams would also account for internet disruptions and provide backup options for demos.
+**Challenge:**  
+We want to see a working project that:  
+- Compiles and builds without obvious errors.  
+- Has **well-documented readmes**.  
+- Demonstrates **at least 2-3 major user flows** that integrate with **Walrus**.  
+- Can be executed by anyone without encountering **non-recoverable errors**.  
+- Accounts for **internet disruptions** and provides **backup options** for demos.
 
-### Explanation for why FaceBuddy satisfies the requirements:
-FaceBuddy leverages Walrus's decentralized, efficient, and scalable storage to handle the large amounts of facial hash data generated during processing. This ensures reliable data availability and resilience, enabling seamless execution of user flows without errors that can scale to billions.
+---
 
-Demo:
+### **Why FaceBuddy satisfies the requirements:**
 
+FaceBuddy leverages **Walrus's decentralized, efficient, and scalable storage** to handle large amounts of facial hash data during processing. This ensures:  
+- **Reliable data availability** and **resilience**.  
+- **Seamless execution** of user flows without errors, even at scale (up to billions of users).  
 
-https://github.com/user-attachments/assets/b7e6f115-1223-48e9-9827-21e12b3240cc
+**Key Features:**
+- FaceBuddy uses **Walrus storage** to store facial data securely and efficiently.  
+- It integrates Walrus's storage and retrieval system to provide a smooth, error-free experience.  
 
+---
 
+🎥 **Demo:**  
+[GitHub - Walrus Integration Demo](https://github.com/user-attachments/assets/b7e6f115-1223-48e9-9827-21e12b3240cc)  
 
-Code Walkthrough:
+🔑 **Code Walkthrough:**  
+[GitHub - Walrus Walkthrough](https://github.com/user-attachments/assets/712fc657-25cb-4d54-98d1-25fc9df7a08b)  
 
+🔗 **Walrus API Call Code:**  
+[Walrus API Integration Code](https://github.com/WilliamUW/facebuddy-web-app/blob/main/src/utility/walrus.ts)  
 
-https://github.com/user-attachments/assets/712fc657-25cb-4d54-98d1-25fc9df7a08b
+🔗 **Face Storage Code:**  
+[Face Storage Code Snippet](https://github.com/WilliamUW/facebuddy-web-app/blob/faade49d336570d5f3198cdbec0d9d42ae66cac7/src/components/FaceRegistration.tsx#L132-L144)  
 
-
-
-Walrus API Call Code:
-https://github.com/WilliamUW/facebuddy-web-app/blob/main/src/utility/walrus.ts
-
-Face Storage:
-https://github.com/WilliamUW/facebuddy-web-app/blob/faade49d336570d5f3198cdbec0d9d42ae66cac7/src/components/FaceRegistration.tsx#L132-L144
-
-Face Retrieval:
-https://github.com/WilliamUW/facebuddy-web-app/blob/72f78f23db06639094df4b59360dc9f856307141/src/app/page.tsx#L70-L85
+🔗 **Face Retrieval Code:**  
+[Face Retrieval Code Snippet](https://github.com/WilliamUW/facebuddy-web-app/blob/72f78f23db06639094df4b59360dc9f856307141/src/app/page.tsx#L70-L85)  
