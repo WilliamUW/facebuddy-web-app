@@ -276,7 +276,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
             // Store TransactionWrapper component in state
             setTransactionComponent(
               <TransactionWrapper
-                recipient={profile.name as `0x${string}`}
+                recipient={matchedProfile?.name as `0x${string}`}
                 inputToken={
                   "0x0000000000000000000000000000000000000000" as `0x${string}`
                 }
@@ -316,7 +316,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 .faceBuddyAddress as `0x${string}`,
               functionName: "swapAndSendPreferredToken",
               args: [
-                profile.name as `0x${string}`,
+                matchedProfile?.name as `0x${string}`,
                 "0x0000000000000000000000000000000000000000" as `0x${string}`,
                 amountInWei,
                 {
