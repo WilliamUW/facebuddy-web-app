@@ -529,8 +529,10 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     setTransactionError(null);
     try {
       // Replace with actual API call to fetch transactions
+      const url = `${process.env.NEXT_PUBLIC_ONRENDER_API_URL}/api/transactions/${address}`;
+      console.log(url)
       const response = await fetch(
-        `http://localhost:4000/api/transactions/${address}`
+        `${process.env.NEXT_PUBLIC_ONRENDER_API_URL}/api/transactions/${address}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch transaction data");

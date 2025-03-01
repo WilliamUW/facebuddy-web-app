@@ -10,24 +10,26 @@ import {
   detectFacesInImage,
   findLargestFace,
 } from "../utility/faceRecognitionUtils";
-import { useEffect, useRef, useState } from "react";
-import { faceBuddyConfig } from "../constants";
-import AgentModal from "./AgentModal";
-import { ProfileData } from "./FaceRegistration";
-import Webcam from "react-webcam";
-import { facebuddyabi } from "../facebuddyabi";
 import { useAccount, useReadContract } from "wagmi";
 import {
-  useWriteContract,
-  useWaitForTransactionReceipt,
   useChainId,
+  useWaitForTransactionReceipt,
+  useWriteContract,
 } from "wagmi";
+import { useEffect, useRef, useState } from "react";
+
+import AgentModal from "./AgentModal";
+import { ProfileData } from "./FaceRegistration";
 import TransactionWrapper from "./FaceBuddyWrapper";
+import Webcam from "react-webcam";
+import { base } from "viem/chains";
+import { faceBuddyConfig } from "../constants";
+import { facebuddyabi } from "../facebuddyabi";
+
 export interface SavedFace {
   label: ProfileData;
   descriptor: Float32Array;
 }
-import { base } from "viem/chains";
 interface Props {
   savedFaces: SavedFace[];
 }
@@ -503,7 +505,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
               };
 
               const res = await fetch(
-                "https://ai-quickstart.onrender.com/api/generate",
+                `${process.env.NEXT_PUBLIC_ONRENDER_API_URL}/api/generate`,
                 {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
