@@ -97,6 +97,7 @@ export const facebuddyabi = [
       { name: "minAmountOut", type: "uint128", internalType: "uint128" },
       { name: "deadline", type: "uint256", internalType: "uint256" },
       { name: "zeroForOne", type: "bool", internalType: "bool" },
+      { name: "recipient", type: "address", internalType: "address" },
     ],
     outputs: [],
     stateMutability: "payable",

@@ -54,7 +54,7 @@ export const faceBuddyConfig: FaceBuddyConfig = {
     blockExplorer: "https://uniscan.xyz",
   },
   [base.id]: {
-    faceBuddyAddress: "0xf83e6AF69B226d9446fB8C17CA9f258b91F0202D",
+    faceBuddyAddress: "0x6A7732d9354FcC8b46CD43F3D19aA74b938AF1Ec",
     usdcAddress: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
     poolKey: {
       currency0: "0x0000000000000000000000000000000000000000",
