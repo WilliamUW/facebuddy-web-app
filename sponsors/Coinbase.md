@@ -1,3 +1,12 @@
+$25,000: Build an AI-powered app on Base
+
+Build new AI agents and applications on Base that can perform useful onchain actions using Coinbase's AgentKit and other Coinbase developer platform tools.
+
+Explanation: 
+
+FaceBuddy leverages Coinbase's Smart Wallet through OnchainKit Wallet Connect to onboard the next billion users onchain with easy access to a self-custodial wallet, enabling them to receive payments regardless of financial status or lack of traditional banking infrastructure. We use Base’s paymaster to allow for gas-free USDC transfers.
+
+
 $3,000: CDP Regen Prize
 
 We want you to build something with a relation to the ReFi movement, which includes concepts like environmental focus, sustainable economics, decentralized governance, transparency and accountability, and financial inclusion. 
