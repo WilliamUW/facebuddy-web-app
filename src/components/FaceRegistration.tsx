@@ -530,7 +530,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     try {
       // Replace with actual API call to fetch transactions
       const url = `${process.env.NEXT_PUBLIC_ONRENDER_API_URL}/api/transactions/${address}`;
-      console.log(url)
+      console.log(url);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_ONRENDER_API_URL}/api/transactions/${address}`
       );
@@ -538,7 +538,32 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
         throw new Error("Failed to fetch transaction data");
       }
       const data: TransactionData = await response.json();
-      setTransactionData(data);
+      console.log("data", data);
+
+      // Add comprehensive validation to ensure all required fields exist
+      const validatedData = {
+        ...data,
+        transactions: data.transactions.map((tx) => ({
+          ...tx,
+          result: {
+            text: tx.result?.text || "",
+            functionCall: tx.result?.functionCall
+              ? {
+                  functionName: tx.result.functionCall.functionName || "",
+                  args: tx.result.functionCall.args || {},
+                }
+              : {
+                  functionName: "",
+                  args: {},
+                },
+          },
+          hasProof: tx.hasProof || false,
+          timestamp: tx.timestamp || new Date().toISOString(),
+          userAddress: tx.userAddress || "",
+          sequence: tx.sequence || 0,
+        })),
+      };
+      setTransactionData(validatedData);
     } catch (error) {
       console.error("Error fetching transaction data:", error);
       setTransactionError("Failed to fetch transaction data");
