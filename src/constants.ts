@@ -128,4 +128,4 @@ export const USDC_ABI = [
   },
 ] as const;
 
-export const latestWalrusBlobId = "012FioMpNIKAcu8tTXC8Q7cU__PLc5VaO81J9lEGy3g";
+export const latestWalrusBlobId = "Bd3Fww_U-gS0Bo2mI7MpRV9Qv8FVAcG6DkzbUArQMcE";
