@@ -304,7 +304,6 @@ export default function FaceRecognition({ savedFaces }: Props) {
                       type: "transaction",
                     },
                   ]);
-                  setTransactionComponent(null);
                 }}
               />
             );
@@ -676,7 +675,6 @@ export default function FaceRecognition({ savedFaces }: Props) {
         isOpen={isAgentModalOpen}
         onClose={() => {
           setIsAgentModalOpen(false);
-          setTransactionComponent(null);
           // Resume speech recognition when agent modal is closed
           if (browserSupportsSpeechRecognition) {
             SpeechRecognition.startListening({ continuous: true });
