@@ -68,11 +68,11 @@ export default function Page() {
   useEffect(() => {
     async function populateFaces() {
       try {
-        const jsonContent = await readFromBlobId(latestWalrusBlobId);
+        // const jsonContent = await readFromBlobId(latestWalrusBlobId);
 
-        const parsedContent = JSON.parse(jsonContent as string);
+        // const parsedContent = JSON.parse(jsonContent as string);
 
-        // const parsedContent = referenceFaces;
+        const parsedContent = referenceFaces;
 
         // Convert the regular arrays back to Float32Array
         const processedFaces = parsedContent.map((face: any) => ({
