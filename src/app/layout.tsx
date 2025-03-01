@@ -20,11 +20,15 @@ export const viewport = {
 
 export const metadata: Metadata = {
   title: 'FaceBuddy',
-  description: 'Connect and Pay with 1 Click',
+  description: 'Connect and Pay with Anyone with Just Their Face',
+  icons: {
+    icon: '/facebuddyLogoBest.svg',
+    apple: '/facebuddyLogoBest.svg',
+  },
   openGraph: {
     title: 'FaceBuddy',
-    description: 'Connect and Pay with 1 Click',
-    images: [`${NEXT_PUBLIC_URL}/vibes/vibes-19.png`],
+    description: 'Connect and Pay with Anyone with Just Their Face',
+    images: [`${NEXT_PUBLIC_URL}/facebuddySquare.png`],
   },
 };
 
