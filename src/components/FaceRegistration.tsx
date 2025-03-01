@@ -66,6 +66,7 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   const [isCapturing, setIsCapturing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [webcamError, setWebcamError] = useState<string | null>(null);
+  const [saveFace2Called, setSaveFace2Called] = useState(false);
   const [profile, setProfile] = useState<ProfileData>({
     name: address ?? "",
     linkedin: "",
@@ -444,6 +445,8 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
   };
 
   const saveFace2 = async () => {
+    if (saveFace2Called) return;
+    setSaveFace2Called(true);
     if (
       !imageRef.current ||
       !isModelLoaded ||
