@@ -12,14 +12,14 @@ import { ONCHAINKIT_LINK } from "src/links";
 import OnchainkitSvg from "src/svg/OnchainkitSvg";
 import { ProfileData } from "src/components/FaceRegistration";
 import SignupButton from "../components/SignupButton";
-import TransactionWrapper from "src/components/TransactionWrapper";
+import TransactionWrapper from "src/components/FaceBuddyWrapper";
 import WalletWrapper from "src/components/WalletWrapper";
 import Webcam from "react-webcam";
 import dynamic from "next/dynamic";
 import { getFileContent } from "src/utility/faceDataStorage";
-import {latestWalrusBlobId} from "src/constants";
+import { latestWalrusBlobId } from "src/constants";
 import { readFromBlobId } from "src/utility/walrus";
-import {referenceFaces} from "src/lib/faces";
+import { referenceFaces } from "src/lib/faces";
 import { useAccount } from "wagmi";
 
 // Dynamically import FaceRecognition with ssr disabled
@@ -68,9 +68,7 @@ export default function Page() {
   useEffect(() => {
     async function populateFaces() {
       try {
-        const jsonContent = await readFromBlobId(
-         latestWalrusBlobId
-        );
+        const jsonContent = await readFromBlobId(latestWalrusBlobId);
 
         const parsedContent = JSON.parse(jsonContent as string);
 
@@ -134,15 +132,11 @@ export default function Page() {
             ) : (
               <>
                 <FaceRecognition savedFaces={savedFaces} />
-             
               </>
             )}
           </>
         ) : (
-          <WalletWrapper
-            className="w-[450px] max-w-full"
-            text="Sign in to transact"
-          />
+          <WalletWrapper className=" max-w-full" text="Sign in to transact" />
         )}
       </section>
       <br />

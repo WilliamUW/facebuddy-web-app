@@ -36,7 +36,7 @@ export default function WalletWrapper({
           text={text}
           className={className}
         >
-          <Avatar className="h-6 w-6" />
+          <Avatar className="" />
           <Name />
         </ConnectWallet>
         <WalletDropdown>

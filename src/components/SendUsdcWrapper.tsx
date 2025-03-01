@@ -186,7 +186,7 @@ export default function SendUsdcWrapper({
         onSuccess={handleSuccess}
       >
         <TransactionButton
-          className="mt-0 mr-auto ml-auto w-[450px] max-w-full text-[white] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-0 mr-auto ml-auto max-w-full text-[white] disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={
             isLoadingTokenInfo ||
             !usdcAmount ||

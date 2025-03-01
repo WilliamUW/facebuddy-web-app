@@ -108,7 +108,7 @@ export default function SendUsdcWrapper({ recipientAddress, initialUsdAmount }: 
         onSuccess={handleSuccess}
       >
         <TransactionButton 
-          className="mt-0 mr-auto ml-auto w-[450px] max-w-full text-[white] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-0 mr-auto ml-auto max-w-full text-[white] disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!usdcAmount || parseFloat(usdcAmount) <= 0 || hasInitiatedTransaction}
         />
         <div className="text-center text-sm text-gray-600">

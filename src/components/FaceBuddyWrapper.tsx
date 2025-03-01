@@ -66,16 +66,16 @@ export default function TransactionWrapper({
   };
 
   return (
-    <div className="flex w-[450px]">
+    <div className="flex">
       <Transaction
         isSponsored={true}
         contracts={contracts}
-        className="w-[450px]"
+        className=""
         chainId={base.id}
         onError={handleError}
         onSuccess={handleSuccess}
       >
-        <TransactionButton className="mt-0 mr-auto ml-auto w-[450px] max-w-full text-[white]" />
+        <TransactionButton className="mt-0 mr-auto ml-auto max-w-full text-[white]" />
         <TransactionStatus>
           <TransactionStatusLabel />
           <TransactionStatusAction />
