@@ -438,7 +438,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     } catch (error) {
       console.error("Error saving face:", error);
       setIsRegistering(false);
-      alert("Error saving face. Please try again.");
     }
   };
 
@@ -493,7 +492,6 @@ export default function FaceRegistration({ onFaceSaved, savedFaces }: Props) {
     } catch (error) {
       console.error("Error saving face:", error);
       setIsRegistering(false);
-      alert("Error saving face. Please try again.");
     }
   };
 
