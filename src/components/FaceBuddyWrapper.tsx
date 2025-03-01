@@ -35,6 +35,7 @@ export default function TransactionWrapper({
   minAmountOut,
   deadline,
   onSentTx,
+  value,
 }: {
   recipient: Address;
   inputToken: Address;
@@ -43,6 +44,7 @@ export default function TransactionWrapper({
   minAmountOut: bigint;
   deadline: bigint;
   onSentTx: () => void;
+  value: bigint;
 }) {
   const contracts = [
     {
@@ -50,6 +52,7 @@ export default function TransactionWrapper({
       abi: facebuddyabi,
       functionName: "swapAndSendPreferredToken",
       args: [recipient, inputToken, amount, poolKey, minAmountOut, deadline],
+      value: value,
     },
   ] as unknown as ContractFunctionParameters[];
 

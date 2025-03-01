@@ -270,6 +270,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
           ]);
 
           if (chainId === base.id) {
+            console.log("profile.name:", profile.name);
             // Store TransactionWrapper component in state
             setTransactionComponent(
               <TransactionWrapper
@@ -293,6 +294,7 @@ export default function FaceRecognition({ savedFaces }: Props) {
                 }}
                 minAmountOut={BigInt(0)}
                 deadline={BigInt(Math.floor(Date.now() / 1000) + 3600)}
+                value={amountInWei}
                 onSentTx={() => {
                   setAgentSteps((prevSteps) => [
                     ...prevSteps.slice(0, -1),
